@@ -8,14 +8,14 @@ using Thrift.Transport;
 
 namespace Poseidon.rpc
 {
-    class Init
+    class _Init
     {
-        public static TTransport transport = new TSocket("192.168.6.128", 8080);
+        public static TTransport transport = new TSocket(Class1.Ip, 8080);
         public static TProtocol protocol = new TBinaryProtocol(transport);
         public static Server.Client Client = new Server.Client(protocol);
         public static void InitRpcClient()
         {
-            transport = new TSocket("192.168.6.128", 8080);
+            transport = new TSocket(Class1.Ip, 8080);
             protocol = new TBinaryProtocol(transport);
             Client = new Server.Client(protocol);
             transport.Open();

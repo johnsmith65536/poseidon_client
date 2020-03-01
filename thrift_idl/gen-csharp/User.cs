@@ -19,10 +19,12 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class ReplyAddFriendResp : TBase
+public partial class User : TBase
 {
   private long _Id;
-  private long _CreateTime;
+  private string _NickName;
+  private long _LastOnlineTime;
+  private bool _IsFriend;
 
   public long Id
   {
@@ -37,16 +39,42 @@ public partial class ReplyAddFriendResp : TBase
     }
   }
 
-  public long CreateTime
+  public string NickName
   {
     get
     {
-      return _CreateTime;
+      return _NickName;
     }
     set
     {
-      __isset.CreateTime = true;
-      this._CreateTime = value;
+      __isset.NickName = true;
+      this._NickName = value;
+    }
+  }
+
+  public long LastOnlineTime
+  {
+    get
+    {
+      return _LastOnlineTime;
+    }
+    set
+    {
+      __isset.LastOnlineTime = true;
+      this._LastOnlineTime = value;
+    }
+  }
+
+  public bool IsFriend
+  {
+    get
+    {
+      return _IsFriend;
+    }
+    set
+    {
+      __isset.IsFriend = true;
+      this._IsFriend = value;
     }
   }
 
@@ -57,10 +85,12 @@ public partial class ReplyAddFriendResp : TBase
   #endif
   public struct Isset {
     public bool Id;
-    public bool CreateTime;
+    public bool NickName;
+    public bool LastOnlineTime;
+    public bool IsFriend;
   }
 
-  public ReplyAddFriendResp() {
+  public User() {
   }
 
   public void Read (TProtocol iprot)
@@ -86,8 +116,22 @@ public partial class ReplyAddFriendResp : TBase
             }
             break;
           case 2:
+            if (field.Type == TType.String) {
+              NickName = iprot.ReadString();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 3:
             if (field.Type == TType.I64) {
-              CreateTime = iprot.ReadI64();
+              LastOnlineTime = iprot.ReadI64();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 4:
+            if (field.Type == TType.Bool) {
+              IsFriend = iprot.ReadBool();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -110,7 +154,7 @@ public partial class ReplyAddFriendResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("ReplyAddFriendResp");
+      TStruct struc = new TStruct("User");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
       if (__isset.Id) {
@@ -121,12 +165,28 @@ public partial class ReplyAddFriendResp : TBase
         oprot.WriteI64(Id);
         oprot.WriteFieldEnd();
       }
-      if (__isset.CreateTime) {
-        field.Name = "CreateTime";
-        field.Type = TType.I64;
+      if (NickName != null && __isset.NickName) {
+        field.Name = "NickName";
+        field.Type = TType.String;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(CreateTime);
+        oprot.WriteString(NickName);
+        oprot.WriteFieldEnd();
+      }
+      if (__isset.LastOnlineTime) {
+        field.Name = "LastOnlineTime";
+        field.Type = TType.I64;
+        field.ID = 3;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteI64(LastOnlineTime);
+        oprot.WriteFieldEnd();
+      }
+      if (__isset.IsFriend) {
+        field.Name = "IsFriend";
+        field.Type = TType.Bool;
+        field.ID = 4;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteBool(IsFriend);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -139,7 +199,7 @@ public partial class ReplyAddFriendResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("ReplyAddFriendResp(");
+    StringBuilder __sb = new StringBuilder("User(");
     bool __first = true;
     if (__isset.Id) {
       if(!__first) { __sb.Append(", "); }
@@ -147,11 +207,23 @@ public partial class ReplyAddFriendResp : TBase
       __sb.Append("Id: ");
       __sb.Append(Id);
     }
-    if (__isset.CreateTime) {
+    if (NickName != null && __isset.NickName) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("CreateTime: ");
-      __sb.Append(CreateTime);
+      __sb.Append("NickName: ");
+      __sb.Append(NickName);
+    }
+    if (__isset.LastOnlineTime) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("LastOnlineTime: ");
+      __sb.Append(LastOnlineTime);
+    }
+    if (__isset.IsFriend) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("IsFriend: ");
+      __sb.Append(IsFriend);
     }
     __sb.Append(")");
     return __sb.ToString();

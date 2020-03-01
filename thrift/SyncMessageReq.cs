@@ -19,34 +19,48 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class ReplyAddFriendResp : TBase
+public partial class SyncMessageReq : TBase
 {
-  private long _Id;
-  private long _CreateTime;
+  private long _UserId;
+  private long _MessageId;
+  private long _UserRelationId;
 
-  public long Id
+  public long UserId
   {
     get
     {
-      return _Id;
+      return _UserId;
     }
     set
     {
-      __isset.Id = true;
-      this._Id = value;
+      __isset.UserId = true;
+      this._UserId = value;
     }
   }
 
-  public long CreateTime
+  public long MessageId
   {
     get
     {
-      return _CreateTime;
+      return _MessageId;
     }
     set
     {
-      __isset.CreateTime = true;
-      this._CreateTime = value;
+      __isset.MessageId = true;
+      this._MessageId = value;
+    }
+  }
+
+  public long UserRelationId
+  {
+    get
+    {
+      return _UserRelationId;
+    }
+    set
+    {
+      __isset.UserRelationId = true;
+      this._UserRelationId = value;
     }
   }
 
@@ -56,11 +70,12 @@ public partial class ReplyAddFriendResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Id;
-    public bool CreateTime;
+    public bool UserId;
+    public bool MessageId;
+    public bool UserRelationId;
   }
 
-  public ReplyAddFriendResp() {
+  public SyncMessageReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -80,14 +95,21 @@ public partial class ReplyAddFriendResp : TBase
         {
           case 1:
             if (field.Type == TType.I64) {
-              Id = iprot.ReadI64();
+              UserId = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
             break;
           case 2:
             if (field.Type == TType.I64) {
-              CreateTime = iprot.ReadI64();
+              MessageId = iprot.ReadI64();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 3:
+            if (field.Type == TType.I64) {
+              UserRelationId = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -110,23 +132,31 @@ public partial class ReplyAddFriendResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("ReplyAddFriendResp");
+      TStruct struc = new TStruct("SyncMessageReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (__isset.Id) {
-        field.Name = "Id";
+      if (__isset.UserId) {
+        field.Name = "UserId";
         field.Type = TType.I64;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(Id);
+        oprot.WriteI64(UserId);
         oprot.WriteFieldEnd();
       }
-      if (__isset.CreateTime) {
-        field.Name = "CreateTime";
+      if (__isset.MessageId) {
+        field.Name = "MessageId";
         field.Type = TType.I64;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(CreateTime);
+        oprot.WriteI64(MessageId);
+        oprot.WriteFieldEnd();
+      }
+      if (__isset.UserRelationId) {
+        field.Name = "UserRelationId";
+        field.Type = TType.I64;
+        field.ID = 3;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteI64(UserRelationId);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -139,19 +169,25 @@ public partial class ReplyAddFriendResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("ReplyAddFriendResp(");
+    StringBuilder __sb = new StringBuilder("SyncMessageReq(");
     bool __first = true;
-    if (__isset.Id) {
+    if (__isset.UserId) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Id: ");
-      __sb.Append(Id);
+      __sb.Append("UserId: ");
+      __sb.Append(UserId);
     }
-    if (__isset.CreateTime) {
+    if (__isset.MessageId) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("CreateTime: ");
-      __sb.Append(CreateTime);
+      __sb.Append("MessageId: ");
+      __sb.Append(MessageId);
+    }
+    if (__isset.UserRelationId) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("UserRelationId: ");
+      __sb.Append(UserRelationId);
     }
     __sb.Append(")");
     return __sb.ToString();

@@ -10,7 +10,7 @@ namespace Poseidon.infra.redis
     class redis
     {
         // redis config
-        private static ConfigurationOptions connDCS = ConfigurationOptions.Parse("192.168.6.128:6379,password=,connectTimeout=2000");
+        private static ConfigurationOptions connDCS = ConfigurationOptions.Parse(Class1.Ip + ":6379,password=,connectTimeout=2000");
         //the lock for singleton
         private static readonly object Locker = new object();
         //singleton

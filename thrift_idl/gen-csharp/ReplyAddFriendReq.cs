@@ -19,10 +19,10 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class ReplyAddFriendResp : TBase
+public partial class ReplyAddFriendReq : TBase
 {
   private long _Id;
-  private long _CreateTime;
+  private int _Status;
 
   public long Id
   {
@@ -37,16 +37,16 @@ public partial class ReplyAddFriendResp : TBase
     }
   }
 
-  public long CreateTime
+  public int Status
   {
     get
     {
-      return _CreateTime;
+      return _Status;
     }
     set
     {
-      __isset.CreateTime = true;
-      this._CreateTime = value;
+      __isset.Status = true;
+      this._Status = value;
     }
   }
 
@@ -57,10 +57,10 @@ public partial class ReplyAddFriendResp : TBase
   #endif
   public struct Isset {
     public bool Id;
-    public bool CreateTime;
+    public bool Status;
   }
 
-  public ReplyAddFriendResp() {
+  public ReplyAddFriendReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -86,8 +86,8 @@ public partial class ReplyAddFriendResp : TBase
             }
             break;
           case 2:
-            if (field.Type == TType.I64) {
-              CreateTime = iprot.ReadI64();
+            if (field.Type == TType.I32) {
+              Status = iprot.ReadI32();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -110,7 +110,7 @@ public partial class ReplyAddFriendResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("ReplyAddFriendResp");
+      TStruct struc = new TStruct("ReplyAddFriendReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
       if (__isset.Id) {
@@ -121,12 +121,12 @@ public partial class ReplyAddFriendResp : TBase
         oprot.WriteI64(Id);
         oprot.WriteFieldEnd();
       }
-      if (__isset.CreateTime) {
-        field.Name = "CreateTime";
-        field.Type = TType.I64;
+      if (__isset.Status) {
+        field.Name = "Status";
+        field.Type = TType.I32;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(CreateTime);
+        oprot.WriteI32(Status);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -139,7 +139,7 @@ public partial class ReplyAddFriendResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("ReplyAddFriendResp(");
+    StringBuilder __sb = new StringBuilder("ReplyAddFriendReq(");
     bool __first = true;
     if (__isset.Id) {
       if(!__first) { __sb.Append(", "); }
@@ -147,11 +147,11 @@ public partial class ReplyAddFriendResp : TBase
       __sb.Append("Id: ");
       __sb.Append(Id);
     }
-    if (__isset.CreateTime) {
+    if (__isset.Status) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("CreateTime: ");
-      __sb.Append(CreateTime);
+      __sb.Append("Status: ");
+      __sb.Append(Status);
     }
     __sb.Append(")");
     return __sb.ToString();

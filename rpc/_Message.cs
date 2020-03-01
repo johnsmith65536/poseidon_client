@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Poseidon.rpc
 {
-    class Messages
+    class _Message
     {
         public static Tuple<long,long> SendMessage(Int64 userId, Int64 idRecv, string content, Int32 contentType, Int32 msgType)
         {
@@ -18,27 +18,28 @@ namespace Poseidon.rpc
                 ContentType = contentType,
                 MessageType = msgType
             };
-            var resp = Init.Client.SendMessage(req);
+            var resp = _Init.Client.SendMessage(req);
             return new Tuple<long,long>(resp.Id,resp.CreateTime);
         }
-        public static void MessageDelivered(long msgId)
+        public static void UpdateMessageStatus(Dictionary<long, int> message, Dictionary<long, int> userRelationRequest)
         {
-            var req = new MessageDeliveredReq()
+            var req = new UpdateMessageStatusReq()
             {
-                MsgId = msgId
+                MessageIds = message,
+                UserRelationRequestIds = userRelationRequest
             };
-            var resp = Init.Client.MessageDelivered(req);
+            _Init.Client.UpdateMessageStatus(req);
         }
-        public static Tuple<List<Message>,List<UserRelation>> FetchOfflineMessage(long userId,long messageId,long userRelationId)
+        public static Tuple<List<Message>,List<UserRelation>,long> SyncMessage(long userId,long messageId,long userRelationId)
         {
-            var req = new FetchOfflineMessageReq()
+            var req = new SyncMessageReq()
             {
                 UserId = userId,
                 MessageId = messageId,
                 UserRelationId = userRelationId,
             };
-            var resp = Init.Client.FetchOfflineMessage(req);
-            return new Tuple<List<Message>, List<UserRelation>>(resp.Messages, resp.UserRelations);
+            var resp = _Init.Client.SyncMessage(req);
+            return new Tuple<List<Message>, List<UserRelation>,long>(resp.Messages, resp.UserRelations,resp.LastOnlineTime);
         }
     }
 }

@@ -73,25 +73,51 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Thrift">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Thrift.dll</HintPath>
+      <HintPath>..\Thrift.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="Class1.cs" />
+    <Compile Include="frm_chat.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="frm_chat.Designer.cs">
+      <DependentUpon>frm_chat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_login.Designer.cs">
+      <DependentUpon>frm_login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_main.Designer.cs">
+      <DependentUpon>frm_main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_reply_add_friend.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_reply_add_friend.Designer.cs">
+      <DependentUpon>frm_reply_add_friend.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_search_user.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_search_user.Designer.cs">
+      <DependentUpon>frm_search_user.cs</DependentUpon>
     </Compile>
     <Compile Include="infra\redis\redis.cs" />
     <Compile Include="infra\sqlite\SQLiteDB.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="rpc\Relation.cs" />
-    <Compile Include="rpc\Heart_Beat.cs" />
-    <Compile Include="rpc\Init.cs" />
-    <Compile Include="rpc\Loginout.cs" />
-    <Compile Include="rpc\Messages.cs" />
+    <Compile Include="rpc\_Relation.cs" />
+    <Compile Include="rpc\_Heart_Beat.cs" />
+    <Compile Include="rpc\_Init.cs" />
+    <Compile Include="rpc\_Loginout.cs" />
+    <Compile Include="rpc\_Message.cs" />
+    <Compile Include="rpc\_User.cs" />
     <Compile Include="thrift\AddFriendReq.cs" />
     <Compile Include="thrift\AddFriendResp.cs" />
     <Compile Include="thrift\CreateUserReq.cs" />
@@ -111,14 +137,33 @@
     <Compile Include="thrift\MessageDeliveredResp.cs" />
     <Compile Include="thrift\ReplyAddFriendReq.cs" />
     <Compile Include="thrift\ReplyAddFriendResp.cs" />
+    <Compile Include="thrift\SearchUserReq.cs" />
+    <Compile Include="thrift\SearchUserResp.cs" />
     <Compile Include="thrift\SendMessageReq.cs" />
     <Compile Include="thrift\SendMessageResp.cs" />
     <Compile Include="thrift\Server.cs" />
+    <Compile Include="thrift\SyncMessageReq.cs" />
+    <Compile Include="thrift\SyncMessageResp.cs" />
+    <Compile Include="thrift\UpdateMessageStatusReq.cs" />
+    <Compile Include="thrift\UpdateMessageStatusResp.cs" />
     <Compile Include="thrift\UploadObjectReq.cs" />
     <Compile Include="thrift\UploadObjectResp.cs" />
+    <Compile Include="thrift\User.cs" />
     <Compile Include="thrift\UserRelation.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="frm_chat.resx">
+      <DependentUpon>frm_chat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_login.resx">
+      <DependentUpon>frm_login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_main.resx">
+      <DependentUpon>frm_main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_reply_add_friend.resx">
+      <DependentUpon>frm_reply_add_friend.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_search_user.resx">
+      <DependentUpon>frm_search_user.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

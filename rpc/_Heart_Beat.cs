@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Poseidon.rpc
 {
-    class Heart_Beat
+    class _Heart_Beat
     {
         public static void HeartBeat(Int64 userId)
         {
@@ -14,7 +14,7 @@ namespace Poseidon.rpc
             {
                 UserId = userId,
             };
-            Init.Client.HeartBeat(req);
+            _Init.Client.HeartBeat(req);
         }
     }
 }

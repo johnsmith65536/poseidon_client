@@ -19,7 +19,7 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class ReplyAddFriendResp : TBase
+public partial class SendMessageResp : TBase
 {
   private long _Id;
   private long _CreateTime;
@@ -60,7 +60,7 @@ public partial class ReplyAddFriendResp : TBase
     public bool CreateTime;
   }
 
-  public ReplyAddFriendResp() {
+  public SendMessageResp() {
   }
 
   public void Read (TProtocol iprot)
@@ -110,7 +110,7 @@ public partial class ReplyAddFriendResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("ReplyAddFriendResp");
+      TStruct struc = new TStruct("SendMessageResp");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
       if (__isset.Id) {
@@ -139,7 +139,7 @@ public partial class ReplyAddFriendResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("ReplyAddFriendResp(");
+    StringBuilder __sb = new StringBuilder("SendMessageResp(");
     bool __first = true;
     if (__isset.Id) {
       if(!__first) { __sb.Append(", "); }

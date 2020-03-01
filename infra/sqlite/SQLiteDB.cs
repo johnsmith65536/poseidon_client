@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Poseidon.infra.sqlite
 {
-    class SQLiteDB
+    public class SQLiteDB
     {
 
         /// <summary>

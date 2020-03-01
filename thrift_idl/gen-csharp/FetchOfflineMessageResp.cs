@@ -19,34 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class FetchFriendsListResp : TBase
+public partial class FetchOfflineMessageResp : TBase
 {
-  private List<long> _OnlineUserIds;
-  private List<long> _OfflineUserIds;
+  private List<Message> _Messages;
+  private List<UserRelation> _UserRelations;
 
-  public List<long> OnlineUserIds
+  public List<Message> Messages
   {
     get
     {
-      return _OnlineUserIds;
+      return _Messages;
     }
     set
     {
-      __isset.OnlineUserIds = true;
-      this._OnlineUserIds = value;
+      __isset.Messages = true;
+      this._Messages = value;
     }
   }
 
-  public List<long> OfflineUserIds
+  public List<UserRelation> UserRelations
   {
     get
     {
-      return _OfflineUserIds;
+      return _UserRelations;
     }
     set
     {
-      __isset.OfflineUserIds = true;
-      this._OfflineUserIds = value;
+      __isset.UserRelations = true;
+      this._UserRelations = value;
     }
   }
 
@@ -56,11 +56,11 @@ public partial class FetchFriendsListResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool OnlineUserIds;
-    public bool OfflineUserIds;
+    public bool Messages;
+    public bool UserRelations;
   }
 
-  public FetchFriendsListResp() {
+  public FetchOfflineMessageResp() {
   }
 
   public void Read (TProtocol iprot)
@@ -81,13 +81,14 @@ public partial class FetchFriendsListResp : TBase
           case 1:
             if (field.Type == TType.List) {
               {
-                OnlineUserIds = new List<long>();
-                TList _list10 = iprot.ReadListBegin();
-                for( int _i11 = 0; _i11 < _list10.Count; ++_i11)
+                Messages = new List<Message>();
+                TList _list8 = iprot.ReadListBegin();
+                for( int _i9 = 0; _i9 < _list8.Count; ++_i9)
                 {
-                  long _elem12;
-                  _elem12 = iprot.ReadI64();
-                  OnlineUserIds.Add(_elem12);
+                  Message _elem10;
+                  _elem10 = new Message();
+                  _elem10.Read(iprot);
+                  Messages.Add(_elem10);
                 }
                 iprot.ReadListEnd();
               }
@@ -98,13 +99,14 @@ public partial class FetchFriendsListResp : TBase
           case 2:
             if (field.Type == TType.List) {
               {
-                OfflineUserIds = new List<long>();
-                TList _list13 = iprot.ReadListBegin();
-                for( int _i14 = 0; _i14 < _list13.Count; ++_i14)
+                UserRelations = new List<UserRelation>();
+                TList _list11 = iprot.ReadListBegin();
+                for( int _i12 = 0; _i12 < _list11.Count; ++_i12)
                 {
-                  long _elem15;
-                  _elem15 = iprot.ReadI64();
-                  OfflineUserIds.Add(_elem15);
+                  UserRelation _elem13;
+                  _elem13 = new UserRelation();
+                  _elem13.Read(iprot);
+                  UserRelations.Add(_elem13);
                 }
                 iprot.ReadListEnd();
               }
@@ -130,34 +132,34 @@ public partial class FetchFriendsListResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("FetchFriendsListResp");
+      TStruct struc = new TStruct("FetchOfflineMessageResp");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (OnlineUserIds != null && __isset.OnlineUserIds) {
-        field.Name = "OnlineUserIds";
+      if (Messages != null && __isset.Messages) {
+        field.Name = "Messages";
         field.Type = TType.List;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
         {
-          oprot.WriteListBegin(new TList(TType.I64, OnlineUserIds.Count));
-          foreach (long _iter16 in OnlineUserIds)
+          oprot.WriteListBegin(new TList(TType.Struct, Messages.Count));
+          foreach (Message _iter14 in Messages)
           {
-            oprot.WriteI64(_iter16);
+            _iter14.Write(oprot);
           }
           oprot.WriteListEnd();
         }
         oprot.WriteFieldEnd();
       }
-      if (OfflineUserIds != null && __isset.OfflineUserIds) {
-        field.Name = "OfflineUserIds";
+      if (UserRelations != null && __isset.UserRelations) {
+        field.Name = "UserRelations";
         field.Type = TType.List;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
         {
-          oprot.WriteListBegin(new TList(TType.I64, OfflineUserIds.Count));
-          foreach (long _iter17 in OfflineUserIds)
+          oprot.WriteListBegin(new TList(TType.Struct, UserRelations.Count));
+          foreach (UserRelation _iter15 in UserRelations)
           {
-            oprot.WriteI64(_iter17);
+            _iter15.Write(oprot);
           }
           oprot.WriteListEnd();
         }
@@ -173,19 +175,19 @@ public partial class FetchFriendsListResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("FetchFriendsListResp(");
+    StringBuilder __sb = new StringBuilder("FetchOfflineMessageResp(");
     bool __first = true;
-    if (OnlineUserIds != null && __isset.OnlineUserIds) {
+    if (Messages != null && __isset.Messages) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("OnlineUserIds: ");
-      __sb.Append(OnlineUserIds);
+      __sb.Append("Messages: ");
+      __sb.Append(Messages);
     }
-    if (OfflineUserIds != null && __isset.OfflineUserIds) {
+    if (UserRelations != null && __isset.UserRelations) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("OfflineUserIds: ");
-      __sb.Append(OfflineUserIds);
+      __sb.Append("UserRelations: ");
+      __sb.Append(UserRelations);
     }
     __sb.Append(")");
     return __sb.ToString();

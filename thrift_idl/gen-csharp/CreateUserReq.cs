@@ -19,34 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class ReplyAddFriendResp : TBase
+public partial class CreateUserReq : TBase
 {
-  private long _Id;
-  private long _CreateTime;
+  private string _Password;
+  private string _NickName;
 
-  public long Id
+  public string Password
   {
     get
     {
-      return _Id;
+      return _Password;
     }
     set
     {
-      __isset.Id = true;
-      this._Id = value;
+      __isset.Password = true;
+      this._Password = value;
     }
   }
 
-  public long CreateTime
+  public string NickName
   {
     get
     {
-      return _CreateTime;
+      return _NickName;
     }
     set
     {
-      __isset.CreateTime = true;
-      this._CreateTime = value;
+      __isset.NickName = true;
+      this._NickName = value;
     }
   }
 
@@ -56,11 +56,11 @@ public partial class ReplyAddFriendResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Id;
-    public bool CreateTime;
+    public bool Password;
+    public bool NickName;
   }
 
-  public ReplyAddFriendResp() {
+  public CreateUserReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -79,15 +79,15 @@ public partial class ReplyAddFriendResp : TBase
         switch (field.ID)
         {
           case 1:
-            if (field.Type == TType.I64) {
-              Id = iprot.ReadI64();
+            if (field.Type == TType.String) {
+              Password = iprot.ReadString();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
             break;
           case 2:
-            if (field.Type == TType.I64) {
-              CreateTime = iprot.ReadI64();
+            if (field.Type == TType.String) {
+              NickName = iprot.ReadString();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -110,23 +110,23 @@ public partial class ReplyAddFriendResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("ReplyAddFriendResp");
+      TStruct struc = new TStruct("CreateUserReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (__isset.Id) {
-        field.Name = "Id";
-        field.Type = TType.I64;
+      if (Password != null && __isset.Password) {
+        field.Name = "Password";
+        field.Type = TType.String;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(Id);
+        oprot.WriteString(Password);
         oprot.WriteFieldEnd();
       }
-      if (__isset.CreateTime) {
-        field.Name = "CreateTime";
-        field.Type = TType.I64;
+      if (NickName != null && __isset.NickName) {
+        field.Name = "NickName";
+        field.Type = TType.String;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(CreateTime);
+        oprot.WriteString(NickName);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -139,19 +139,19 @@ public partial class ReplyAddFriendResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("ReplyAddFriendResp(");
+    StringBuilder __sb = new StringBuilder("CreateUserReq(");
     bool __first = true;
-    if (__isset.Id) {
+    if (Password != null && __isset.Password) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Id: ");
-      __sb.Append(Id);
+      __sb.Append("Password: ");
+      __sb.Append(Password);
     }
-    if (__isset.CreateTime) {
+    if (NickName != null && __isset.NickName) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("CreateTime: ");
-      __sb.Append(CreateTime);
+      __sb.Append("NickName: ");
+      __sb.Append(NickName);
     }
     __sb.Append(")");
     return __sb.ToString();
