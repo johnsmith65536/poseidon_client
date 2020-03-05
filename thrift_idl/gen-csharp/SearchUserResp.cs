@@ -67,13 +67,13 @@ public partial class SearchUserResp : TBase
             if (field.Type == TType.List) {
               {
                 Users = new List<User>();
-                TList _list26 = iprot.ReadListBegin();
-                for( int _i27 = 0; _i27 < _list26.Count; ++_i27)
+                TList _list48 = iprot.ReadListBegin();
+                for( int _i49 = 0; _i49 < _list48.Count; ++_i49)
                 {
-                  User _elem28;
-                  _elem28 = new User();
-                  _elem28.Read(iprot);
-                  Users.Add(_elem28);
+                  User _elem50;
+                  _elem50 = new User();
+                  _elem50.Read(iprot);
+                  Users.Add(_elem50);
                 }
                 iprot.ReadListEnd();
               }
@@ -109,9 +109,9 @@ public partial class SearchUserResp : TBase
         oprot.WriteFieldBegin(field);
         {
           oprot.WriteListBegin(new TList(TType.Struct, Users.Count));
-          foreach (User _iter29 in Users)
+          foreach (User _iter51 in Users)
           {
-            _iter29.Write(oprot);
+            _iter51.Write(oprot);
           }
           oprot.WriteListEnd();
         }

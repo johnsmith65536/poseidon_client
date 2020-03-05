@@ -19,20 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class SearchUserResp : TBase
+public partial class AddObjectReq : TBase
 {
-  private List<User> _Users;
+  private string _ETag;
+  private string _Name;
 
-  public List<User> Users
+  public string ETag
   {
     get
     {
-      return _Users;
+      return _ETag;
     }
     set
     {
-      __isset.Users = true;
-      this._Users = value;
+      __isset.ETag = true;
+      this._ETag = value;
+    }
+  }
+
+  public string Name
+  {
+    get
+    {
+      return _Name;
+    }
+    set
+    {
+      __isset.Name = true;
+      this._Name = value;
     }
   }
 
@@ -42,10 +56,11 @@ public partial class SearchUserResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Users;
+    public bool ETag;
+    public bool Name;
   }
 
-  public SearchUserResp() {
+  public AddObjectReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -64,19 +79,15 @@ public partial class SearchUserResp : TBase
         switch (field.ID)
         {
           case 1:
-            if (field.Type == TType.List) {
-              {
-                Users = new List<User>();
-                TList _list48 = iprot.ReadListBegin();
-                for( int _i49 = 0; _i49 < _list48.Count; ++_i49)
-                {
-                  User _elem50;
-                  _elem50 = new User();
-                  _elem50.Read(iprot);
-                  Users.Add(_elem50);
-                }
-                iprot.ReadListEnd();
-              }
+            if (field.Type == TType.String) {
+              ETag = iprot.ReadString();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 2:
+            if (field.Type == TType.String) {
+              Name = iprot.ReadString();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -99,22 +110,23 @@ public partial class SearchUserResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("SearchUserResp");
+      TStruct struc = new TStruct("AddObjectReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (Users != null && __isset.Users) {
-        field.Name = "Users";
-        field.Type = TType.List;
+      if (ETag != null && __isset.ETag) {
+        field.Name = "ETag";
+        field.Type = TType.String;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        {
-          oprot.WriteListBegin(new TList(TType.Struct, Users.Count));
-          foreach (User _iter51 in Users)
-          {
-            _iter51.Write(oprot);
-          }
-          oprot.WriteListEnd();
-        }
+        oprot.WriteString(ETag);
+        oprot.WriteFieldEnd();
+      }
+      if (Name != null && __isset.Name) {
+        field.Name = "Name";
+        field.Type = TType.String;
+        field.ID = 2;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteString(Name);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -127,13 +139,19 @@ public partial class SearchUserResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("SearchUserResp(");
+    StringBuilder __sb = new StringBuilder("AddObjectReq(");
     bool __first = true;
-    if (Users != null && __isset.Users) {
+    if (ETag != null && __isset.ETag) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Users: ");
-      __sb.Append(Users);
+      __sb.Append("ETag: ");
+      __sb.Append(ETag);
+    }
+    if (Name != null && __isset.Name) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("Name: ");
+      __sb.Append(Name);
     }
     __sb.Append(")");
     return __sb.ToString();

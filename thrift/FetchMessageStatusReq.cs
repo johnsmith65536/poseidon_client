@@ -19,34 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class FetchOfflineMessageResp : TBase
+public partial class FetchMessageStatusReq : TBase
 {
-  private List<Message> _Messages;
-  private List<UserRelation> _UserRelations;
+  private List<long> _MessageIds;
+  private List<long> _UserRelationRequestIds;
 
-  public List<Message> Messages
+  public List<long> MessageIds
   {
     get
     {
-      return _Messages;
+      return _MessageIds;
     }
     set
     {
-      __isset.Messages = true;
-      this._Messages = value;
+      __isset.MessageIds = true;
+      this._MessageIds = value;
     }
   }
 
-  public List<UserRelation> UserRelations
+  public List<long> UserRelationRequestIds
   {
     get
     {
-      return _UserRelations;
+      return _UserRelationRequestIds;
     }
     set
     {
-      __isset.UserRelations = true;
-      this._UserRelations = value;
+      __isset.UserRelationRequestIds = true;
+      this._UserRelationRequestIds = value;
     }
   }
 
@@ -56,11 +56,11 @@ public partial class FetchOfflineMessageResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Messages;
-    public bool UserRelations;
+    public bool MessageIds;
+    public bool UserRelationRequestIds;
   }
 
-  public FetchOfflineMessageResp() {
+  public FetchMessageStatusReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -81,14 +81,13 @@ public partial class FetchOfflineMessageResp : TBase
           case 1:
             if (field.Type == TType.List) {
               {
-                Messages = new List<Message>();
-                TList _list8 = iprot.ReadListBegin();
-                for( int _i9 = 0; _i9 < _list8.Count; ++_i9)
+                MessageIds = new List<long>();
+                TList _list10 = iprot.ReadListBegin();
+                for( int _i11 = 0; _i11 < _list10.Count; ++_i11)
                 {
-                  Message _elem10;
-                  _elem10 = new Message();
-                  _elem10.Read(iprot);
-                  Messages.Add(_elem10);
+                  long _elem12;
+                  _elem12 = iprot.ReadI64();
+                  MessageIds.Add(_elem12);
                 }
                 iprot.ReadListEnd();
               }
@@ -99,14 +98,13 @@ public partial class FetchOfflineMessageResp : TBase
           case 2:
             if (field.Type == TType.List) {
               {
-                UserRelations = new List<UserRelation>();
-                TList _list11 = iprot.ReadListBegin();
-                for( int _i12 = 0; _i12 < _list11.Count; ++_i12)
+                UserRelationRequestIds = new List<long>();
+                TList _list13 = iprot.ReadListBegin();
+                for( int _i14 = 0; _i14 < _list13.Count; ++_i14)
                 {
-                  UserRelation _elem13;
-                  _elem13 = new UserRelation();
-                  _elem13.Read(iprot);
-                  UserRelations.Add(_elem13);
+                  long _elem15;
+                  _elem15 = iprot.ReadI64();
+                  UserRelationRequestIds.Add(_elem15);
                 }
                 iprot.ReadListEnd();
               }
@@ -132,34 +130,34 @@ public partial class FetchOfflineMessageResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("FetchOfflineMessageResp");
+      TStruct struc = new TStruct("FetchMessageStatusReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (Messages != null && __isset.Messages) {
-        field.Name = "Messages";
+      if (MessageIds != null && __isset.MessageIds) {
+        field.Name = "MessageIds";
         field.Type = TType.List;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
         {
-          oprot.WriteListBegin(new TList(TType.Struct, Messages.Count));
-          foreach (Message _iter14 in Messages)
+          oprot.WriteListBegin(new TList(TType.I64, MessageIds.Count));
+          foreach (long _iter16 in MessageIds)
           {
-            _iter14.Write(oprot);
+            oprot.WriteI64(_iter16);
           }
           oprot.WriteListEnd();
         }
         oprot.WriteFieldEnd();
       }
-      if (UserRelations != null && __isset.UserRelations) {
-        field.Name = "UserRelations";
+      if (UserRelationRequestIds != null && __isset.UserRelationRequestIds) {
+        field.Name = "UserRelationRequestIds";
         field.Type = TType.List;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
         {
-          oprot.WriteListBegin(new TList(TType.Struct, UserRelations.Count));
-          foreach (UserRelation _iter15 in UserRelations)
+          oprot.WriteListBegin(new TList(TType.I64, UserRelationRequestIds.Count));
+          foreach (long _iter17 in UserRelationRequestIds)
           {
-            _iter15.Write(oprot);
+            oprot.WriteI64(_iter17);
           }
           oprot.WriteListEnd();
         }
@@ -175,19 +173,19 @@ public partial class FetchOfflineMessageResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("FetchOfflineMessageResp(");
+    StringBuilder __sb = new StringBuilder("FetchMessageStatusReq(");
     bool __first = true;
-    if (Messages != null && __isset.Messages) {
+    if (MessageIds != null && __isset.MessageIds) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Messages: ");
-      __sb.Append(Messages);
+      __sb.Append("MessageIds: ");
+      __sb.Append(MessageIds);
     }
-    if (UserRelations != null && __isset.UserRelations) {
+    if (UserRelationRequestIds != null && __isset.UserRelationRequestIds) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("UserRelations: ");
-      __sb.Append(UserRelations);
+      __sb.Append("UserRelationRequestIds: ");
+      __sb.Append(UserRelationRequestIds);
     }
     __sb.Append(")");
     return __sb.ToString();

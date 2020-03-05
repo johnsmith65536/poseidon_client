@@ -27,6 +27,7 @@ public partial class Message : TBase
   private long _GroupId;
   private string _Content;
   private long _CreateTime;
+  private int _ContentType;
   private int _MsgType;
   private int _IsRead;
 
@@ -108,6 +109,19 @@ public partial class Message : TBase
     }
   }
 
+  public int ContentType
+  {
+    get
+    {
+      return _ContentType;
+    }
+    set
+    {
+      __isset.ContentType = true;
+      this._ContentType = value;
+    }
+  }
+
   public int MsgType
   {
     get
@@ -146,6 +160,7 @@ public partial class Message : TBase
     public bool GroupId;
     public bool Content;
     public bool CreateTime;
+    public bool ContentType;
     public bool MsgType;
     public bool IsRead;
   }
@@ -212,12 +227,19 @@ public partial class Message : TBase
             break;
           case 7:
             if (field.Type == TType.I32) {
-              MsgType = iprot.ReadI32();
+              ContentType = iprot.ReadI32();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
             break;
           case 8:
+            if (field.Type == TType.I32) {
+              MsgType = iprot.ReadI32();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 9:
             if (field.Type == TType.I32) {
               IsRead = iprot.ReadI32();
             } else { 
@@ -293,10 +315,18 @@ public partial class Message : TBase
         oprot.WriteI64(CreateTime);
         oprot.WriteFieldEnd();
       }
+      if (__isset.ContentType) {
+        field.Name = "ContentType";
+        field.Type = TType.I32;
+        field.ID = 7;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteI32(ContentType);
+        oprot.WriteFieldEnd();
+      }
       if (__isset.MsgType) {
         field.Name = "MsgType";
         field.Type = TType.I32;
-        field.ID = 7;
+        field.ID = 8;
         oprot.WriteFieldBegin(field);
         oprot.WriteI32(MsgType);
         oprot.WriteFieldEnd();
@@ -304,7 +334,7 @@ public partial class Message : TBase
       if (__isset.IsRead) {
         field.Name = "IsRead";
         field.Type = TType.I32;
-        field.ID = 8;
+        field.ID = 9;
         oprot.WriteFieldBegin(field);
         oprot.WriteI32(IsRead);
         oprot.WriteFieldEnd();
@@ -356,6 +386,12 @@ public partial class Message : TBase
       __first = false;
       __sb.Append("CreateTime: ");
       __sb.Append(CreateTime);
+    }
+    if (__isset.ContentType) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("ContentType: ");
+      __sb.Append(ContentType);
     }
     if (__isset.MsgType) {
       if(!__first) { __sb.Append(", "); }

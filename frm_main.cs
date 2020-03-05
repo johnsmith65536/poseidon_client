@@ -11,26 +11,27 @@ using System.Threading;
 using StackExchange.Redis;
 using Poseidon.infra.redis;
 using Newtonsoft.Json;
+using Thrift.Collections;
 
 namespace Poseidon
 {
     public partial class frm_main : Form
     {
-
+        private long delFriendUserId;
         private enum BroadcastMsgType
         {
             Chat = 0,
             AddFriend = 1,
             ReplyAddFriend = 2
         }
-        private struct AddFriend
+        private struct RedisAddFriend
         {
             public long Id;
             public long UserIdSend;
             public long UserIdRecv;
             public long CreateTime;
         };
-        private struct ReplyAddFriend
+        private struct RedisReplyAddFriend
         {
             public long Id;
             public long ParentId;
@@ -38,6 +39,21 @@ namespace Poseidon
             public long UserIdRecv;
             public long CreateTime;
             public int Status;
+        };
+
+        private struct RedisMessage
+        {
+            public long Id;
+            public long UserIdSend;
+            public long UserIdRecv;
+            public long GroupId;
+            public string Content;
+            public long CreateTime;
+            public int ContentType;
+            public int MsgType;
+            public int IsRead;
+            public string ObjectETag;
+            public string ObjectName;
         };
         public frm_main()
         {
@@ -68,32 +84,83 @@ namespace Poseidon
         }
         public void LoadUnReadMessage()
         {
+
             InvokeGridClear(dgv_msg);
-            DataTable dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time FROM `message` WHERE `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
+            DataTable dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
             foreach (DataRow row in dt.Rows)
             {
                 var id = long.Parse(row["id"].ToString());
                 var userIdSend = long.Parse(row["user_id_send"].ToString());
                 var content = row["content"].ToString();
                 var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
+                var contentType = long.Parse(row["content_type"].ToString());
+                Console.WriteLine("content_type = ",contentType);
+                switch (contentType)
+                {
+                    case (int)Class1.ContentType.Text:
+                        {
+                            InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
             {"id",id},
             {"type","消息"},
             {"user_id_send",userIdSend},
             {"content",content},
             {"create_time",createTime}
         });
+                            break;
+                        }
+                    case (int)Class1.ContentType.Object:
+                        {
+                            var objId = long.Parse(content);
+                            DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                            if (dt1.Rows.Count != 1)
+                            {
+                                Console.WriteLine("rowCount != 1");
+                                return;
+                            }
+                            InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
+            {"id",id},
+            {"type","消息"},
+            {"user_id_send",userIdSend},
+            {"content","[文件]" + dt1.Rows[0]["name"].ToString()},
+            {"create_time",createTime}
+        });
+                            break;
+                        }
+                }
             }
 
             dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
+
+
+            // 同步最新的status，message暂不同步
+            List<long> queryIds = new List<long>();
+            foreach (DataRow row in dt.Rows)
+            {
+                var parentId = long.Parse(row["parent_id"].ToString());
+                if (parentId != -1)
+                    queryIds.Add(parentId);
+            }
+            var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
+            foreach (var item in resp.UserRelationRequestIds)
+            {
+                var id = item.Key;
+                var status = item.Value;
+                var ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET status = {status} WHERE id = {id}");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+
             foreach (DataRow row in dt.Rows)
             {
                 var id = long.Parse(row["id"].ToString());
                 var userIdSend = long.Parse(row["user_id_send"].ToString());
                 var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                var parentId = row["parent_id"];
-                Console.WriteLine("===== " + parentId);
-                if (parentId == DBNull.Value)
+                var parentId = long.Parse(row["parent_id"].ToString());
+                if (parentId == -1)
                 {
                     InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
             {"id",id},
@@ -104,8 +171,7 @@ namespace Poseidon
                 }
                 else
                 {
-                    var realParentId = long.Parse(parentId.ToString());
-                    var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {realParentId}");
+                    var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {parentId}");
                     if (dt1.Rows.Count == 0)
                     {
                         Console.WriteLine("parentId 不存在");
@@ -119,7 +185,7 @@ namespace Poseidon
                         statusString = "请求被拒绝";
                     else
                     {
-                        Console.WriteLine("无效的status, status = ",status);
+                        Console.WriteLine("无效的status, status = ", status);
                         return;
                     }
                     InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
@@ -170,48 +236,43 @@ namespace Poseidon
                 var resp = rpc._Message.SyncMessage(Class1.UserId, messageId, userRelationId);
                 var messages = resp.Item1;
                 var userRelations = resp.Item2;
-                var lastOnlineTime = resp.Item3;
+                var objects = resp.Item3;
+                var lastOnlineTime = resp.Item4;
                 //消息落库
+
+                foreach (var obj in objects)
+                {
+                    /*bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({obj.Id}, '{obj.ETag}', '{obj.Name}')");
+                    if (!ret1)
+                    {
+                        //MessageBox.Show("DB错误，INSERT INTO object失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        //return;
+                    }*/
+
+                    Class1.InsertObject(obj.Id, obj.ETag, obj.Name);
+                }
+
                 foreach (var msg in messages)
                 {
-                    bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, msg_type, is_read) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, '{msg.Content}', {msg.CreateTime}, {msg.MsgType}, {msg.IsRead})");
+                    bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
+                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, '{msg.Content}', {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})");
                     if (!ret1)
                     {
                         MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-
-                    /*if (msg.CreateTime > lastOnlineTime)
-                        //ListAdd(lbx_msg, $"[新消息]来自{msg.UserIdSend}，内容:{msg.Content}");
-                        InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","消息"},
-            {"user_id_send",msg.UserIdSend},
-            {"content",msg.Content},
-            {"create_time",msg.CreateTime}
-        });*/
                 }
 
 
                 foreach (var msg in userRelations)
                 {
-                    bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, {msg.Status})");
+                    bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({msg.Id}, " +
+                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, {msg.Status}, {msg.ParentId})");
                     if (!ret1)
                     {
                         MessageBox.Show("DB错误，INSERT INTO user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                    /*if (msg.CreateTime > lastOnlineTime)
-                        //ListAdd(lbx_msg, $"[好友请求]来自{msg.UserIdSend}的好友请求");
-                        InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","好友请求"},
-            {"user_id_send",msg.UserIdSend},
-            {"content",""},
-            {"create_time",msg.CreateTime}
-        });*/
                 }
                 LoadUnReadMessage();
 
@@ -250,50 +311,105 @@ namespace Poseidon
             {
                 case BroadcastMsgType.Chat:
                     {
-                        Message msg = JsonConvert.DeserializeObject<Message>(val.ToString());
+                        var msg = JsonConvert.DeserializeObject<RedisMessage>(val.ToString());
                         //var newText = txt_status.Text + "消息接受成功, msgId = " + msg.Id + ", content = " + msg.Content + Environment.NewLine;
                         //SetText(txt_status, newText);
                         //rpc._Message.MessageDelivered(msg.Id);
-                        bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, msg_type, is_read) VALUES({msg.Id}, " +
-                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, '{msg.Content}', {msg.CreateTime}, {msg.MsgType}, {msg.IsRead})");
+                        bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
+                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, '{msg.Content}', {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})");
                         if (!ret)
                         {
                             MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
                         //ListAdd(lbx_msg, $"[新消息]来自{msg.UserIdSend}，内容:{msg.Content}");
-                        InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
+                        switch (msg.ContentType)
+                        {
+                            case (int)Class1.ContentType.Text:
+                                {
+                                    InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
             {"id",msg.Id},
             {"type","消息"},
             {"user_id_send",msg.UserIdSend},
             {"content",msg.Content},
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
         });
+                                    break;
+                                }
+                            case (int)Class1.ContentType.Object:
+                                {
+                                    var objId = long.Parse(msg.Content);
+
+                                    /*bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({objId}, '{msg.ObjectETag}', '{msg.ObjectName}')");
+                                    if (!ret1)
+                                    {
+                                        //MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        //return;
+                                    }*/
+
+                                    Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
+
+                                    InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
+            {"id",msg.Id},
+            {"type","消息"},
+            {"user_id_send",msg.UserIdSend},
+            {"content","[文件]" + msg.ObjectName},
+            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
+        });
+                                    break;
+                                }
+                            default:
+                                {
+                                    Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
+                                    break;
+                                }
+                        }
                         if (Class1.formChatPool.ContainsKey(msg.UserIdSend))
                         {
                             var frm_chat = Class1.formChatPool[msg.UserIdSend];
                             //ListAdd(frm_chat.listBox1, "对方:" + msg.Content + " " + Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime)));
-                            InvokeGridAdd(frm_chat.dgv_msg, new Dictionary<string, object> {
+                            switch (msg.ContentType)
+                            {
+                                case (int)Class1.ContentType.Text:
+                                    {
+                                        InvokeGridAdd(frm_chat.dgv_msg, new Dictionary<string, object> {
             {"user_id",msg.UserIdSend},
             {"content",msg.Content},
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
         });
-
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Object:
+                                    {
+                                        InvokeGridAdd(frm_chat.dgv_msg, new Dictionary<string, object> {
+            {"user_id",msg.UserIdSend},
+            {"content","[文件]" + msg.ObjectName},
+            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))},
+            {"e_tag",msg.ObjectETag}
+        });
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
+                                        break;
+                                    }
+                            }
                         }
 
                         break;
                     }
                 case BroadcastMsgType.AddFriend:
                     {
-                        AddFriend msg = JsonConvert.DeserializeObject<AddFriend>(val.ToString());
+                        var msg = JsonConvert.DeserializeObject<RedisAddFriend>(val.ToString());
                         //var newText = txt_status.Text + "用户" + msg.UserIdSend + "请求添加你为好友, msgId = " + msg.Id + Environment.NewLine;
                         //SetText(txt_status, newText);
                         //SetText(txt_add_friend_id, msg.Id.ToString());
-                        bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status) VALUES({msg.Id}, " +
-                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, 0)");
+                        bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({msg.Id}, " +
+                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, 0, -1)");
                         if (!ret)
                         {
-                            MessageBox.Show("DB错误，INSERT INTO user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("DB错误，INSERT INTO user_relation_request失败888", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
                         //ListAdd(lbx_msg, $"[好友请求]来自{msg.UserIdSend}的好友请求");
@@ -308,7 +424,7 @@ namespace Poseidon
                     }
                 case BroadcastMsgType.ReplyAddFriend:
                     {
-                        ReplyAddFriend msg = JsonConvert.DeserializeObject<ReplyAddFriend>(val.ToString());
+                        var msg = JsonConvert.DeserializeObject<RedisReplyAddFriend>(val.ToString());
                         bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({msg.Id}, " +
                             $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, 0, {msg.ParentId})");
                         if (!ret)
@@ -438,20 +554,6 @@ namespace Poseidon
                 LoadUnReadMessage();
             }
         }
-        private void dgv_msg_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-
-        }
-
-        private void dgv_msg_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void dgv_msg_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-
-        }
 
         private void dgv_msg_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -523,7 +625,7 @@ namespace Poseidon
                 }
                 else if (type == "好友请求回复")
                 {
-                    UpdateMessageStatus(new Dictionary<long, int>(),new Dictionary<long, int> { {id, 1 }});
+                    UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
                     LoadUnReadMessage();
                 }
                 else
@@ -532,6 +634,26 @@ namespace Poseidon
                 }
 
             }
+        }
+        private void dgv_friend_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                {
+                    delFriendUserId = long.Parse(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value.ToString());
+                    dgv_friend.ClearSelection();
+                    dgv_friend.Rows[e.RowIndex].Selected = true;
+                    dgv_friend.CurrentCell = dgv_friend.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                    mnu_strip.Show(MousePosition.X, MousePosition.Y);
+                }
+            }
+        }
+
+        private void mnu_del_friend_Click(object sender, EventArgs e)
+        {
+            rpc._Relation.DeleteFriend(Class1.UserId, delFriendUserId);
+            MessageBox.Show("好友删除成功", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

@@ -19,20 +19,20 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class SearchUserResp : TBase
+public partial class GetSTSInfoReq : TBase
 {
-  private List<User> _Users;
+  private long _userId;
 
-  public List<User> Users
+  public long UserId
   {
     get
     {
-      return _Users;
+      return _userId;
     }
     set
     {
-      __isset.Users = true;
-      this._Users = value;
+      __isset.userId = true;
+      this._userId = value;
     }
   }
 
@@ -42,10 +42,10 @@ public partial class SearchUserResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Users;
+    public bool userId;
   }
 
-  public SearchUserResp() {
+  public GetSTSInfoReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -64,19 +64,8 @@ public partial class SearchUserResp : TBase
         switch (field.ID)
         {
           case 1:
-            if (field.Type == TType.List) {
-              {
-                Users = new List<User>();
-                TList _list48 = iprot.ReadListBegin();
-                for( int _i49 = 0; _i49 < _list48.Count; ++_i49)
-                {
-                  User _elem50;
-                  _elem50 = new User();
-                  _elem50.Read(iprot);
-                  Users.Add(_elem50);
-                }
-                iprot.ReadListEnd();
-              }
+            if (field.Type == TType.I64) {
+              UserId = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -99,22 +88,15 @@ public partial class SearchUserResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("SearchUserResp");
+      TStruct struc = new TStruct("GetSTSInfoReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (Users != null && __isset.Users) {
-        field.Name = "Users";
-        field.Type = TType.List;
+      if (__isset.userId) {
+        field.Name = "userId";
+        field.Type = TType.I64;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        {
-          oprot.WriteListBegin(new TList(TType.Struct, Users.Count));
-          foreach (User _iter51 in Users)
-          {
-            _iter51.Write(oprot);
-          }
-          oprot.WriteListEnd();
-        }
+        oprot.WriteI64(UserId);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -127,13 +109,13 @@ public partial class SearchUserResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("SearchUserResp(");
+    StringBuilder __sb = new StringBuilder("GetSTSInfoReq(");
     bool __first = true;
-    if (Users != null && __isset.Users) {
+    if (__isset.userId) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Users: ");
-      __sb.Append(Users);
+      __sb.Append("UserId: ");
+      __sb.Append(UserId);
     }
     __sb.Append(")");
     return __sb.ToString();

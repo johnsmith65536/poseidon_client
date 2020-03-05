@@ -19,48 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class FetchOfflineMessageReq : TBase
+public partial class DeleteFriendReq : TBase
 {
-  private long _UserId;
-  private long _MessageId;
-  private long _UserRelationId;
+  private long _UserIdSend;
+  private long _UserIdRecv;
 
-  public long UserId
+  public long UserIdSend
   {
     get
     {
-      return _UserId;
+      return _UserIdSend;
     }
     set
     {
-      __isset.UserId = true;
-      this._UserId = value;
+      __isset.UserIdSend = true;
+      this._UserIdSend = value;
     }
   }
 
-  public long MessageId
+  public long UserIdRecv
   {
     get
     {
-      return _MessageId;
+      return _UserIdRecv;
     }
     set
     {
-      __isset.MessageId = true;
-      this._MessageId = value;
-    }
-  }
-
-  public long UserRelationId
-  {
-    get
-    {
-      return _UserRelationId;
-    }
-    set
-    {
-      __isset.UserRelationId = true;
-      this._UserRelationId = value;
+      __isset.UserIdRecv = true;
+      this._UserIdRecv = value;
     }
   }
 
@@ -70,12 +56,11 @@ public partial class FetchOfflineMessageReq : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool UserId;
-    public bool MessageId;
-    public bool UserRelationId;
+    public bool UserIdSend;
+    public bool UserIdRecv;
   }
 
-  public FetchOfflineMessageReq() {
+  public DeleteFriendReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -95,21 +80,14 @@ public partial class FetchOfflineMessageReq : TBase
         {
           case 1:
             if (field.Type == TType.I64) {
-              UserId = iprot.ReadI64();
+              UserIdSend = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
             break;
           case 2:
             if (field.Type == TType.I64) {
-              MessageId = iprot.ReadI64();
-            } else { 
-              TProtocolUtil.Skip(iprot, field.Type);
-            }
-            break;
-          case 3:
-            if (field.Type == TType.I64) {
-              UserRelationId = iprot.ReadI64();
+              UserIdRecv = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -132,31 +110,23 @@ public partial class FetchOfflineMessageReq : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("FetchOfflineMessageReq");
+      TStruct struc = new TStruct("DeleteFriendReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (__isset.UserId) {
-        field.Name = "UserId";
+      if (__isset.UserIdSend) {
+        field.Name = "UserIdSend";
         field.Type = TType.I64;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(UserId);
+        oprot.WriteI64(UserIdSend);
         oprot.WriteFieldEnd();
       }
-      if (__isset.MessageId) {
-        field.Name = "MessageId";
+      if (__isset.UserIdRecv) {
+        field.Name = "UserIdRecv";
         field.Type = TType.I64;
         field.ID = 2;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(MessageId);
-        oprot.WriteFieldEnd();
-      }
-      if (__isset.UserRelationId) {
-        field.Name = "UserRelationId";
-        field.Type = TType.I64;
-        field.ID = 3;
-        oprot.WriteFieldBegin(field);
-        oprot.WriteI64(UserRelationId);
+        oprot.WriteI64(UserIdRecv);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -169,25 +139,19 @@ public partial class FetchOfflineMessageReq : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("FetchOfflineMessageReq(");
+    StringBuilder __sb = new StringBuilder("DeleteFriendReq(");
     bool __first = true;
-    if (__isset.UserId) {
+    if (__isset.UserIdSend) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("UserId: ");
-      __sb.Append(UserId);
+      __sb.Append("UserIdSend: ");
+      __sb.Append(UserIdSend);
     }
-    if (__isset.MessageId) {
+    if (__isset.UserIdRecv) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("MessageId: ");
-      __sb.Append(MessageId);
-    }
-    if (__isset.UserRelationId) {
-      if(!__first) { __sb.Append(", "); }
-      __first = false;
-      __sb.Append("UserRelationId: ");
-      __sb.Append(UserRelationId);
+      __sb.Append("UserIdRecv: ");
+      __sb.Append(UserIdRecv);
     }
     __sb.Append(")");
     return __sb.ToString();

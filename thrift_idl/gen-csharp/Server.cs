@@ -24,11 +24,14 @@ public partial class Server {
     HeartBeatResp HeartBeat(HeartBeatReq req);
     FetchFriendsListResp FetchFriendsList(FetchFriendsListReq req);
     SyncMessageResp SyncMessage(SyncMessageReq req);
-    UploadObjectResp UploadObject(UploadObjectReq req);
     AddFriendResp AddFriend(AddFriendReq req);
     ReplyAddFriendResp ReplyAddFriend(ReplyAddFriendReq req);
     UpdateMessageStatusResp UpdateMessageStatus(UpdateMessageStatusReq req);
     SearchUserResp SearchUser(SearchUserReq req);
+    DeleteFriendResp DeleteFriend(DeleteFriendReq req);
+    GetSTSInfoResp GetSTSInfo(GetSTSInfoReq req);
+    FetchMessageStatusResp FetchMessageStatus(FetchMessageStatusReq req);
+    CreateObjectResp CreateObject(CreateObjectReq req);
   }
 
   public interface Iface : ISync {
@@ -61,10 +64,6 @@ public partial class Server {
     SyncMessageResp End_SyncMessage(IAsyncResult asyncResult);
     #endif
     #if SILVERLIGHT
-    IAsyncResult Begin_UploadObject(AsyncCallback callback, object state, UploadObjectReq req);
-    UploadObjectResp End_UploadObject(IAsyncResult asyncResult);
-    #endif
-    #if SILVERLIGHT
     IAsyncResult Begin_AddFriend(AsyncCallback callback, object state, AddFriendReq req);
     AddFriendResp End_AddFriend(IAsyncResult asyncResult);
     #endif
@@ -79,6 +78,22 @@ public partial class Server {
     #if SILVERLIGHT
     IAsyncResult Begin_SearchUser(AsyncCallback callback, object state, SearchUserReq req);
     SearchUserResp End_SearchUser(IAsyncResult asyncResult);
+    #endif
+    #if SILVERLIGHT
+    IAsyncResult Begin_DeleteFriend(AsyncCallback callback, object state, DeleteFriendReq req);
+    DeleteFriendResp End_DeleteFriend(IAsyncResult asyncResult);
+    #endif
+    #if SILVERLIGHT
+    IAsyncResult Begin_GetSTSInfo(AsyncCallback callback, object state, GetSTSInfoReq req);
+    GetSTSInfoResp End_GetSTSInfo(IAsyncResult asyncResult);
+    #endif
+    #if SILVERLIGHT
+    IAsyncResult Begin_FetchMessageStatus(AsyncCallback callback, object state, FetchMessageStatusReq req);
+    FetchMessageStatusResp End_FetchMessageStatus(IAsyncResult asyncResult);
+    #endif
+    #if SILVERLIGHT
+    IAsyncResult Begin_CreateObject(AsyncCallback callback, object state, CreateObjectReq req);
+    CreateObjectResp End_CreateObject(IAsyncResult asyncResult);
     #endif
   }
 
@@ -624,75 +639,6 @@ public partial class Server {
     
     #if SILVERLIGHT
     
-    public IAsyncResult Begin_UploadObject(AsyncCallback callback, object state, UploadObjectReq req)
-    {
-      return send_UploadObject(callback, state, req);
-    }
-
-    public UploadObjectResp End_UploadObject(IAsyncResult asyncResult)
-    {
-      oprot_.Transport.EndFlush(asyncResult);
-      return recv_UploadObject();
-    }
-
-    #endif
-
-    public UploadObjectResp UploadObject(UploadObjectReq req)
-    {
-      #if SILVERLIGHT
-      var asyncResult = Begin_UploadObject(null, null, req);
-      return End_UploadObject(asyncResult);
-
-      #else
-      send_UploadObject(req);
-      return recv_UploadObject();
-
-      #endif
-    }
-    #if SILVERLIGHT
-    public IAsyncResult send_UploadObject(AsyncCallback callback, object state, UploadObjectReq req)
-    {
-      oprot_.WriteMessageBegin(new TMessage("UploadObject", TMessageType.Call, seqid_));
-      UploadObject_args args = new UploadObject_args();
-      args.Req = req;
-      args.Write(oprot_);
-      oprot_.WriteMessageEnd();
-      return oprot_.Transport.BeginFlush(callback, state);
-    }
-
-    #else
-
-    public void send_UploadObject(UploadObjectReq req)
-    {
-      oprot_.WriteMessageBegin(new TMessage("UploadObject", TMessageType.Call, seqid_));
-      UploadObject_args args = new UploadObject_args();
-      args.Req = req;
-      args.Write(oprot_);
-      oprot_.WriteMessageEnd();
-      oprot_.Transport.Flush();
-    }
-    #endif
-
-    public UploadObjectResp recv_UploadObject()
-    {
-      TMessage msg = iprot_.ReadMessageBegin();
-      if (msg.Type == TMessageType.Exception) {
-        TApplicationException x = TApplicationException.Read(iprot_);
-        iprot_.ReadMessageEnd();
-        throw x;
-      }
-      UploadObject_result result = new UploadObject_result();
-      result.Read(iprot_);
-      iprot_.ReadMessageEnd();
-      if (result.__isset.success) {
-        return result.Success;
-      }
-      throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "UploadObject failed: unknown result");
-    }
-
-    
-    #if SILVERLIGHT
-    
     public IAsyncResult Begin_AddFriend(AsyncCallback callback, object state, AddFriendReq req)
     {
       return send_AddFriend(callback, state, req);
@@ -966,6 +912,282 @@ public partial class Server {
       throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "SearchUser failed: unknown result");
     }
 
+    
+    #if SILVERLIGHT
+    
+    public IAsyncResult Begin_DeleteFriend(AsyncCallback callback, object state, DeleteFriendReq req)
+    {
+      return send_DeleteFriend(callback, state, req);
+    }
+
+    public DeleteFriendResp End_DeleteFriend(IAsyncResult asyncResult)
+    {
+      oprot_.Transport.EndFlush(asyncResult);
+      return recv_DeleteFriend();
+    }
+
+    #endif
+
+    public DeleteFriendResp DeleteFriend(DeleteFriendReq req)
+    {
+      #if SILVERLIGHT
+      var asyncResult = Begin_DeleteFriend(null, null, req);
+      return End_DeleteFriend(asyncResult);
+
+      #else
+      send_DeleteFriend(req);
+      return recv_DeleteFriend();
+
+      #endif
+    }
+    #if SILVERLIGHT
+    public IAsyncResult send_DeleteFriend(AsyncCallback callback, object state, DeleteFriendReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("DeleteFriend", TMessageType.Call, seqid_));
+      DeleteFriend_args args = new DeleteFriend_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      return oprot_.Transport.BeginFlush(callback, state);
+    }
+
+    #else
+
+    public void send_DeleteFriend(DeleteFriendReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("DeleteFriend", TMessageType.Call, seqid_));
+      DeleteFriend_args args = new DeleteFriend_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      oprot_.Transport.Flush();
+    }
+    #endif
+
+    public DeleteFriendResp recv_DeleteFriend()
+    {
+      TMessage msg = iprot_.ReadMessageBegin();
+      if (msg.Type == TMessageType.Exception) {
+        TApplicationException x = TApplicationException.Read(iprot_);
+        iprot_.ReadMessageEnd();
+        throw x;
+      }
+      DeleteFriend_result result = new DeleteFriend_result();
+      result.Read(iprot_);
+      iprot_.ReadMessageEnd();
+      if (result.__isset.success) {
+        return result.Success;
+      }
+      throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "DeleteFriend failed: unknown result");
+    }
+
+    
+    #if SILVERLIGHT
+    
+    public IAsyncResult Begin_GetSTSInfo(AsyncCallback callback, object state, GetSTSInfoReq req)
+    {
+      return send_GetSTSInfo(callback, state, req);
+    }
+
+    public GetSTSInfoResp End_GetSTSInfo(IAsyncResult asyncResult)
+    {
+      oprot_.Transport.EndFlush(asyncResult);
+      return recv_GetSTSInfo();
+    }
+
+    #endif
+
+    public GetSTSInfoResp GetSTSInfo(GetSTSInfoReq req)
+    {
+      #if SILVERLIGHT
+      var asyncResult = Begin_GetSTSInfo(null, null, req);
+      return End_GetSTSInfo(asyncResult);
+
+      #else
+      send_GetSTSInfo(req);
+      return recv_GetSTSInfo();
+
+      #endif
+    }
+    #if SILVERLIGHT
+    public IAsyncResult send_GetSTSInfo(AsyncCallback callback, object state, GetSTSInfoReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("GetSTSInfo", TMessageType.Call, seqid_));
+      GetSTSInfo_args args = new GetSTSInfo_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      return oprot_.Transport.BeginFlush(callback, state);
+    }
+
+    #else
+
+    public void send_GetSTSInfo(GetSTSInfoReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("GetSTSInfo", TMessageType.Call, seqid_));
+      GetSTSInfo_args args = new GetSTSInfo_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      oprot_.Transport.Flush();
+    }
+    #endif
+
+    public GetSTSInfoResp recv_GetSTSInfo()
+    {
+      TMessage msg = iprot_.ReadMessageBegin();
+      if (msg.Type == TMessageType.Exception) {
+        TApplicationException x = TApplicationException.Read(iprot_);
+        iprot_.ReadMessageEnd();
+        throw x;
+      }
+      GetSTSInfo_result result = new GetSTSInfo_result();
+      result.Read(iprot_);
+      iprot_.ReadMessageEnd();
+      if (result.__isset.success) {
+        return result.Success;
+      }
+      throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "GetSTSInfo failed: unknown result");
+    }
+
+    
+    #if SILVERLIGHT
+    
+    public IAsyncResult Begin_FetchMessageStatus(AsyncCallback callback, object state, FetchMessageStatusReq req)
+    {
+      return send_FetchMessageStatus(callback, state, req);
+    }
+
+    public FetchMessageStatusResp End_FetchMessageStatus(IAsyncResult asyncResult)
+    {
+      oprot_.Transport.EndFlush(asyncResult);
+      return recv_FetchMessageStatus();
+    }
+
+    #endif
+
+    public FetchMessageStatusResp FetchMessageStatus(FetchMessageStatusReq req)
+    {
+      #if SILVERLIGHT
+      var asyncResult = Begin_FetchMessageStatus(null, null, req);
+      return End_FetchMessageStatus(asyncResult);
+
+      #else
+      send_FetchMessageStatus(req);
+      return recv_FetchMessageStatus();
+
+      #endif
+    }
+    #if SILVERLIGHT
+    public IAsyncResult send_FetchMessageStatus(AsyncCallback callback, object state, FetchMessageStatusReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("FetchMessageStatus", TMessageType.Call, seqid_));
+      FetchMessageStatus_args args = new FetchMessageStatus_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      return oprot_.Transport.BeginFlush(callback, state);
+    }
+
+    #else
+
+    public void send_FetchMessageStatus(FetchMessageStatusReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("FetchMessageStatus", TMessageType.Call, seqid_));
+      FetchMessageStatus_args args = new FetchMessageStatus_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      oprot_.Transport.Flush();
+    }
+    #endif
+
+    public FetchMessageStatusResp recv_FetchMessageStatus()
+    {
+      TMessage msg = iprot_.ReadMessageBegin();
+      if (msg.Type == TMessageType.Exception) {
+        TApplicationException x = TApplicationException.Read(iprot_);
+        iprot_.ReadMessageEnd();
+        throw x;
+      }
+      FetchMessageStatus_result result = new FetchMessageStatus_result();
+      result.Read(iprot_);
+      iprot_.ReadMessageEnd();
+      if (result.__isset.success) {
+        return result.Success;
+      }
+      throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "FetchMessageStatus failed: unknown result");
+    }
+
+    
+    #if SILVERLIGHT
+    
+    public IAsyncResult Begin_CreateObject(AsyncCallback callback, object state, CreateObjectReq req)
+    {
+      return send_CreateObject(callback, state, req);
+    }
+
+    public CreateObjectResp End_CreateObject(IAsyncResult asyncResult)
+    {
+      oprot_.Transport.EndFlush(asyncResult);
+      return recv_CreateObject();
+    }
+
+    #endif
+
+    public CreateObjectResp CreateObject(CreateObjectReq req)
+    {
+      #if SILVERLIGHT
+      var asyncResult = Begin_CreateObject(null, null, req);
+      return End_CreateObject(asyncResult);
+
+      #else
+      send_CreateObject(req);
+      return recv_CreateObject();
+
+      #endif
+    }
+    #if SILVERLIGHT
+    public IAsyncResult send_CreateObject(AsyncCallback callback, object state, CreateObjectReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("CreateObject", TMessageType.Call, seqid_));
+      CreateObject_args args = new CreateObject_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      return oprot_.Transport.BeginFlush(callback, state);
+    }
+
+    #else
+
+    public void send_CreateObject(CreateObjectReq req)
+    {
+      oprot_.WriteMessageBegin(new TMessage("CreateObject", TMessageType.Call, seqid_));
+      CreateObject_args args = new CreateObject_args();
+      args.Req = req;
+      args.Write(oprot_);
+      oprot_.WriteMessageEnd();
+      oprot_.Transport.Flush();
+    }
+    #endif
+
+    public CreateObjectResp recv_CreateObject()
+    {
+      TMessage msg = iprot_.ReadMessageBegin();
+      if (msg.Type == TMessageType.Exception) {
+        TApplicationException x = TApplicationException.Read(iprot_);
+        iprot_.ReadMessageEnd();
+        throw x;
+      }
+      CreateObject_result result = new CreateObject_result();
+      result.Read(iprot_);
+      iprot_.ReadMessageEnd();
+      if (result.__isset.success) {
+        return result.Success;
+      }
+      throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "CreateObject failed: unknown result");
+    }
+
   }
   public class Processor : TProcessor {
     public Processor(ISync iface)
@@ -978,11 +1200,14 @@ public partial class Server {
       processMap_["HeartBeat"] = HeartBeat_Process;
       processMap_["FetchFriendsList"] = FetchFriendsList_Process;
       processMap_["SyncMessage"] = SyncMessage_Process;
-      processMap_["UploadObject"] = UploadObject_Process;
       processMap_["AddFriend"] = AddFriend_Process;
       processMap_["ReplyAddFriend"] = ReplyAddFriend_Process;
       processMap_["UpdateMessageStatus"] = UpdateMessageStatus_Process;
       processMap_["SearchUser"] = SearchUser_Process;
+      processMap_["DeleteFriend"] = DeleteFriend_Process;
+      processMap_["GetSTSInfo"] = GetSTSInfo_Process;
+      processMap_["FetchMessageStatus"] = FetchMessageStatus_Process;
+      processMap_["CreateObject"] = CreateObject_Process;
     }
 
     protected delegate void ProcessFunction(int seqid, TProtocol iprot, TProtocol oprot);
@@ -1211,34 +1436,6 @@ public partial class Server {
       oprot.Transport.Flush();
     }
 
-    public void UploadObject_Process(int seqid, TProtocol iprot, TProtocol oprot)
-    {
-      UploadObject_args args = new UploadObject_args();
-      args.Read(iprot);
-      iprot.ReadMessageEnd();
-      UploadObject_result result = new UploadObject_result();
-      try
-      {
-        result.Success = iface_.UploadObject(args.Req);
-        oprot.WriteMessageBegin(new TMessage("UploadObject", TMessageType.Reply, seqid)); 
-        result.Write(oprot);
-      }
-      catch (TTransportException)
-      {
-        throw;
-      }
-      catch (Exception ex)
-      {
-        Console.Error.WriteLine("Error occurred in processor:");
-        Console.Error.WriteLine(ex.ToString());
-        TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
-        oprot.WriteMessageBegin(new TMessage("UploadObject", TMessageType.Exception, seqid));
-        x.Write(oprot);
-      }
-      oprot.WriteMessageEnd();
-      oprot.Transport.Flush();
-    }
-
     public void AddFriend_Process(int seqid, TProtocol iprot, TProtocol oprot)
     {
       AddFriend_args args = new AddFriend_args();
@@ -1345,6 +1542,118 @@ public partial class Server {
         Console.Error.WriteLine(ex.ToString());
         TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
         oprot.WriteMessageBegin(new TMessage("SearchUser", TMessageType.Exception, seqid));
+        x.Write(oprot);
+      }
+      oprot.WriteMessageEnd();
+      oprot.Transport.Flush();
+    }
+
+    public void DeleteFriend_Process(int seqid, TProtocol iprot, TProtocol oprot)
+    {
+      DeleteFriend_args args = new DeleteFriend_args();
+      args.Read(iprot);
+      iprot.ReadMessageEnd();
+      DeleteFriend_result result = new DeleteFriend_result();
+      try
+      {
+        result.Success = iface_.DeleteFriend(args.Req);
+        oprot.WriteMessageBegin(new TMessage("DeleteFriend", TMessageType.Reply, seqid)); 
+        result.Write(oprot);
+      }
+      catch (TTransportException)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine("Error occurred in processor:");
+        Console.Error.WriteLine(ex.ToString());
+        TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
+        oprot.WriteMessageBegin(new TMessage("DeleteFriend", TMessageType.Exception, seqid));
+        x.Write(oprot);
+      }
+      oprot.WriteMessageEnd();
+      oprot.Transport.Flush();
+    }
+
+    public void GetSTSInfo_Process(int seqid, TProtocol iprot, TProtocol oprot)
+    {
+      GetSTSInfo_args args = new GetSTSInfo_args();
+      args.Read(iprot);
+      iprot.ReadMessageEnd();
+      GetSTSInfo_result result = new GetSTSInfo_result();
+      try
+      {
+        result.Success = iface_.GetSTSInfo(args.Req);
+        oprot.WriteMessageBegin(new TMessage("GetSTSInfo", TMessageType.Reply, seqid)); 
+        result.Write(oprot);
+      }
+      catch (TTransportException)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine("Error occurred in processor:");
+        Console.Error.WriteLine(ex.ToString());
+        TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
+        oprot.WriteMessageBegin(new TMessage("GetSTSInfo", TMessageType.Exception, seqid));
+        x.Write(oprot);
+      }
+      oprot.WriteMessageEnd();
+      oprot.Transport.Flush();
+    }
+
+    public void FetchMessageStatus_Process(int seqid, TProtocol iprot, TProtocol oprot)
+    {
+      FetchMessageStatus_args args = new FetchMessageStatus_args();
+      args.Read(iprot);
+      iprot.ReadMessageEnd();
+      FetchMessageStatus_result result = new FetchMessageStatus_result();
+      try
+      {
+        result.Success = iface_.FetchMessageStatus(args.Req);
+        oprot.WriteMessageBegin(new TMessage("FetchMessageStatus", TMessageType.Reply, seqid)); 
+        result.Write(oprot);
+      }
+      catch (TTransportException)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine("Error occurred in processor:");
+        Console.Error.WriteLine(ex.ToString());
+        TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
+        oprot.WriteMessageBegin(new TMessage("FetchMessageStatus", TMessageType.Exception, seqid));
+        x.Write(oprot);
+      }
+      oprot.WriteMessageEnd();
+      oprot.Transport.Flush();
+    }
+
+    public void CreateObject_Process(int seqid, TProtocol iprot, TProtocol oprot)
+    {
+      CreateObject_args args = new CreateObject_args();
+      args.Read(iprot);
+      iprot.ReadMessageEnd();
+      CreateObject_result result = new CreateObject_result();
+      try
+      {
+        result.Success = iface_.CreateObject(args.Req);
+        oprot.WriteMessageBegin(new TMessage("CreateObject", TMessageType.Reply, seqid)); 
+        result.Write(oprot);
+      }
+      catch (TTransportException)
+      {
+        throw;
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine("Error occurred in processor:");
+        Console.Error.WriteLine(ex.ToString());
+        TApplicationException x = new TApplicationException      (TApplicationException.ExceptionType.InternalError," Internal error.");
+        oprot.WriteMessageBegin(new TMessage("CreateObject", TMessageType.Exception, seqid));
         x.Write(oprot);
       }
       oprot.WriteMessageEnd();
@@ -2904,227 +3213,6 @@ public partial class Server {
   #if !SILVERLIGHT
   [Serializable]
   #endif
-  public partial class UploadObject_args : TBase
-  {
-    private UploadObjectReq _req;
-
-    public UploadObjectReq Req
-    {
-      get
-      {
-        return _req;
-      }
-      set
-      {
-        __isset.req = true;
-        this._req = value;
-      }
-    }
-
-
-    public Isset __isset;
-    #if !SILVERLIGHT
-    [Serializable]
-    #endif
-    public struct Isset {
-      public bool req;
-    }
-
-    public UploadObject_args() {
-    }
-
-    public void Read (TProtocol iprot)
-    {
-      iprot.IncrementRecursionDepth();
-      try
-      {
-        TField field;
-        iprot.ReadStructBegin();
-        while (true)
-        {
-          field = iprot.ReadFieldBegin();
-          if (field.Type == TType.Stop) { 
-            break;
-          }
-          switch (field.ID)
-          {
-            case 1:
-              if (field.Type == TType.Struct) {
-                Req = new UploadObjectReq();
-                Req.Read(iprot);
-              } else { 
-                TProtocolUtil.Skip(iprot, field.Type);
-              }
-              break;
-            default: 
-              TProtocolUtil.Skip(iprot, field.Type);
-              break;
-          }
-          iprot.ReadFieldEnd();
-        }
-        iprot.ReadStructEnd();
-      }
-      finally
-      {
-        iprot.DecrementRecursionDepth();
-      }
-    }
-
-    public void Write(TProtocol oprot) {
-      oprot.IncrementRecursionDepth();
-      try
-      {
-        TStruct struc = new TStruct("UploadObject_args");
-        oprot.WriteStructBegin(struc);
-        TField field = new TField();
-        if (Req != null && __isset.req) {
-          field.Name = "req";
-          field.Type = TType.Struct;
-          field.ID = 1;
-          oprot.WriteFieldBegin(field);
-          Req.Write(oprot);
-          oprot.WriteFieldEnd();
-        }
-        oprot.WriteFieldStop();
-        oprot.WriteStructEnd();
-      }
-      finally
-      {
-        oprot.DecrementRecursionDepth();
-      }
-    }
-
-    public override string ToString() {
-      StringBuilder __sb = new StringBuilder("UploadObject_args(");
-      bool __first = true;
-      if (Req != null && __isset.req) {
-        if(!__first) { __sb.Append(", "); }
-        __first = false;
-        __sb.Append("Req: ");
-        __sb.Append(Req== null ? "<null>" : Req.ToString());
-      }
-      __sb.Append(")");
-      return __sb.ToString();
-    }
-
-  }
-
-
-  #if !SILVERLIGHT
-  [Serializable]
-  #endif
-  public partial class UploadObject_result : TBase
-  {
-    private UploadObjectResp _success;
-
-    public UploadObjectResp Success
-    {
-      get
-      {
-        return _success;
-      }
-      set
-      {
-        __isset.success = true;
-        this._success = value;
-      }
-    }
-
-
-    public Isset __isset;
-    #if !SILVERLIGHT
-    [Serializable]
-    #endif
-    public struct Isset {
-      public bool success;
-    }
-
-    public UploadObject_result() {
-    }
-
-    public void Read (TProtocol iprot)
-    {
-      iprot.IncrementRecursionDepth();
-      try
-      {
-        TField field;
-        iprot.ReadStructBegin();
-        while (true)
-        {
-          field = iprot.ReadFieldBegin();
-          if (field.Type == TType.Stop) { 
-            break;
-          }
-          switch (field.ID)
-          {
-            case 0:
-              if (field.Type == TType.Struct) {
-                Success = new UploadObjectResp();
-                Success.Read(iprot);
-              } else { 
-                TProtocolUtil.Skip(iprot, field.Type);
-              }
-              break;
-            default: 
-              TProtocolUtil.Skip(iprot, field.Type);
-              break;
-          }
-          iprot.ReadFieldEnd();
-        }
-        iprot.ReadStructEnd();
-      }
-      finally
-      {
-        iprot.DecrementRecursionDepth();
-      }
-    }
-
-    public void Write(TProtocol oprot) {
-      oprot.IncrementRecursionDepth();
-      try
-      {
-        TStruct struc = new TStruct("UploadObject_result");
-        oprot.WriteStructBegin(struc);
-        TField field = new TField();
-
-        if (this.__isset.success) {
-          if (Success != null) {
-            field.Name = "Success";
-            field.Type = TType.Struct;
-            field.ID = 0;
-            oprot.WriteFieldBegin(field);
-            Success.Write(oprot);
-            oprot.WriteFieldEnd();
-          }
-        }
-        oprot.WriteFieldStop();
-        oprot.WriteStructEnd();
-      }
-      finally
-      {
-        oprot.DecrementRecursionDepth();
-      }
-    }
-
-    public override string ToString() {
-      StringBuilder __sb = new StringBuilder("UploadObject_result(");
-      bool __first = true;
-      if (Success != null && __isset.success) {
-        if(!__first) { __sb.Append(", "); }
-        __first = false;
-        __sb.Append("Success: ");
-        __sb.Append(Success== null ? "<null>" : Success.ToString());
-      }
-      __sb.Append(")");
-      return __sb.ToString();
-    }
-
-  }
-
-
-  #if !SILVERLIGHT
-  [Serializable]
-  #endif
   public partial class AddFriend_args : TBase
   {
     private AddFriendReq _req;
@@ -3992,6 +4080,890 @@ public partial class Server {
 
     public override string ToString() {
       StringBuilder __sb = new StringBuilder("SearchUser_result(");
+      bool __first = true;
+      if (Success != null && __isset.success) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Success: ");
+        __sb.Append(Success== null ? "<null>" : Success.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class DeleteFriend_args : TBase
+  {
+    private DeleteFriendReq _req;
+
+    public DeleteFriendReq Req
+    {
+      get
+      {
+        return _req;
+      }
+      set
+      {
+        __isset.req = true;
+        this._req = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool req;
+    }
+
+    public DeleteFriend_args() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 1:
+              if (field.Type == TType.Struct) {
+                Req = new DeleteFriendReq();
+                Req.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("DeleteFriend_args");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+        if (Req != null && __isset.req) {
+          field.Name = "req";
+          field.Type = TType.Struct;
+          field.ID = 1;
+          oprot.WriteFieldBegin(field);
+          Req.Write(oprot);
+          oprot.WriteFieldEnd();
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("DeleteFriend_args(");
+      bool __first = true;
+      if (Req != null && __isset.req) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Req: ");
+        __sb.Append(Req== null ? "<null>" : Req.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class DeleteFriend_result : TBase
+  {
+    private DeleteFriendResp _success;
+
+    public DeleteFriendResp Success
+    {
+      get
+      {
+        return _success;
+      }
+      set
+      {
+        __isset.success = true;
+        this._success = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool success;
+    }
+
+    public DeleteFriend_result() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 0:
+              if (field.Type == TType.Struct) {
+                Success = new DeleteFriendResp();
+                Success.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("DeleteFriend_result");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+
+        if (this.__isset.success) {
+          if (Success != null) {
+            field.Name = "Success";
+            field.Type = TType.Struct;
+            field.ID = 0;
+            oprot.WriteFieldBegin(field);
+            Success.Write(oprot);
+            oprot.WriteFieldEnd();
+          }
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("DeleteFriend_result(");
+      bool __first = true;
+      if (Success != null && __isset.success) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Success: ");
+        __sb.Append(Success== null ? "<null>" : Success.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class GetSTSInfo_args : TBase
+  {
+    private GetSTSInfoReq _req;
+
+    public GetSTSInfoReq Req
+    {
+      get
+      {
+        return _req;
+      }
+      set
+      {
+        __isset.req = true;
+        this._req = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool req;
+    }
+
+    public GetSTSInfo_args() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 1:
+              if (field.Type == TType.Struct) {
+                Req = new GetSTSInfoReq();
+                Req.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("GetSTSInfo_args");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+        if (Req != null && __isset.req) {
+          field.Name = "req";
+          field.Type = TType.Struct;
+          field.ID = 1;
+          oprot.WriteFieldBegin(field);
+          Req.Write(oprot);
+          oprot.WriteFieldEnd();
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("GetSTSInfo_args(");
+      bool __first = true;
+      if (Req != null && __isset.req) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Req: ");
+        __sb.Append(Req== null ? "<null>" : Req.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class GetSTSInfo_result : TBase
+  {
+    private GetSTSInfoResp _success;
+
+    public GetSTSInfoResp Success
+    {
+      get
+      {
+        return _success;
+      }
+      set
+      {
+        __isset.success = true;
+        this._success = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool success;
+    }
+
+    public GetSTSInfo_result() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 0:
+              if (field.Type == TType.Struct) {
+                Success = new GetSTSInfoResp();
+                Success.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("GetSTSInfo_result");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+
+        if (this.__isset.success) {
+          if (Success != null) {
+            field.Name = "Success";
+            field.Type = TType.Struct;
+            field.ID = 0;
+            oprot.WriteFieldBegin(field);
+            Success.Write(oprot);
+            oprot.WriteFieldEnd();
+          }
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("GetSTSInfo_result(");
+      bool __first = true;
+      if (Success != null && __isset.success) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Success: ");
+        __sb.Append(Success== null ? "<null>" : Success.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class FetchMessageStatus_args : TBase
+  {
+    private FetchMessageStatusReq _req;
+
+    public FetchMessageStatusReq Req
+    {
+      get
+      {
+        return _req;
+      }
+      set
+      {
+        __isset.req = true;
+        this._req = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool req;
+    }
+
+    public FetchMessageStatus_args() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 1:
+              if (field.Type == TType.Struct) {
+                Req = new FetchMessageStatusReq();
+                Req.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("FetchMessageStatus_args");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+        if (Req != null && __isset.req) {
+          field.Name = "req";
+          field.Type = TType.Struct;
+          field.ID = 1;
+          oprot.WriteFieldBegin(field);
+          Req.Write(oprot);
+          oprot.WriteFieldEnd();
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("FetchMessageStatus_args(");
+      bool __first = true;
+      if (Req != null && __isset.req) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Req: ");
+        __sb.Append(Req== null ? "<null>" : Req.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class FetchMessageStatus_result : TBase
+  {
+    private FetchMessageStatusResp _success;
+
+    public FetchMessageStatusResp Success
+    {
+      get
+      {
+        return _success;
+      }
+      set
+      {
+        __isset.success = true;
+        this._success = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool success;
+    }
+
+    public FetchMessageStatus_result() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 0:
+              if (field.Type == TType.Struct) {
+                Success = new FetchMessageStatusResp();
+                Success.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("FetchMessageStatus_result");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+
+        if (this.__isset.success) {
+          if (Success != null) {
+            field.Name = "Success";
+            field.Type = TType.Struct;
+            field.ID = 0;
+            oprot.WriteFieldBegin(field);
+            Success.Write(oprot);
+            oprot.WriteFieldEnd();
+          }
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("FetchMessageStatus_result(");
+      bool __first = true;
+      if (Success != null && __isset.success) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Success: ");
+        __sb.Append(Success== null ? "<null>" : Success.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class CreateObject_args : TBase
+  {
+    private CreateObjectReq _req;
+
+    public CreateObjectReq Req
+    {
+      get
+      {
+        return _req;
+      }
+      set
+      {
+        __isset.req = true;
+        this._req = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool req;
+    }
+
+    public CreateObject_args() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 1:
+              if (field.Type == TType.Struct) {
+                Req = new CreateObjectReq();
+                Req.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("CreateObject_args");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+        if (Req != null && __isset.req) {
+          field.Name = "req";
+          field.Type = TType.Struct;
+          field.ID = 1;
+          oprot.WriteFieldBegin(field);
+          Req.Write(oprot);
+          oprot.WriteFieldEnd();
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("CreateObject_args(");
+      bool __first = true;
+      if (Req != null && __isset.req) {
+        if(!__first) { __sb.Append(", "); }
+        __first = false;
+        __sb.Append("Req: ");
+        __sb.Append(Req== null ? "<null>" : Req.ToString());
+      }
+      __sb.Append(")");
+      return __sb.ToString();
+    }
+
+  }
+
+
+  #if !SILVERLIGHT
+  [Serializable]
+  #endif
+  public partial class CreateObject_result : TBase
+  {
+    private CreateObjectResp _success;
+
+    public CreateObjectResp Success
+    {
+      get
+      {
+        return _success;
+      }
+      set
+      {
+        __isset.success = true;
+        this._success = value;
+      }
+    }
+
+
+    public Isset __isset;
+    #if !SILVERLIGHT
+    [Serializable]
+    #endif
+    public struct Isset {
+      public bool success;
+    }
+
+    public CreateObject_result() {
+    }
+
+    public void Read (TProtocol iprot)
+    {
+      iprot.IncrementRecursionDepth();
+      try
+      {
+        TField field;
+        iprot.ReadStructBegin();
+        while (true)
+        {
+          field = iprot.ReadFieldBegin();
+          if (field.Type == TType.Stop) { 
+            break;
+          }
+          switch (field.ID)
+          {
+            case 0:
+              if (field.Type == TType.Struct) {
+                Success = new CreateObjectResp();
+                Success.Read(iprot);
+              } else { 
+                TProtocolUtil.Skip(iprot, field.Type);
+              }
+              break;
+            default: 
+              TProtocolUtil.Skip(iprot, field.Type);
+              break;
+          }
+          iprot.ReadFieldEnd();
+        }
+        iprot.ReadStructEnd();
+      }
+      finally
+      {
+        iprot.DecrementRecursionDepth();
+      }
+    }
+
+    public void Write(TProtocol oprot) {
+      oprot.IncrementRecursionDepth();
+      try
+      {
+        TStruct struc = new TStruct("CreateObject_result");
+        oprot.WriteStructBegin(struc);
+        TField field = new TField();
+
+        if (this.__isset.success) {
+          if (Success != null) {
+            field.Name = "Success";
+            field.Type = TType.Struct;
+            field.ID = 0;
+            oprot.WriteFieldBegin(field);
+            Success.Write(oprot);
+            oprot.WriteFieldEnd();
+          }
+        }
+        oprot.WriteFieldStop();
+        oprot.WriteStructEnd();
+      }
+      finally
+      {
+        oprot.DecrementRecursionDepth();
+      }
+    }
+
+    public override string ToString() {
+      StringBuilder __sb = new StringBuilder("CreateObject_result(");
       bool __first = true;
       if (Success != null && __isset.success) {
         if(!__first) { __sb.Append(", "); }

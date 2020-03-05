@@ -82,12 +82,12 @@ public partial class FetchFriendsListResp : TBase
             if (field.Type == TType.List) {
               {
                 OnlineUserIds = new List<long>();
-                TList _list10 = iprot.ReadListBegin();
-                for( int _i11 = 0; _i11 < _list10.Count; ++_i11)
+                TList _list28 = iprot.ReadListBegin();
+                for( int _i29 = 0; _i29 < _list28.Count; ++_i29)
                 {
-                  long _elem12;
-                  _elem12 = iprot.ReadI64();
-                  OnlineUserIds.Add(_elem12);
+                  long _elem30;
+                  _elem30 = iprot.ReadI64();
+                  OnlineUserIds.Add(_elem30);
                 }
                 iprot.ReadListEnd();
               }
@@ -99,12 +99,12 @@ public partial class FetchFriendsListResp : TBase
             if (field.Type == TType.List) {
               {
                 OfflineUserIds = new List<long>();
-                TList _list13 = iprot.ReadListBegin();
-                for( int _i14 = 0; _i14 < _list13.Count; ++_i14)
+                TList _list31 = iprot.ReadListBegin();
+                for( int _i32 = 0; _i32 < _list31.Count; ++_i32)
                 {
-                  long _elem15;
-                  _elem15 = iprot.ReadI64();
-                  OfflineUserIds.Add(_elem15);
+                  long _elem33;
+                  _elem33 = iprot.ReadI64();
+                  OfflineUserIds.Add(_elem33);
                 }
                 iprot.ReadListEnd();
               }
@@ -140,9 +140,9 @@ public partial class FetchFriendsListResp : TBase
         oprot.WriteFieldBegin(field);
         {
           oprot.WriteListBegin(new TList(TType.I64, OnlineUserIds.Count));
-          foreach (long _iter16 in OnlineUserIds)
+          foreach (long _iter34 in OnlineUserIds)
           {
-            oprot.WriteI64(_iter16);
+            oprot.WriteI64(_iter34);
           }
           oprot.WriteListEnd();
         }
@@ -155,9 +155,9 @@ public partial class FetchFriendsListResp : TBase
         oprot.WriteFieldBegin(field);
         {
           oprot.WriteListBegin(new TList(TType.I64, OfflineUserIds.Count));
-          foreach (long _iter17 in OfflineUserIds)
+          foreach (long _iter35 in OfflineUserIds)
           {
-            oprot.WriteI64(_iter17);
+            oprot.WriteI64(_iter35);
           }
           oprot.WriteListEnd();
         }

@@ -26,6 +26,7 @@ public partial class UserRelation : TBase
   private long _UserIdRecv;
   private long _CreateTime;
   private int _Status;
+  private long _ParentId;
 
   public long Id
   {
@@ -92,6 +93,19 @@ public partial class UserRelation : TBase
     }
   }
 
+  public long ParentId
+  {
+    get
+    {
+      return _ParentId;
+    }
+    set
+    {
+      __isset.ParentId = true;
+      this._ParentId = value;
+    }
+  }
+
 
   public Isset __isset;
   #if !SILVERLIGHT
@@ -103,6 +117,7 @@ public partial class UserRelation : TBase
     public bool UserIdRecv;
     public bool CreateTime;
     public bool Status;
+    public bool ParentId;
   }
 
   public UserRelation() {
@@ -154,6 +169,13 @@ public partial class UserRelation : TBase
           case 5:
             if (field.Type == TType.I32) {
               Status = iprot.ReadI32();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 6:
+            if (field.Type == TType.I64) {
+              ParentId = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -219,6 +241,14 @@ public partial class UserRelation : TBase
         oprot.WriteI32(Status);
         oprot.WriteFieldEnd();
       }
+      if (__isset.ParentId) {
+        field.Name = "ParentId";
+        field.Type = TType.I64;
+        field.ID = 6;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteI64(ParentId);
+        oprot.WriteFieldEnd();
+      }
       oprot.WriteFieldStop();
       oprot.WriteStructEnd();
     }
@@ -260,6 +290,12 @@ public partial class UserRelation : TBase
       __first = false;
       __sb.Append("Status: ");
       __sb.Append(Status);
+    }
+    if (__isset.ParentId) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("ParentId: ");
+      __sb.Append(ParentId);
     }
     __sb.Append(")");
     return __sb.ToString();

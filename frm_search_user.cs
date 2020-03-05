@@ -47,21 +47,26 @@ namespace Poseidon
             var id = resp.Item1;
             var createTime = resp.Item2;
             var statusCode = resp.Item3;
-            if (statusCode == 1)
-            {
-                MessageBox.Show("重复的好友请求", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            //
 
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status) VALUES({id}, " +
-                            $"{Class1.UserId}, {userIdRecv}, {createTime}, 0)");
+            switch (statusCode)
+            
+            {
+                case 1:
+                    MessageBox.Show("重复的好友请求", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                case 2:
+                    MessageBox.Show("已为好友", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+            }
+
+            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({id}, " +
+                            $"{Class1.UserId}, {userIdRecv}, {createTime}, 0, -1)");
             if (!ret)
             {
-                MessageBox.Show("DB错误，INSERT INTO user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("DB错误，INSERT INTO user_relation_request失败777", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show("好友请求已发送", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("好友请求已发送666", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void dataGridView1_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)

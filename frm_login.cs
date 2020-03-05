@@ -36,6 +36,7 @@ namespace Poseidon
                   `group_id` INTEGER NOT NULL,
                   `content` TEXT,
                   `create_time` INTEGER NOT NULL,
+                  `content_type` INTEGER NOT NULL,
                   `msg_type` INTEGER NOT NULL,
                   `is_read` INTEGER DEFAULT NULL,
                   PRIMARY KEY(`id`)
@@ -45,13 +46,14 @@ namespace Poseidon
                     MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
+
                 ret = Class1.sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `user_relation_request` (
                   `id` INTEGER NOT NULL,
                   `user_id_send` INTEGER NOT NULL,
                   `user_id_recv` INTEGER NOT NULL,
                   `create_time` INTEGER NOT NULL,
                   `status` INTEGER NOT NULL,
-                  `parent_id` INTEGER,
+                  `parent_id` INTEGER NOT NULL,
                   PRIMARY KEY (`id`)
                 ) ;");
                 if (!ret)
@@ -59,6 +61,19 @@ namespace Poseidon
                     MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
+
+                ret = Class1.sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `object` (
+                  `id` INTEGER NOT NULL,
+                  `e_tag` TEXT NOT NULL,
+                  `name` TEXT NOT NULL,
+                  PRIMARY KEY (`id`)
+                ) ;");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+
                 Class1.UserId = userId;
                 return true;
             }

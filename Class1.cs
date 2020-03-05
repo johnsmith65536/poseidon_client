@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Poseidon.infra.sqlite;
 using System.Windows.Forms;
+using System.IO;
+using System.Data;
 
 namespace Poseidon
 {
     public static class Class1
     {
-        public static string Ip = "192.168.6.128";
+        public const string Ip = "192.168.6.128";
+
+        public const string EndPoint = "oss-cn-shenzhen.aliyuncs.com";
+        public const string BucketName = "poseidon-data";
 
         public static Int64 UserId;
 
@@ -24,6 +29,12 @@ namespace Poseidon
             Pending = 0,
             Rejected = 1,
             Accepted = 2
+        }
+
+        public enum ContentType
+        {
+            Text = 0,
+            Object = 1
         }
 
         public static void GridAdd(DataGridView dgv, Dictionary<string, object> dict)
@@ -48,6 +59,18 @@ namespace Poseidon
                 return sb.ToString();
             }
         }
+
+        public static string GenerateMD5WithFilePath(string filePath)
+        {
+            FileStream file = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            byte[] hash_byte = md5.ComputeHash(file);
+            string str = System.BitConverter.ToString(hash_byte);
+            str = str.Replace("-", "");
+            file.Close();
+            return str;
+        }
+
         public static DateTime StampToDateTime(long timestamp)
         {
             System.DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
@@ -60,6 +83,19 @@ namespace Poseidon
         public static string FormatDateTime(DateTime dateTime)
         {
             return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        public static void InsertObject(long id,string eTag,string name)
+        {
+            DataTable dt = Class1.sql.SqlTable($"SELECT * FROM `object` WHERE id = {id}");
+            if (dt.Rows.Count != 0)
+                return;
+            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({id},'{eTag}', '{name}')");
+            if (!ret)
+            {
+                MessageBox.Show("DB错误，INSERT INTO object失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
         }
     }
 }

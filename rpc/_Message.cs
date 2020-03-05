@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Thrift.Collections;
 
 namespace Poseidon.rpc
 {
     class _Message
     {
-        public static Tuple<long,long> SendMessage(Int64 userId, Int64 idRecv, string content, Int32 contentType, Int32 msgType)
+        public static Tuple<long,long> SendMessage(Int64 userId, Int64 idRecv, string content, Class1.ContentType contentType, Int32 msgType)
         {
             var req = new SendMessageReq()
             {
                 UserIdSend = userId,
                 IdRecv = idRecv,
                 Content = content,
-                ContentType = contentType,
+                ContentType = (int)contentType,
                 MessageType = msgType
             };
             var resp = _Init.Client.SendMessage(req);
@@ -30,7 +31,7 @@ namespace Poseidon.rpc
             };
             _Init.Client.UpdateMessageStatus(req);
         }
-        public static Tuple<List<Message>,List<UserRelation>,long> SyncMessage(long userId,long messageId,long userRelationId)
+        public static Tuple<List<Message>,List<UserRelation>,List<Object>,long> SyncMessage(long userId,long messageId,long userRelationId)
         {
             var req = new SyncMessageReq()
             {
@@ -39,7 +40,17 @@ namespace Poseidon.rpc
                 UserRelationId = userRelationId,
             };
             var resp = _Init.Client.SyncMessage(req);
-            return new Tuple<List<Message>, List<UserRelation>,long>(resp.Messages, resp.UserRelations,resp.LastOnlineTime);
+            return new Tuple<List<Message>, List<UserRelation>, List<Object>, long>(resp.Messages, resp.UserRelations,resp.Objects,resp.LastOnlineTime);
         }
+        public static FetchMessageStatusResp FetchMessageStatus(List<long> message, List<long> userRelationRequest)
+        {
+            var req = new FetchMessageStatusReq()
+            {
+                MessageIds = message,
+                UserRelationRequestIds = userRelationRequest,
+            };
+            return _Init.Client.FetchMessageStatus(req);
+        }
+
     }
 }

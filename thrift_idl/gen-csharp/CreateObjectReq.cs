@@ -19,20 +19,34 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class MessageDeliveredResp : TBase
+public partial class CreateObjectReq : TBase
 {
-  private int _Status;
+  private string _ETag;
+  private string _Name;
 
-  public int Status
+  public string ETag
   {
     get
     {
-      return _Status;
+      return _ETag;
     }
     set
     {
-      __isset.Status = true;
-      this._Status = value;
+      __isset.ETag = true;
+      this._ETag = value;
+    }
+  }
+
+  public string Name
+  {
+    get
+    {
+      return _Name;
+    }
+    set
+    {
+      __isset.Name = true;
+      this._Name = value;
     }
   }
 
@@ -42,10 +56,11 @@ public partial class MessageDeliveredResp : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool Status;
+    public bool ETag;
+    public bool Name;
   }
 
-  public MessageDeliveredResp() {
+  public CreateObjectReq() {
   }
 
   public void Read (TProtocol iprot)
@@ -64,8 +79,15 @@ public partial class MessageDeliveredResp : TBase
         switch (field.ID)
         {
           case 1:
-            if (field.Type == TType.I32) {
-              Status = iprot.ReadI32();
+            if (field.Type == TType.String) {
+              ETag = iprot.ReadString();
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 2:
+            if (field.Type == TType.String) {
+              Name = iprot.ReadString();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -88,15 +110,23 @@ public partial class MessageDeliveredResp : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("MessageDeliveredResp");
+      TStruct struc = new TStruct("CreateObjectReq");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (__isset.Status) {
-        field.Name = "Status";
-        field.Type = TType.I32;
+      if (ETag != null && __isset.ETag) {
+        field.Name = "ETag";
+        field.Type = TType.String;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI32(Status);
+        oprot.WriteString(ETag);
+        oprot.WriteFieldEnd();
+      }
+      if (Name != null && __isset.Name) {
+        field.Name = "Name";
+        field.Type = TType.String;
+        field.ID = 2;
+        oprot.WriteFieldBegin(field);
+        oprot.WriteString(Name);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -109,13 +139,19 @@ public partial class MessageDeliveredResp : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("MessageDeliveredResp(");
+    StringBuilder __sb = new StringBuilder("CreateObjectReq(");
     bool __first = true;
-    if (__isset.Status) {
+    if (ETag != null && __isset.ETag) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("Status: ");
-      __sb.Append(Status);
+      __sb.Append("ETag: ");
+      __sb.Append(ETag);
+    }
+    if (Name != null && __isset.Name) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("Name: ");
+      __sb.Append(Name);
     }
     __sb.Append(")");
     return __sb.ToString();

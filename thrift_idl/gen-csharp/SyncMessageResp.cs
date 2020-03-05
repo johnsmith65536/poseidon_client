@@ -23,6 +23,7 @@ public partial class SyncMessageResp : TBase
 {
   private List<Message> _Messages;
   private List<UserRelation> _UserRelations;
+  private List<@Object> _Objects;
   private long _LastOnlineTime;
 
   public List<Message> Messages
@@ -51,6 +52,19 @@ public partial class SyncMessageResp : TBase
     }
   }
 
+  public List<@Object> Objects
+  {
+    get
+    {
+      return _Objects;
+    }
+    set
+    {
+      __isset.Objects = true;
+      this._Objects = value;
+    }
+  }
+
   public long LastOnlineTime
   {
     get
@@ -72,6 +86,7 @@ public partial class SyncMessageResp : TBase
   public struct Isset {
     public bool Messages;
     public bool UserRelations;
+    public bool Objects;
     public bool LastOnlineTime;
   }
 
@@ -97,13 +112,13 @@ public partial class SyncMessageResp : TBase
             if (field.Type == TType.List) {
               {
                 Messages = new List<Message>();
-                TList _list18 = iprot.ReadListBegin();
-                for( int _i19 = 0; _i19 < _list18.Count; ++_i19)
+                TList _list36 = iprot.ReadListBegin();
+                for( int _i37 = 0; _i37 < _list36.Count; ++_i37)
                 {
-                  Message _elem20;
-                  _elem20 = new Message();
-                  _elem20.Read(iprot);
-                  Messages.Add(_elem20);
+                  Message _elem38;
+                  _elem38 = new Message();
+                  _elem38.Read(iprot);
+                  Messages.Add(_elem38);
                 }
                 iprot.ReadListEnd();
               }
@@ -115,13 +130,13 @@ public partial class SyncMessageResp : TBase
             if (field.Type == TType.List) {
               {
                 UserRelations = new List<UserRelation>();
-                TList _list21 = iprot.ReadListBegin();
-                for( int _i22 = 0; _i22 < _list21.Count; ++_i22)
+                TList _list39 = iprot.ReadListBegin();
+                for( int _i40 = 0; _i40 < _list39.Count; ++_i40)
                 {
-                  UserRelation _elem23;
-                  _elem23 = new UserRelation();
-                  _elem23.Read(iprot);
-                  UserRelations.Add(_elem23);
+                  UserRelation _elem41;
+                  _elem41 = new UserRelation();
+                  _elem41.Read(iprot);
+                  UserRelations.Add(_elem41);
                 }
                 iprot.ReadListEnd();
               }
@@ -130,6 +145,24 @@ public partial class SyncMessageResp : TBase
             }
             break;
           case 3:
+            if (field.Type == TType.List) {
+              {
+                Objects = new List<@Object>();
+                TList _list42 = iprot.ReadListBegin();
+                for( int _i43 = 0; _i43 < _list42.Count; ++_i43)
+                {
+                  @Object _elem44;
+                  _elem44 = new @Object();
+                  _elem44.Read(iprot);
+                  Objects.Add(_elem44);
+                }
+                iprot.ReadListEnd();
+              }
+            } else { 
+              TProtocolUtil.Skip(iprot, field.Type);
+            }
+            break;
+          case 4:
             if (field.Type == TType.I64) {
               LastOnlineTime = iprot.ReadI64();
             } else { 
@@ -164,9 +197,9 @@ public partial class SyncMessageResp : TBase
         oprot.WriteFieldBegin(field);
         {
           oprot.WriteListBegin(new TList(TType.Struct, Messages.Count));
-          foreach (Message _iter24 in Messages)
+          foreach (Message _iter45 in Messages)
           {
-            _iter24.Write(oprot);
+            _iter45.Write(oprot);
           }
           oprot.WriteListEnd();
         }
@@ -179,9 +212,24 @@ public partial class SyncMessageResp : TBase
         oprot.WriteFieldBegin(field);
         {
           oprot.WriteListBegin(new TList(TType.Struct, UserRelations.Count));
-          foreach (UserRelation _iter25 in UserRelations)
+          foreach (UserRelation _iter46 in UserRelations)
           {
-            _iter25.Write(oprot);
+            _iter46.Write(oprot);
+          }
+          oprot.WriteListEnd();
+        }
+        oprot.WriteFieldEnd();
+      }
+      if (Objects != null && __isset.Objects) {
+        field.Name = "Objects";
+        field.Type = TType.List;
+        field.ID = 3;
+        oprot.WriteFieldBegin(field);
+        {
+          oprot.WriteListBegin(new TList(TType.Struct, Objects.Count));
+          foreach (@Object _iter47 in Objects)
+          {
+            _iter47.Write(oprot);
           }
           oprot.WriteListEnd();
         }
@@ -190,7 +238,7 @@ public partial class SyncMessageResp : TBase
       if (__isset.LastOnlineTime) {
         field.Name = "LastOnlineTime";
         field.Type = TType.I64;
-        field.ID = 3;
+        field.ID = 4;
         oprot.WriteFieldBegin(field);
         oprot.WriteI64(LastOnlineTime);
         oprot.WriteFieldEnd();
@@ -218,6 +266,12 @@ public partial class SyncMessageResp : TBase
       __first = false;
       __sb.Append("UserRelations: ");
       __sb.Append(UserRelations);
+    }
+    if (Objects != null && __isset.Objects) {
+      if(!__first) { __sb.Append(", "); }
+      __first = false;
+      __sb.Append("Objects: ");
+      __sb.Append(Objects);
     }
     if (__isset.LastOnlineTime) {
       if(!__first) { __sb.Append(", "); }

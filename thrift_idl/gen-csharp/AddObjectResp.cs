@@ -19,20 +19,20 @@ using Thrift.Transport;
 #if !SILVERLIGHT
 [Serializable]
 #endif
-public partial class MessageDeliveredReq : TBase
+public partial class AddObjectResp : TBase
 {
-  private long _MsgId;
+  private long _id;
 
-  public long MsgId
+  public long Id
   {
     get
     {
-      return _MsgId;
+      return _id;
     }
     set
     {
-      __isset.MsgId = true;
-      this._MsgId = value;
+      __isset.id = true;
+      this._id = value;
     }
   }
 
@@ -42,10 +42,10 @@ public partial class MessageDeliveredReq : TBase
   [Serializable]
   #endif
   public struct Isset {
-    public bool MsgId;
+    public bool id;
   }
 
-  public MessageDeliveredReq() {
+  public AddObjectResp() {
   }
 
   public void Read (TProtocol iprot)
@@ -65,7 +65,7 @@ public partial class MessageDeliveredReq : TBase
         {
           case 1:
             if (field.Type == TType.I64) {
-              MsgId = iprot.ReadI64();
+              Id = iprot.ReadI64();
             } else { 
               TProtocolUtil.Skip(iprot, field.Type);
             }
@@ -88,15 +88,15 @@ public partial class MessageDeliveredReq : TBase
     oprot.IncrementRecursionDepth();
     try
     {
-      TStruct struc = new TStruct("MessageDeliveredReq");
+      TStruct struc = new TStruct("AddObjectResp");
       oprot.WriteStructBegin(struc);
       TField field = new TField();
-      if (__isset.MsgId) {
-        field.Name = "MsgId";
+      if (__isset.id) {
+        field.Name = "id";
         field.Type = TType.I64;
         field.ID = 1;
         oprot.WriteFieldBegin(field);
-        oprot.WriteI64(MsgId);
+        oprot.WriteI64(Id);
         oprot.WriteFieldEnd();
       }
       oprot.WriteFieldStop();
@@ -109,13 +109,13 @@ public partial class MessageDeliveredReq : TBase
   }
 
   public override string ToString() {
-    StringBuilder __sb = new StringBuilder("MessageDeliveredReq(");
+    StringBuilder __sb = new StringBuilder("AddObjectResp(");
     bool __first = true;
-    if (__isset.MsgId) {
+    if (__isset.id) {
       if(!__first) { __sb.Append(", "); }
       __first = false;
-      __sb.Append("MsgId: ");
-      __sb.Append(MsgId);
+      __sb.Append("Id: ");
+      __sb.Append(Id);
     }
     __sb.Append(")");
     return __sb.ToString();

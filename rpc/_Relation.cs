@@ -38,5 +38,14 @@ namespace Poseidon.rpc
             var resp = _Init.Client.FetchFriendsList(req);
             return new Tuple<List<long>, List<long>>(resp.OnlineUserIds,resp.OfflineUserIds);
         }
+        public static void DeleteFriend(long userIdSend,long userIdRecv)
+        {
+            var req = new DeleteFriendReq()
+            {
+                UserIdSend = userIdSend,
+                UserIdRecv = userIdRecv
+            };
+            _Init.Client.DeleteFriend(req);
+        }
     }
 }

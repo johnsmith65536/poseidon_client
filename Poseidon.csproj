@@ -37,6 +37,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="aliyun-net-sdk-core, Version=1.5.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\aliyun-net-sdk-core.1.5.3\lib\net45\aliyun-net-sdk-core.dll</HintPath>
+    </Reference>
+    <Reference Include="Aliyun.OSS, Version=2.9.0.0, Culture=neutral, PublicKeyToken=0ad4175f0dac0b9b, processorArchitecture=MSIL">
+      <HintPath>packages\Aliyun.OSS.SDK.2.9.0\lib\Aliyun.OSS.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.3.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -51,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.112.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>packages\System.Data.SQLite.Core.1.0.112.0\lib\net46\System.Data.SQLite.dll</HintPath>
@@ -63,6 +70,8 @@
     </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -112,6 +121,8 @@
     <Compile Include="infra\sqlite\SQLiteDB.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="rpc\_Object.cs" />
+    <Compile Include="rpc\_Oss.cs" />
     <Compile Include="rpc\_Relation.cs" />
     <Compile Include="rpc\_Heart_Beat.cs" />
     <Compile Include="rpc\_Init.cs" />
@@ -120,12 +131,20 @@
     <Compile Include="rpc\_User.cs" />
     <Compile Include="thrift\AddFriendReq.cs" />
     <Compile Include="thrift\AddFriendResp.cs" />
+    <Compile Include="thrift\AddObjectReq.cs" />
+    <Compile Include="thrift\AddObjectResp.cs" />
+    <Compile Include="thrift\CreateObjectReq.cs" />
+    <Compile Include="thrift\CreateObjectResp.cs" />
     <Compile Include="thrift\CreateUserReq.cs" />
     <Compile Include="thrift\CreateUserResp.cs" />
+    <Compile Include="thrift\DeleteFriendReq.cs" />
+    <Compile Include="thrift\DeleteFriendResp.cs" />
     <Compile Include="thrift\FetchFriendsListReq.cs" />
     <Compile Include="thrift\FetchFriendsListResp.cs" />
-    <Compile Include="thrift\FetchOfflineMessageReq.cs" />
-    <Compile Include="thrift\FetchOfflineMessageResp.cs" />
+    <Compile Include="thrift\FetchMessageStatusReq.cs" />
+    <Compile Include="thrift\FetchMessageStatusResp.cs" />
+    <Compile Include="thrift\GetSTSInfoReq.cs" />
+    <Compile Include="thrift\GetSTSInfoResp.cs" />
     <Compile Include="thrift\HeartBeatReq.cs" />
     <Compile Include="thrift\HeartBeatResp.cs" />
     <Compile Include="thrift\LoginReq.cs" />
@@ -133,8 +152,7 @@
     <Compile Include="thrift\LogoutReq.cs" />
     <Compile Include="thrift\LogoutResp.cs" />
     <Compile Include="thrift\Message.cs" />
-    <Compile Include="thrift\MessageDeliveredReq.cs" />
-    <Compile Include="thrift\MessageDeliveredResp.cs" />
+    <Compile Include="thrift\Object.cs" />
     <Compile Include="thrift\ReplyAddFriendReq.cs" />
     <Compile Include="thrift\ReplyAddFriendResp.cs" />
     <Compile Include="thrift\SearchUserReq.cs" />
