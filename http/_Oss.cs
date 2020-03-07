@@ -7,21 +7,24 @@ using System.Threading.Tasks;
 
 namespace Poseidon.http
 {
-    class _Heart_Beat
+    class _Oss
     {
-        public struct HeartBeatReq
+        public struct GetSTSInfoReq
         {
             public long UserId;
         }
-        public struct HeartBeatResp
+        public struct GetSTSInfoResp
         {
+            public string SecurityToken;
+            public string AccessKeyId;
+            public string AccessKeySecret;
             public int StatusCode;
             public string StatusMessage;
         }
-        public static HeartBeatResp HeartBeat(HeartBeatReq req)
+        public static GetSTSInfoResp GetSTSInfo(GetSTSInfoReq req)
         {
-            var ret = Class1.DoHttpRequest("/heart_beat/" + req.UserId,"GET");
-            var resp = JsonConvert.DeserializeObject<HeartBeatResp>(ret);
+            var ret = Class1.DoHttpRequest("/sts_info/" + req.UserId, "GET");
+            var resp = JsonConvert.DeserializeObject<GetSTSInfoResp>(ret);
             if (resp.StatusCode == 255)
                 Console.WriteLine("error: " + resp.StatusMessage);
             return resp;

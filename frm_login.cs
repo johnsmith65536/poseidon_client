@@ -21,10 +21,16 @@ namespace Poseidon
         {
             InitializeComponent();
         }
-        private bool login(long userId,string password)
+        private bool login(long userId, string password)
         {
-            var ok = rpc._Loginout.Login(userId, password);
-            if (ok)
+            var req = new http._Login.LoginReq()
+            {
+                UserId = userId,
+                Password = password
+            };
+
+            var resp = http._Login.Login(req);
+            if (resp.Success)
             {
                 string sqlFile = $"{System.Environment.CurrentDirectory}\\{userId}\\profile.db";
                 Class1.sql.CreateDBFile(sqlFile);
@@ -84,7 +90,7 @@ namespace Poseidon
             var userId = Convert.ToInt64(txt_user_id.Text);
             var password = Class1.GenerateMD5(txt_password.Text);
             var ok = login(userId, password);
-            if(!ok)
+            if (!ok)
             {
                 MessageBox.Show("登陆失败，账号或密码有误", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -96,7 +102,7 @@ namespace Poseidon
 
         private void frm_login_Load(object sender, EventArgs e)
         {
-            rpc._Init.InitRpcClient();
+            //rpc._Init.InitRpcClient();
         }
     }
 }

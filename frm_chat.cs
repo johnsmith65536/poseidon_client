@@ -167,7 +167,12 @@ namespace Poseidon
         private void UploadFile(string localFileName)
         {
             var eTag = Class1.GenerateMD5WithFilePath(localFileName);
-            var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
+            var req = new http._Oss.GetSTSInfoReq()
+            {
+                UserId = Class1.UserId
+            };
+            var resp = http._Oss.GetSTSInfo(req);
+            //var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
 
             Thread t = new Thread(new ThreadStart(() =>
             {
@@ -197,7 +202,13 @@ namespace Poseidon
                 }
                 
                 var name = Path.GetFileName(localFileName);
-                var createObjectResp = rpc._Object.CreateObject(eTag, name);
+               // var createObjectResp = rpc._Object.CreateObject(eTag, name);
+               var createObjectReq = new http._Object.CreateObjectReq()
+                {
+                    ETag = eTag,
+                    Name = name
+                };
+                var createObjectResp = http._Object.CreateObject(createObjectReq);
                 var objId = createObjectResp.Id;
 
                 /*bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({objId}, " +
@@ -209,7 +220,7 @@ namespace Poseidon
                 }*/
                 Class1.InsertObject(objId, eTag, name);
 
-                var req = new http._Message.SendMessageReq()
+                var sendMessageReq = new http._Message.SendMessageReq()
                 {
                     UserIdSend = Class1.UserId,
                     IdRecv = userIdChat,
@@ -217,7 +228,7 @@ namespace Poseidon
                     ContentType = (int)Class1.ContentType.Object,
                     MessageType = 0
                 };
-                var sendMessageResp = http._Message.SendMessage(req);
+                var sendMessageResp = http._Message.SendMessage(sendMessageReq);
 
                 //var sendMessageResp = rpc._Message.SendMessage(Class1.UserId, userIdChat, objId.ToString(), Class1.ContentType.Object, 0);
                 var messageId = sendMessageResp.Id;
@@ -270,7 +281,12 @@ namespace Poseidon
         }
         private void DownloadFile(string eTag, string localFileName)
         {
-            var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
+            var req = new http._Oss.GetSTSInfoReq()
+            {
+                UserId = Class1.UserId
+            };
+            var resp = http._Oss.GetSTSInfo(req);
+            //var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
             Thread t = new Thread(new ThreadStart(() =>
             {
                 // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。

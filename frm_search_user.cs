@@ -19,10 +19,15 @@ namespace Poseidon
         }
         private void btn_search_Click(object sender, EventArgs e)
         {
-            var users = rpc._User.SearchUser(Class1.UserId,txt_search.Text);
-
+            //var users = rpc._User.SearchUser(Class1.UserId,txt_search.Text);
+            var req = new http._User.SearchUserReq()
+            {
+                UserId = Class1.UserId,
+                Data = txt_search.Text
+            };
+            var resp = http._User.SearchUser(req);
             dataGridView1.Rows.Clear();
-            foreach (var user in users)
+            foreach (var user in resp.Users)
             {
                 var index = dataGridView1.Rows.Add(new DataGridViewRow());
                 dataGridView1.Rows[index].Cells["user_id"].Value = user.Id.ToString();
@@ -43,10 +48,16 @@ namespace Poseidon
 
         private void mnu_add_friend_Click(object sender, EventArgs e)
         {
-            var resp = rpc._Relation.AddFriend(Class1.UserId,userIdRecv);
-            var id = resp.Item1;
-            var createTime = resp.Item2;
-            var statusCode = resp.Item3;
+            var req = new http._Relation.AddFriendReq()
+            {
+                UserIdSend = Class1.UserId,
+                UserIdRecv = userIdRecv
+            };
+            var resp = http._Relation.AddFriend(req);
+            //var resp = rpc._Relation.AddFriend(Class1.UserId,userIdRecv);
+            var id = resp.Id;
+            var createTime = resp.CreateTime;
+            var statusCode = resp.StatusCode;
 
             switch (statusCode)
             

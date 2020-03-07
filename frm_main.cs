@@ -140,7 +140,13 @@ namespace Poseidon
                 if (parentId != -1)
                     queryIds.Add(parentId);
             }
-            var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
+            //var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
+            var req = new http._Message.FetchMessageStatusReq()
+            {
+                MessageIds = new List<long>(),
+                UserRelationRequestIds = queryIds
+            };
+            var resp = http._Message.FetchMessageStatus(req);
             foreach (var item in resp.UserRelationRequestIds)
             {
                 var id = item.Key;
@@ -206,14 +212,19 @@ namespace Poseidon
                 {
                     //ListClear(lbx_friend);
                     InvokeGridClear(dgv_friend);
-                    var resp = rpc._Relation.FetchFriendList(Class1.UserId);
-                    foreach (long userId in resp.Item1)
+                    //var resp = rpc._Relation.FetchFriendList(Class1.UserId);
+                    var req = new http._Relation.FetchFriendListReq()
+                    {
+                        UserId = Class1.UserId
+                    };
+                    var resp = http._Relation.FetchFriendList(req);
+                    foreach (long userId in resp.OnlineUserIds)
                         //ListAdd(lbx_friend, userId + "(online)");
                         InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
             {"user_id",userId},
             {"status","online"}
         });
-                    foreach (long userId in resp.Item2)
+                    foreach (long userId in resp.OfflineUserIds)
                         //ListAdd(lbx_friend, userId + "(offline)");
                         InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
             {"user_id",userId},
@@ -233,11 +244,18 @@ namespace Poseidon
                 dt = Class1.sql.SqlTable($"SELECT count(*) as count, MAX(id) as id FROM `user_relation_request` WHERE (`user_id_send` = {Class1.UserId} OR `user_id_recv` = {Class1.UserId})");
                 if (dt != null && dt.Rows.Count == 1 && (long)dt.Rows[0]["count"] > 0)
                     userRelationId = (long)dt.Rows[0]["id"];
-                var resp = rpc._Message.SyncMessage(Class1.UserId, messageId, userRelationId);
-                var messages = resp.Item1;
-                var userRelations = resp.Item2;
-                var objects = resp.Item3;
-                var lastOnlineTime = resp.Item4;
+                //var resp = rpc._Message.SyncMessage(Class1.UserId, messageId, userRelationId);
+                var req = new http._Message.SyncMessageReq()
+                {
+                    UserId = Class1.UserId,
+                    MessageId = messageId,
+                    UserRelationId = userRelationId
+                };
+                var resp = http._Message.SyncMessage(req);
+                var messages = resp.Messages;
+                var userRelations = resp.UserRelations;
+                var objects = resp.Objects;
+                var lastOnlineTime = resp.LastOnlineTime;
                 //消息落库
 
                 foreach (var obj in objects)
@@ -474,7 +492,11 @@ namespace Poseidon
         public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
         {
             //rpc._Heart_Beat.HeartBeat(Class1.UserId);
-            http._Heart_Beat.HeartBeat(Class1.UserId);
+            var req = new http._Heart_Beat.HeartBeatReq()
+            {
+                UserId = Class1.UserId
+            };
+            http._Heart_Beat.HeartBeat(req);
             Console.WriteLine("Send HeartBeat");
             //Console.WriteLine("频道：" + cnl + "\t收到消息:" + val); ;
             // Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
@@ -515,7 +537,13 @@ namespace Poseidon
                     return;
                 }
             }
-            rpc._Message.UpdateMessageStatus(message, userRelationRequest);
+            //rpc._Message.UpdateMessageStatus(message, userRelationRequest);
+            var req = new http._Message.UpdateMessageStatusReq()
+            {
+                MessageIds = message,
+                UserRelationRequestIds = userRelationRequest
+            };
+            http._Message.UpdateMessageStatus(req);
         }
 
         private void dgv_friend_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -606,9 +634,15 @@ namespace Poseidon
                     else
                         return;
 
-                    var resp = rpc._Relation.ReplyAddFriend(id, status);
-                    var replyId = resp.Item1;
-                    var createTime = resp.Item2;
+                    //var resp = rpc._Relation.ReplyAddFriend(id, status);
+                    var req = new http._Relation.ReplyAddFriendReq()
+                    {
+                        Id = id,
+                        Status = status
+                    };
+                    var resp = http._Relation.ReplyAddFriend(req);
+                    var replyId = resp.Id;
+                    var createTime = resp.CreateTime;
                     bool ok = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {status} WHERE `id` = {id}");
                     if (!ok)
                     {
@@ -653,7 +687,13 @@ namespace Poseidon
 
         private void mnu_del_friend_Click(object sender, EventArgs e)
         {
-            rpc._Relation.DeleteFriend(Class1.UserId, delFriendUserId);
+            //rpc._Relation.DeleteFriend(Class1.UserId, delFriendUserId);
+            var req = new http._Relation.DeleteFriendReq()
+            {
+                UserIdSend = Class1.UserId,
+                UserIdRecv = delFriendUserId
+            };
+            http._Relation.DeleteFriend(req);
             MessageBox.Show("好友删除成功", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }

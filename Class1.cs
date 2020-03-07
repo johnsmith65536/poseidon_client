@@ -103,7 +103,7 @@ namespace Poseidon
         }
         public static string DoHttpRequest(string url, string method, Hashtable header = null, string data = null)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + Class1.Ip + Class1.HttpPort + url);
             request.Method = method;
             request.ContentType = "application/json;charset=utf-8";
             if (header != null)
