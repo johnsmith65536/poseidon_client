@@ -8,12 +8,16 @@ using Poseidon.infra.sqlite;
 using System.Windows.Forms;
 using System.IO;
 using System.Data;
+using System.Collections;
+using System.Net;
 
 namespace Poseidon
 {
     public static class Class1
     {
         public const string Ip = "192.168.6.128";
+
+        public const string HttpPort = ":8081";
 
         public const string EndPoint = "oss-cn-shenzhen.aliyuncs.com";
         public const string BucketName = "poseidon-data";
@@ -97,5 +101,29 @@ namespace Poseidon
                 return;
             }
         }
+        public static string DoHttpRequest(string url, string method, Hashtable header = null, string data = null)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = method;
+            request.ContentType = "application/json;charset=utf-8";
+            if (header != null)
+                foreach (var i in header.Keys)
+                    request.Headers.Add(i.ToString(), header[i].ToString());
+            if (!string.IsNullOrEmpty(data))
+            {
+                Stream RequestStream = request.GetRequestStream();
+                byte[] bytes = Encoding.UTF8.GetBytes(data);
+                RequestStream.Write(bytes, 0, bytes.Length);
+                RequestStream.Close();
+            }
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream ResponseStream = response.GetResponseStream();
+            StreamReader StreamReader = new StreamReader(ResponseStream, Encoding.GetEncoding("utf-8"));
+            string re = StreamReader.ReadToEnd();
+            StreamReader.Close();
+            ResponseStream.Close();
+            return re;
+        }
+
     }
 }

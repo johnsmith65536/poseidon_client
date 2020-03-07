@@ -473,7 +473,8 @@ namespace Poseidon
         }
         public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
         {
-            rpc._Heart_Beat.HeartBeat(Class1.UserId);
+            //rpc._Heart_Beat.HeartBeat(Class1.UserId);
+            http._Heart_Beat.HeartBeat(Class1.UserId);
             Console.WriteLine("Send HeartBeat");
             //Console.WriteLine("频道：" + cnl + "\t收到消息:" + val); ;
             // Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);

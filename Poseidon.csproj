@@ -117,6 +117,8 @@
     <Compile Include="frm_search_user.Designer.cs">
       <DependentUpon>frm_search_user.cs</DependentUpon>
     </Compile>
+    <Compile Include="http\_Heart_Beat.cs" />
+    <Compile Include="http\_Message.cs" />
     <Compile Include="infra\redis\redis.cs" />
     <Compile Include="infra\sqlite\SQLiteDB.cs" />
     <Compile Include="Program.cs" />

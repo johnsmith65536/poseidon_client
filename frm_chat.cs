@@ -100,10 +100,18 @@ namespace Poseidon
         private void btn_send_Click(object sender, EventArgs e)
         {
             var content = txt_send.Text;
-            Tuple<long, long> resp = rpc._Message.SendMessage(Class1.UserId, userIdChat, content, 0, 0);
-            //txt_status.Text += "消息发送成功, msgId = " + resp.Item1 + Environment.NewLine;
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Item1}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, '{content}', {resp.Item2}, {(int)Class1.ContentType.Text}, 0, 0)");
+            //Tuple<long, long> resp = rpc._Message.SendMessage(Class1.UserId, userIdChat, content, 0, 0);
+            var req = new http._Message.SendMessageReq()
+            {
+                UserIdSend = Class1.UserId,
+                IdRecv = userIdChat,
+                Content = content,
+                ContentType = (int)Class1.ContentType.Text,
+                MessageType = 0
+            };
+            var resp = http._Message.SendMessage(req);
+            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, '{content}', {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -114,7 +122,7 @@ namespace Poseidon
             Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
             {"user_id",Class1.UserId},
             {"content",content},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.Item2))}
+            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
         });
             txt_send.Text = "";
         }
@@ -201,10 +209,19 @@ namespace Poseidon
                 }*/
                 Class1.InsertObject(objId, eTag, name);
 
+                var req = new http._Message.SendMessageReq()
+                {
+                    UserIdSend = Class1.UserId,
+                    IdRecv = userIdChat,
+                    Content = objId.ToString(),
+                    ContentType = (int)Class1.ContentType.Object,
+                    MessageType = 0
+                };
+                var sendMessageResp = http._Message.SendMessage(req);
 
-                var sendMessageResp = rpc._Message.SendMessage(Class1.UserId, userIdChat, objId.ToString(), Class1.ContentType.Object, 0);
-                var messageId = sendMessageResp.Item1;
-                var createTime = sendMessageResp.Item2;
+                //var sendMessageResp = rpc._Message.SendMessage(Class1.UserId, userIdChat, objId.ToString(), Class1.ContentType.Object, 0);
+                var messageId = sendMessageResp.Id;
+                var createTime = sendMessageResp.CreateTime;
                 var ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
                             $"{Class1.UserId}, {userIdChat}, 0, '{objId}', {createTime}, {(int)Class1.ContentType.Object}, 0, 0)");
                 if (!ret)
