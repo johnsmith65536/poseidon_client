@@ -91,26 +91,20 @@ namespace Poseidon.http
         }
         public static SendMessageResp SendMessage(SendMessageReq req)
         {
-            var ret = Class1.DoHttpRequest("/message", "POST", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/message", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<SendMessageResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static SyncMessageResp SyncMessage(SyncMessageReq req)
         {
-            var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}", "GET", null, null);
+            var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<SyncMessageResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static UpdateMessageStatusResp UpdateMessageStatus(UpdateMessageStatusReq req)
         {
-            var ret = Class1.DoHttpRequest("/message/status", "PUT", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/message/status", "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<UpdateMessageStatusResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static FetchMessageStatusResp FetchMessageStatus(FetchMessageStatusReq req)
@@ -120,10 +114,8 @@ namespace Poseidon.http
                 url += "message_ids=" + messageId + "&";
             foreach (var userRelationRequestId in req.UserRelationRequestIds)
                 url += "user_relation_request_ids=" + userRelationRequestId + "&";
-            var ret = Class1.DoHttpRequest(url, "GET", null, null);
+            var ret = Class1.DoHttpRequest(url, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<FetchMessageStatusResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

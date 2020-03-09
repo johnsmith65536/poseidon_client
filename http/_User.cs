@@ -43,18 +43,14 @@ namespace Poseidon.http
         }
         public static CreateUserResp CreateUser(CreateUserReq req)
         {
-            var ret = Class1.DoHttpRequest("/user", "POST",null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/user", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<CreateUserResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static SearchUserResp SearchUser(SearchUserReq req)
         {
-            var ret = Class1.DoHttpRequest($"/user/search?user_id={req.UserId}&data={req.Data}", "GET");
+            var ret = Class1.DoHttpRequest($"/user/search?user_id={req.UserId}&data={req.Data}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<SearchUserResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

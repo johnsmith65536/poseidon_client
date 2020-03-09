@@ -23,10 +23,8 @@ namespace Poseidon.http
         }
         public static GetSTSInfoResp GetSTSInfo(GetSTSInfoReq req)
         {
-            var ret = Class1.DoHttpRequest("/sts_info/" + req.UserId, "GET");
+            var ret = Class1.DoHttpRequest("/sts_info/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<GetSTSInfoResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

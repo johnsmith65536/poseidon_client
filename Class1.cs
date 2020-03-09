@@ -10,6 +10,8 @@ using System.IO;
 using System.Data;
 using System.Collections;
 using System.Net;
+using Newtonsoft.Json;
+using Poseidon.infra.redis;
 
 namespace Poseidon
 {
@@ -22,7 +24,14 @@ namespace Poseidon
         public const string EndPoint = "oss-cn-shenzhen.aliyuncs.com";
         public const string BucketName = "poseidon-data";
 
-        public static Int64 UserId;
+        public static long UserId;
+        public static string Password;
+
+        public static string AccessToken;
+
+        public static bool IsOnline;
+
+        public static frm_main frm_main;
 
         public static SQLiteDB sql = new SQLiteDB();
 
@@ -40,6 +49,30 @@ namespace Poseidon
             Text = 0,
             Object = 1
         }
+
+        delegate void MenuSetCheckCallBack(ToolStripMenuItem mnu, bool value);
+        delegate void ToolStripStatusLabelCallBack(ToolStripStatusLabel obj, string value);
+        public static void InvokeToolStripStatusLabel(ToolStripStatusLabel obj, string value)
+        {
+            if (frm_main.InvokeRequired)
+            {
+                ToolStripStatusLabelCallBack cb = new ToolStripStatusLabelCallBack(InvokeToolStripStatusLabel);
+                frm_main.Invoke(cb, new object[] { obj, value });
+            }
+            else
+                obj.Text = value;
+        }
+        public static void InvokeMenuSetCheck(ToolStripMenuItem mnu, bool value)
+        {
+            if (frm_main.menuStrip1.InvokeRequired)
+            {
+                MenuSetCheckCallBack cb = new MenuSetCheckCallBack(InvokeMenuSetCheck);
+                frm_main.Invoke(cb, new object[] { mnu, value });
+            }
+            else
+                mnu.Checked = value;
+        }
+
 
         public static void GridAdd(DataGridView dgv, Dictionary<string, object> dict)
         {
@@ -101,14 +134,14 @@ namespace Poseidon
                 return;
             }
         }
-        public static string DoHttpRequest(string url, string method, Hashtable header = null, string data = null)
+        public static string DoHttpRequest(string url, string method, Dictionary<string,string> header, string data = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + Class1.Ip + Class1.HttpPort + url);
             request.Method = method;
             request.ContentType = "application/json;charset=utf-8";
             if (header != null)
-                foreach (var i in header.Keys)
-                    request.Headers.Add(i.ToString(), header[i].ToString());
+                foreach (var item in header)
+                    request.Headers.Add(item.Key, item.Value);
             if (!string.IsNullOrEmpty(data))
             {
                 Stream RequestStream = request.GetRequestStream();
@@ -122,8 +155,127 @@ namespace Poseidon
             string re = StreamReader.ReadToEnd();
             StreamReader.Close();
             ResponseStream.Close();
+            var status = GetStatus(re);
+            var statusCode = status.Item1;
+            var statusMessage = status.Item2;
+            switch(statusCode)
+            {
+                case 254:
+                    {
+                        redis.UnSubscribe("poseidon_heart_beat_channel");
+                        redis.UnSubscribe("poseidon_message_channel_" + UserId);
+                        IsOnline = false;
+                        AccessToken = "";
+                        UpdateStatusCheckBox(false);
+                        InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
+                        MessageBox.Show(statusMessage, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        break;
+                    }
+                case 255:
+                    {
+                        MessageBox.Show("server error, message: " + statusMessage, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw new Exception("server error, message: " + statusMessage);
+                    }
+            }
             return re;
         }
 
+        public static Tuple<int,string> GetStatus(string jsonString)
+        {
+            Console.WriteLine(jsonString);
+            var obj = JsonConvert.DeserializeObject<dynamic>(jsonString);
+            return new Tuple<int,string>((int)obj.StatusCode, (string)obj.StatusMessage);
+        }
+
+        public static void UpdateStatusCheckBox(bool isOnline)
+        {
+            InvokeMenuSetCheck(frm_main.mnu_online, isOnline);
+            InvokeMenuSetCheck(frm_main.mnu_offline, !isOnline);
+            //frm_main.mnu_online.Checked = isOnline;
+            //frm_main.mnu_offline.Checked = !isOnline;
+        }
+
+        public static bool Login(long userId, string password)
+        {
+            var req = new http._Login.LoginReq()
+            {
+                UserId = userId,
+                Password = password
+            };
+
+            var resp = http._Login.Login(req);
+            if (resp.Success)
+            {
+                string sqlFile = $"{System.Environment.CurrentDirectory}\\{userId}\\profile.db";
+                sql.CreateDBFile(sqlFile);
+                sql.Connection(sqlFile);
+                var ret = sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `message` (
+                  `id` INTEGER NOT NULL,
+                  `user_id_send` INTEGER NOT NULL,
+                  `user_id_recv` INTEGER NOT NULL,
+                  `group_id` INTEGER NOT NULL,
+                  `content` TEXT,
+                  `create_time` INTEGER NOT NULL,
+                  `content_type` INTEGER NOT NULL,
+                  `msg_type` INTEGER NOT NULL,
+                  `is_read` INTEGER DEFAULT NULL,
+                  PRIMARY KEY(`id`)
+                ) ; ");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+
+                ret = sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `user_relation_request` (
+                  `id` INTEGER NOT NULL,
+                  `user_id_send` INTEGER NOT NULL,
+                  `user_id_recv` INTEGER NOT NULL,
+                  `create_time` INTEGER NOT NULL,
+                  `status` INTEGER NOT NULL,
+                  `parent_id` INTEGER NOT NULL,
+                  PRIMARY KEY (`id`)
+                ) ;");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+
+                ret = sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `object` (
+                  `id` INTEGER NOT NULL,
+                  `e_tag` TEXT NOT NULL,
+                  `name` TEXT NOT NULL,
+                  PRIMARY KEY (`id`)
+                ) ;");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+
+                UserId = userId;
+                Password = password;
+                AccessToken = resp.AccessToken;
+                IsOnline = true;
+                return true;
+            }
+            return false;
+        }
+        public static void Logout(long userId, string accessToken)
+        {
+            var req = new http._Login.LogoutReq()
+            {
+                UserId = userId,
+                AccessToken = accessToken
+            };
+
+            http._Login.Logout(req);
+            redis.UnSubscribe("poseidon_heart_beat_channel");
+            redis.UnSubscribe("poseidon_message_channel_" + UserId);
+            IsOnline = false;
+            InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
+            AccessToken = "";
+        }
     }
 }

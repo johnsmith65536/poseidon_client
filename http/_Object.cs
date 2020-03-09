@@ -22,10 +22,8 @@ namespace Poseidon.http
         }
         public static CreateObjectResp CreateObject(CreateObjectReq req)
         {
-            var ret = Class1.DoHttpRequest("/object", "POST", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/object", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<CreateObjectResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

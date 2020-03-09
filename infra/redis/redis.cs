@@ -30,5 +30,17 @@ namespace Poseidon.infra.redis
             }
             return redisConn;
         }
+        public static void Subscribe(RedisChannel channel, Action<RedisChannel, RedisValue> handler)
+        {
+            ConnectionMultiplexer redisCli = GetRedisConn();
+            var sub = redisCli.GetSubscriber();
+            sub.Subscribe(channel, handler);
+        }
+        public static void UnSubscribe(RedisChannel channel)
+        {
+            ConnectionMultiplexer redisCli = GetRedisConn();
+            var sub = redisCli.GetSubscriber();
+            sub.Unsubscribe(channel);
+        }
     }
 }

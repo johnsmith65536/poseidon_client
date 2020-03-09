@@ -99,6 +99,11 @@ namespace Poseidon
 
         private void btn_send_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var content = txt_send.Text;
             //Tuple<long, long> resp = rpc._Message.SendMessage(Class1.UserId, userIdChat, content, 0, 0);
             var req = new http._Message.SendMessageReq()
@@ -126,29 +131,18 @@ namespace Poseidon
         });
             txt_send.Text = "";
         }
-
-        private void frm_chat_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void frm_chat_FormClosed(object sender, FormClosedEventArgs e)
         {
             Class1.formChatPool.Remove(userIdChat);
         }
 
-        private void dgv_msg_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
-        {
-
-        }
-
         private void btn_send_file_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var localFileName = openFileDialog1.FileName;
@@ -262,7 +256,11 @@ namespace Poseidon
                 dgv_msg.CurrentCell = dgv_msg.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 if (eTag == null)
                     return;
-
+                if (!Class1.IsOnline)
+                {
+                    MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
                 saveFileDialog1.FileName = objectName.Substring(4);
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {

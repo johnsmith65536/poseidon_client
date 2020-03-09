@@ -17,12 +17,14 @@ namespace Poseidon.http
         public struct LoginResp
         {
             public bool Success;
+            public string AccessToken;
             public int StatusCode;
             public string StatusMessage;
         }
         public struct LogoutReq
         {
             public long UserId;
+            public string AccessToken;
         }
         public struct LogoutResp
         {
@@ -33,16 +35,12 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest("/login", "POST", null, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<LoginResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static LogoutResp Logout(LogoutReq req)
         {
-            var ret = Class1.DoHttpRequest("/logout", "POST", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/logout", "POST", new Dictionary<string, string>{{ "access_token", Class1.AccessToken}}, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<LogoutResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

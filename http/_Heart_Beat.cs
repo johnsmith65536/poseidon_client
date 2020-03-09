@@ -20,10 +20,8 @@ namespace Poseidon.http
         }
         public static HeartBeatResp HeartBeat(HeartBeatReq req)
         {
-            var ret = Class1.DoHttpRequest("/heart_beat/" + req.UserId,"GET");
+            var ret = Class1.DoHttpRequest("/heart_beat/" + req.UserId,"GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<HeartBeatResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

@@ -83,7 +83,6 @@
             this.dgv_msg.RowTemplate.Height = 23;
             this.dgv_msg.Size = new System.Drawing.Size(510, 232);
             this.dgv_msg.TabIndex = 20;
-            this.dgv_msg.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_msg_CellContentClick);
             this.dgv_msg.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_msg_CellDoubleClick);
             // 
             // btn_send_file
@@ -99,7 +98,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
             // 
             // pgb_upload
             // 
@@ -159,7 +157,6 @@
             this.Name = "frm_chat";
             this.Text = "frm_chat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frm_chat_FormClosed);
-            this.Load += new System.EventHandler(this.frm_chat_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_msg)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

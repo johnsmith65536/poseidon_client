@@ -56,34 +56,26 @@ namespace Poseidon.http
         }
         public static AddFriendResp AddFriend(AddFriendReq req)
         {
-            var ret = Class1.DoHttpRequest("/friend", "POST", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/friend", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<AddFriendResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static ReplyAddFriendResp ReplyAddFriend(ReplyAddFriendReq req)
         {
-            var ret = Class1.DoHttpRequest("/friend/reply", "POST", null, JsonConvert.SerializeObject(req));
+            var ret = Class1.DoHttpRequest("/friend/reply", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<ReplyAddFriendResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static FetchFriendListResp FetchFriendList(FetchFriendListReq req)
         {
-            var ret = Class1.DoHttpRequest("/friend/" + req.UserId, "GET");
+            var ret = Class1.DoHttpRequest("/friend/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<FetchFriendListResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
         public static DeleteFriendResp DeleteFriend(DeleteFriendReq req)
         {
-            var ret = Class1.DoHttpRequest($"/friend?user_id_send={req.UserIdSend}&user_id_recv={req.UserIdRecv}", "DELETE");
+            var ret = Class1.DoHttpRequest($"/friend?user_id_send={req.UserIdSend}&user_id_recv={req.UserIdRecv}", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<DeleteFriendResp>(ret);
-            if (resp.StatusCode == 255)
-                Console.WriteLine("error: " + resp.StatusMessage);
             return resp;
         }
     }

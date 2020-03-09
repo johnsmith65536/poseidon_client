@@ -31,27 +31,36 @@
             this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnu_add_friend = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_stats = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_online = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_offline = new System.Windows.Forms.ToolStripMenuItem();
             this.dgv_friend = new System.Windows.Forms.DataGridView();
             this.user_id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgv_msg = new System.Windows.Forms.DataGridView();
-            this.mnu_strip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.mnu_del_friend = new System.Windows.Forms.ToolStripMenuItem();
             this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.type = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.user_id_send = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.content = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.create_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.mnu_strip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnu_del_friend = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_friend)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_msg)).BeginInit();
             this.mnu_strip.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnu_add_friend});
+            this.mnu_add_friend,
+            this.mnu_stats});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1178, 25);
@@ -64,6 +73,29 @@
             this.mnu_add_friend.Size = new System.Drawing.Size(68, 21);
             this.mnu_add_friend.Text = "添加好友";
             this.mnu_add_friend.Click += new System.EventHandler(this.mnu_add_friend_Click);
+            // 
+            // mnu_stats
+            // 
+            this.mnu_stats.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnu_online,
+            this.mnu_offline});
+            this.mnu_stats.Name = "mnu_stats";
+            this.mnu_stats.Size = new System.Drawing.Size(44, 21);
+            this.mnu_stats.Text = "状态";
+            // 
+            // mnu_online
+            // 
+            this.mnu_online.Name = "mnu_online";
+            this.mnu_online.Size = new System.Drawing.Size(180, 22);
+            this.mnu_online.Text = "在线";
+            this.mnu_online.Click += new System.EventHandler(this.mnu_online_Click);
+            // 
+            // mnu_offline
+            // 
+            this.mnu_offline.Name = "mnu_offline";
+            this.mnu_offline.Size = new System.Drawing.Size(180, 22);
+            this.mnu_offline.Text = "离线";
+            this.mnu_offline.Click += new System.EventHandler(this.mnu_offline_Click);
             // 
             // dgv_friend
             // 
@@ -125,20 +157,6 @@
             this.dgv_msg.TabIndex = 19;
             this.dgv_msg.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_msg_CellDoubleClick);
             // 
-            // mnu_strip
-            // 
-            this.mnu_strip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnu_del_friend});
-            this.mnu_strip.Name = "mnu_strip";
-            this.mnu_strip.Size = new System.Drawing.Size(125, 26);
-            // 
-            // mnu_del_friend
-            // 
-            this.mnu_del_friend.Name = "mnu_del_friend";
-            this.mnu_del_friend.Size = new System.Drawing.Size(124, 22);
-            this.mnu_del_friend.Text = "删除好友";
-            this.mnu_del_friend.Click += new System.EventHandler(this.mnu_del_friend_Click);
-            // 
             // id
             // 
             this.id.Frozen = true;
@@ -178,11 +196,59 @@
             this.create_time.Name = "create_time";
             this.create_time.ReadOnly = true;
             // 
+            // mnu_strip
+            // 
+            this.mnu_strip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnu_del_friend});
+            this.mnu_strip.Name = "mnu_strip";
+            this.mnu_strip.Size = new System.Drawing.Size(125, 26);
+            // 
+            // mnu_del_friend
+            // 
+            this.mnu_del_friend.Name = "mnu_del_friend";
+            this.mnu_del_friend.Size = new System.Drawing.Size(124, 22);
+            this.mnu_del_friend.Text = "删除好友";
+            this.mnu_del_friend.Click += new System.EventHandler(this.mnu_del_friend_Click);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1,
+            this.toolStripStatusLabel2});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 339);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1178, 22);
+            this.statusStrip1.TabIndex = 20;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(1001, 17);
+            this.toolStripStatusLabel1.Spring = true;
+            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(131, 17);
+            this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1178, 361);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.dgv_msg);
             this.Controls.Add(this.dgv_friend);
             this.Controls.Add(this.menuStrip1);
@@ -196,13 +262,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgv_friend)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_msg)).EndInit();
             this.mnu_strip.ResumeLayout(false);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem mnu_add_friend;
         private System.Windows.Forms.DataGridView dgv_friend;
         private System.Windows.Forms.DataGridViewTextBoxColumn user_id;
@@ -215,5 +282,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn user_id_send;
         private System.Windows.Forms.DataGridViewTextBoxColumn content;
         private System.Windows.Forms.DataGridViewTextBoxColumn create_time;
+        private System.Windows.Forms.ToolStripMenuItem mnu_stats;
+        public System.Windows.Forms.ToolStripMenuItem mnu_online;
+        public System.Windows.Forms.ToolStripMenuItem mnu_offline;
+        public System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.Timer timer1;
+        public System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
     }
 }

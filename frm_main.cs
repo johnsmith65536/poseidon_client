@@ -131,35 +131,6 @@ namespace Poseidon
 
             dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
 
-
-            // 同步最新的status，message暂不同步
-            List<long> queryIds = new List<long>();
-            foreach (DataRow row in dt.Rows)
-            {
-                var parentId = long.Parse(row["parent_id"].ToString());
-                if (parentId != -1)
-                    queryIds.Add(parentId);
-            }
-            //var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
-            var req = new http._Message.FetchMessageStatusReq()
-            {
-                MessageIds = new List<long>(),
-                UserRelationRequestIds = queryIds
-            };
-            var resp = http._Message.FetchMessageStatus(req);
-            foreach (var item in resp.UserRelationRequestIds)
-            {
-                var id = item.Key;
-                var status = item.Value;
-                var ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET status = {status} WHERE id = {id}");
-                if (!ret)
-                {
-                    MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-            }
-
-
             foreach (DataRow row in dt.Rows)
             {
                 var id = long.Parse(row["id"].ToString());
@@ -204,32 +175,64 @@ namespace Poseidon
                 }
             }
         }
-        private void frm_main_Load(object sender, EventArgs e)
+        public void LoadMain()
         {
             Thread t1 = new Thread(new ThreadStart(() =>
             {
-                while (true)
+                while (Class1.IsOnline)
                 {
-                    //ListClear(lbx_friend);
                     InvokeGridClear(dgv_friend);
-                    //var resp = rpc._Relation.FetchFriendList(Class1.UserId);
                     var req = new http._Relation.FetchFriendListReq()
                     {
                         UserId = Class1.UserId
                     };
                     var resp = http._Relation.FetchFriendList(req);
+                    if (resp.StatusCode == 254)
+                        return;
                     foreach (long userId in resp.OnlineUserIds)
-                        //ListAdd(lbx_friend, userId + "(online)");
                         InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
             {"user_id",userId},
             {"status","online"}
         });
                     foreach (long userId in resp.OfflineUserIds)
-                        //ListAdd(lbx_friend, userId + "(offline)");
                         InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
             {"user_id",userId},
             {"status","offline"}
         });
+
+
+                    var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
+
+                    // 同步最新UserRelationRequest的status，message暂不同步
+                    List<long> queryIds = new List<long>();
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        var parentId = long.Parse(row["parent_id"].ToString());
+                        if (parentId != -1)
+                            queryIds.Add(parentId);
+                    }
+                    //var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
+                    var fetchMessageStatusReq = new http._Message.FetchMessageStatusReq()
+                    {
+                        MessageIds = new List<long>(),
+                        UserRelationRequestIds = queryIds
+                    };
+                    var fetchMessageStatusResp = http._Message.FetchMessageStatus(fetchMessageStatusReq);
+                    if (fetchMessageStatusResp.StatusCode == 254)
+                        return;
+                    foreach (var item in fetchMessageStatusResp.UserRelationRequestIds)
+                    {
+                        var id = item.Key;
+                        var status = item.Value;
+                        var ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET status = {status} WHERE id = {id}");
+                        if (!ret)
+                        {
+                            MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+                    }
+
+
                     Thread.Sleep(2 * 1000);
                 };
             }));
@@ -294,30 +297,19 @@ namespace Poseidon
                 }
                 LoadUnReadMessage();
 
-
+                Console.WriteLine("fetch offline message done");
             }));
             t2.Start();
 
-
-            Thread t3 = new Thread(new ThreadStart(() =>
-            {
-                ConnectionMultiplexer redisCli = redis.GetRedisConn();
-                var sub = redisCli.GetSubscriber();
-                var chn = "poseidon_heart_beat_channel";
-                sub.Subscribe(chn, HeartBeatChannel);
-            }));
-            t3.Start();
-
-            Thread t4 = new Thread(new ThreadStart(() =>
-            {
-                ConnectionMultiplexer redisCli = redis.GetRedisConn();
-                var sub = redisCli.GetSubscriber();
-                var chn = "poseidon_message_channel_" + Class1.UserId;
-                sub.Subscribe(chn, MessageChannel);
-            }));
-            t4.Start();
-
-
+            redis.Subscribe("poseidon_heart_beat_channel", HeartBeatChannel);
+            redis.Subscribe("poseidon_message_channel_" + Class1.UserId, MessageChannel);
+            Class1.UpdateStatusCheckBox(Class1.IsOnline);
+            Class1.InvokeToolStripStatusLabel(toolStripStatusLabel1, "在线");
+            toolStripStatusLabel2.Text = Class1.FormatDateTime(DateTime.Now);
+        }
+        private void frm_main_Load(object sender, EventArgs e)
+        {
+            LoadMain();
         }
         public void MessageChannel(RedisChannel cnl, RedisValue val)
         {
@@ -503,6 +495,15 @@ namespace Poseidon
         }
         private void frm_main_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (Class1.IsOnline)
+            {
+                var req = new http._Login.LogoutReq()
+                {
+                    UserId = Class1.UserId,
+                    AccessToken = Class1.AccessToken
+                };
+                http._Login.Logout(req);
+            }
             Environment.Exit(0);
         }
         private static BroadcastMsgType GetBroadcastMsgType(string jsonString)
@@ -514,11 +515,18 @@ namespace Poseidon
 
         private void mnu_add_friend_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             frm_search_user frm_search_user = new frm_search_user();
             frm_search_user.ShowDialog();
         }
         private void UpdateMessageStatus(Dictionary<long, int> message, Dictionary<long, int> userRelationRequest)
         {
+            if (!Class1.IsOnline) //离线时，为保证本地和远程数据一致性，不做已读状态更新
+                return;
             foreach (var item in message)
             {
                 bool ret = Class1.sql.ExecuteNonQuery($"UPDATE `message` SET `is_read` = {item.Value} WHERE `id` = {item.Key}");
@@ -550,7 +558,7 @@ namespace Poseidon
         {
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
-                Console.WriteLine(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value);
+                //Console.WriteLine(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value);
                 var userId = long.Parse(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value.ToString());
                 dgv_friend.ClearSelection();
                 dgv_friend.Rows[e.RowIndex].Selected = true;
@@ -625,6 +633,11 @@ namespace Poseidon
                 }
                 else if (type == "好友请求")
                 {
+                    if (!Class1.IsOnline)
+                    {
+                        MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return;
+                    }
                     var ret = MessageBox.Show(userIdSend + "请求添加为好友，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
                     int status;
                     if (ret == DialogResult.Yes)
@@ -687,7 +700,11 @@ namespace Poseidon
 
         private void mnu_del_friend_Click(object sender, EventArgs e)
         {
-            //rpc._Relation.DeleteFriend(Class1.UserId, delFriendUserId);
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var req = new http._Relation.DeleteFriendReq()
             {
                 UserIdSend = Class1.UserId,
@@ -695,6 +712,36 @@ namespace Poseidon
             };
             http._Relation.DeleteFriend(req);
             MessageBox.Show("好友删除成功", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void mnu_online_Click(object sender, EventArgs e)
+        {
+            if (Class1.IsOnline)
+                return;
+
+
+            var ok = Class1.Login(Class1.UserId, Class1.Password);
+            if (!ok)
+            {
+                MessageBox.Show("登陆失败，账号或密码有误", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            LoadMain();
+            Class1.UpdateStatusCheckBox(true);
+        }
+
+        private void mnu_offline_Click(object sender, EventArgs e)
+        {
+            if (!Class1.IsOnline)
+                return;
+
+            Class1.Logout(Class1.UserId,Class1.AccessToken);
+
+            Class1.UpdateStatusCheckBox(false);
+        }
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            toolStripStatusLabel2.Text = Class1.FormatDateTime(DateTime.Now);
         }
     }
 }

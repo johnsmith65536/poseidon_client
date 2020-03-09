@@ -19,7 +19,11 @@ namespace Poseidon
         }
         private void btn_search_Click(object sender, EventArgs e)
         {
-            //var users = rpc._User.SearchUser(Class1.UserId,txt_search.Text);
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var req = new http._User.SearchUserReq()
             {
                 UserId = Class1.UserId,
@@ -40,14 +44,13 @@ namespace Poseidon
 
             }
         }
-
-        private void frm_search_user_Load(object sender, EventArgs e)
-        {
-        }
-
-
         private void mnu_add_friend_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var req = new http._Relation.AddFriendReq()
             {
                 UserIdSend = Class1.UserId,
@@ -95,11 +98,6 @@ namespace Poseidon
                     mnu_strip.Show(MousePosition.X, MousePosition.Y);
                 }
             }
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
         }
     }
 }
