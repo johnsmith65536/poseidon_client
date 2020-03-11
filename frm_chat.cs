@@ -1,5 +1,6 @@
 ﻿using Aliyun.OSS;
 using Aliyun.OSS.Common;
+using CCWin.SkinControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -64,11 +65,12 @@ namespace Poseidon
                 {
                     case (int)Class1.ContentType.Text:
                         {
-                            Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
+                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
         {"user_id",userIdSend},
         {"content",content},
         {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))}
-    });
+    });*/
+                            Class1.appendRtfToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), content);
                             break;
                         }
                     case (int)Class1.ContentType.Object:
@@ -80,12 +82,23 @@ namespace Poseidon
                                 Console.WriteLine("rowCount != 1, rowCount = " +dt1.Rows.Count);
                                 return;
                             }
-                            Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
+                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
         {"user_id",userIdSend},
         {"content","[文件]" + dt1.Rows[0]["name"].ToString()},
         {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))},
         {"e_tag",dt1.Rows[0]["e_tag"].ToString()},
-    });
+    });*/
+                            Class1.appendFileToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
+                            break;
+                        }
+                    case (int)Class1.ContentType.Vibration:
+                        {
+                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
+        {"user_id",userIdSend},
+        {"content",content},
+        {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))}
+    });*/
+                            Class1.appendVibrationToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime));
                             break;
                         }
                     default:
@@ -97,7 +110,7 @@ namespace Poseidon
             }
         }
 
-        private void btn_send_Click(object sender, EventArgs e)
+        /*private void btn_send_Click(object sender, EventArgs e)
         {
             if (!Class1.IsOnline)
             {
@@ -105,7 +118,6 @@ namespace Poseidon
                 return;
             }
             var content = txt_send.Text;
-            //Tuple<long, long> resp = rpc._Message.SendMessage(Class1.UserId, userIdChat, content, 0, 0);
             var req = new http._Message.SendMessageReq()
             {
                 UserIdSend = Class1.UserId,
@@ -116,21 +128,20 @@ namespace Poseidon
             };
             var resp = http._Message.SendMessage(req);
             bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, '{content}', {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
+                            $"{Class1.UserId}, {userIdChat}, 0, \"{content}\", {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            //listBox1.Items.Add("我:" + content + " " + Class1.FormatDateTime(Class1.StampToDateTime(resp.Item2)));
             Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
             {"user_id",Class1.UserId},
             {"content",content},
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
         });
             txt_send.Text = "";
-        }
+        }*/
         private void frm_chat_FormClosed(object sender, FormClosedEventArgs e)
         {
             Class1.formChatPool.Remove(userIdChat);
@@ -166,7 +177,6 @@ namespace Poseidon
                 UserId = Class1.UserId
             };
             var resp = http._Oss.GetSTSInfo(req);
-            //var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
 
             Thread t = new Thread(new ThreadStart(() =>
             {
@@ -196,7 +206,6 @@ namespace Poseidon
                 }
                 
                 var name = Path.GetFileName(localFileName);
-               // var createObjectResp = rpc._Object.CreateObject(eTag, name);
                var createObjectReq = new http._Object.CreateObjectReq()
                 {
                     ETag = eTag,
@@ -228,26 +237,27 @@ namespace Poseidon
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, '{objId}', {createTime}, {(int)Class1.ContentType.Object}, 0, 0)");
+                            $"{Class1.UserId}, {userIdChat}, 0, \"{objId}\", {createTime}, {(int)Class1.ContentType.Object}, 0, 0)");
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
+           /*     InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
             {"user_id",Class1.UserId},
             {"content","[文件]" + name},
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))},
             {"e_tag",eTag}
-        });
+        });*/
+                Class1.appendFileToMsgBox(this, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), "[文件]" + name, objId);
             }));
             t.Start();
         }
 
         private void dgv_msg_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+           /* if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
                 var eTag = dgv_msg.Rows[e.RowIndex].Cells["e_tag"].Value;
                 var objectName = dgv_msg.Rows[e.RowIndex].Cells["content"].Value.ToString();
@@ -269,7 +279,7 @@ namespace Poseidon
                     DownloadFile(eTag.ToString(),localFileName);
                     InvokeProgressBarSetValue(pgb_download, 100);
                 }
-            }
+            }*/
         }
         private void DownloadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
@@ -325,5 +335,131 @@ namespace Poseidon
             }));
             t.Start();
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var content = rtxt_send.Rtf;
+            var req = new http._Message.SendMessageReq()
+            {
+                UserIdSend = Class1.UserId,
+                IdRecv = userIdChat,
+                Content = content,
+                ContentType = (int)Class1.ContentType.Text,
+                MessageType = 0
+            };
+            var resp = http._Message.SendMessage(req);
+            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, \"{content}\", {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
+            if (!ret)
+            {
+                MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
+            {"user_id",Class1.UserId},
+            {"content",content},
+            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
+        });*/
+
+            Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(),DateTime.Now,content);
+            rtxt_message.Select(rtxt_message.Text.Length, 0);
+            rtxt_message.ScrollToCaret();
+            rtxt_send.Text = string.Empty;
+            rtxt_send.Focus();
+        }
+        
+
+        private void frm_chat_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rtxt_message_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var text = e.LinkText;
+            var left = text.IndexOf('[');
+            var right = text.IndexOf(']');
+            var objId = long.Parse(text.Substring(left + 1, right - left - 1));
+
+
+            var dt = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
+            if(dt.Rows.Count != 1) 
+                throw new Exception("rowCount != 1");
+            var eTag = dt.Rows[0]["e_tag"].ToString();
+            var name = dt.Rows[0]["name"].ToString();
+
+            saveFileDialog1.FileName = name;
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                var localFileName = saveFileDialog1.FileName;
+                InvokeProgressBarSetValue(pgb_download, 0);
+                DownloadFile(eTag, localFileName);
+                InvokeProgressBarSetValue(pgb_download, 100);
+            }
+        }
+
+        private void toolFont_Click(object sender, EventArgs e)
+        {
+            if (DialogResult.OK == fontDialog1.ShowDialog())
+            {
+                rtxt_send.Font = fontDialog1.Font;
+                rtxt_send.ForeColor = fontDialog1.Color;
+            }
+        }
+
+        private void toolVibration_Click(object sender, EventArgs e)
+        {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var req = new http._Message.SendMessageReq()
+            {
+                UserIdSend = Class1.UserId,
+                IdRecv = userIdChat,
+                ContentType = (int)Class1.ContentType.Vibration
+            };
+            var resp = http._Message.SendMessage(req);
+
+            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, \"\", {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 0)");
+            if (!ret)
+            {
+                MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            /*    Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
+                {"user_id",Class1.UserId},
+                {"content",content},
+                {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
+            });*/
+
+            /*  Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(), DateTime.Now, content);
+              rtxt_message.Select(rtxt_message.Text.Length, 0);
+              rtxt_message.ScrollToCaret();
+              rtxt_send.Text = string.Empty;
+              rtxt_send.Focus();*/
+
+
+            Class1.appendVibrationToMsgBox(this, Class1.UserId.ToString(), DateTime.Now);
+            rtxt_message.Select(rtxt_message.Text.Length, 0);
+            rtxt_message.ScrollToCaret();
+            rtxt_send.Focus();
+            Class1.Vibration(this);
+        }
+        
     }
 }

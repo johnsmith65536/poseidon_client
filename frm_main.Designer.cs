@@ -34,24 +34,16 @@
             this.mnu_stats = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_online = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_offline = new System.Windows.Forms.ToolStripMenuItem();
-            this.dgv_friend = new System.Windows.Forms.DataGridView();
-            this.user_id = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.status = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dgv_msg = new System.Windows.Forms.DataGridView();
-            this.id = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.user_id_send = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.content = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.create_time = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.mnu_strip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnu_del_friend = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.ChatListBox = new CCWin.SkinControl.ChatListBox();
+            this.sqLiteCommand1 = new System.Data.SQLite.SQLiteCommand();
+            this.clb_unread_msg = new CCWin.SkinControl.ChatListBox();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_friend)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_msg)).BeginInit();
             this.mnu_strip.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -63,7 +55,7 @@
             this.mnu_stats});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1178, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(906, 25);
             this.menuStrip1.TabIndex = 17;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -86,115 +78,16 @@
             // mnu_online
             // 
             this.mnu_online.Name = "mnu_online";
-            this.mnu_online.Size = new System.Drawing.Size(180, 22);
+            this.mnu_online.Size = new System.Drawing.Size(100, 22);
             this.mnu_online.Text = "在线";
             this.mnu_online.Click += new System.EventHandler(this.mnu_online_Click);
             // 
             // mnu_offline
             // 
             this.mnu_offline.Name = "mnu_offline";
-            this.mnu_offline.Size = new System.Drawing.Size(180, 22);
+            this.mnu_offline.Size = new System.Drawing.Size(100, 22);
             this.mnu_offline.Text = "离线";
             this.mnu_offline.Click += new System.EventHandler(this.mnu_offline_Click);
-            // 
-            // dgv_friend
-            // 
-            this.dgv_friend.AllowUserToAddRows = false;
-            this.dgv_friend.AllowUserToDeleteRows = false;
-            this.dgv_friend.AllowUserToResizeRows = false;
-            this.dgv_friend.BackgroundColor = System.Drawing.Color.White;
-            this.dgv_friend.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_friend.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.user_id,
-            this.status});
-            this.dgv_friend.GridColor = System.Drawing.Color.White;
-            this.dgv_friend.Location = new System.Drawing.Point(301, 28);
-            this.dgv_friend.Name = "dgv_friend";
-            this.dgv_friend.ReadOnly = true;
-            this.dgv_friend.RowHeadersVisible = false;
-            this.dgv_friend.RowTemplate.Height = 23;
-            this.dgv_friend.Size = new System.Drawing.Size(167, 157);
-            this.dgv_friend.TabIndex = 18;
-            this.dgv_friend.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_friend_CellDoubleClick);
-            this.dgv_friend.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgv_friend_CellMouseUp);
-            // 
-            // user_id
-            // 
-            this.user_id.Frozen = true;
-            this.user_id.HeaderText = "用户Id";
-            this.user_id.Name = "user_id";
-            this.user_id.ReadOnly = true;
-            this.user_id.Width = 75;
-            // 
-            // status
-            // 
-            this.status.Frozen = true;
-            this.status.HeaderText = "状态";
-            this.status.Name = "status";
-            this.status.ReadOnly = true;
-            this.status.Width = 75;
-            // 
-            // dgv_msg
-            // 
-            this.dgv_msg.AllowUserToAddRows = false;
-            this.dgv_msg.AllowUserToDeleteRows = false;
-            this.dgv_msg.AllowUserToResizeRows = false;
-            this.dgv_msg.BackgroundColor = System.Drawing.Color.White;
-            this.dgv_msg.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_msg.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.id,
-            this.type,
-            this.user_id_send,
-            this.content,
-            this.create_time});
-            this.dgv_msg.GridColor = System.Drawing.Color.White;
-            this.dgv_msg.Location = new System.Drawing.Point(509, 28);
-            this.dgv_msg.Name = "dgv_msg";
-            this.dgv_msg.ReadOnly = true;
-            this.dgv_msg.RowHeadersVisible = false;
-            this.dgv_msg.RowTemplate.Height = 23;
-            this.dgv_msg.Size = new System.Drawing.Size(481, 157);
-            this.dgv_msg.TabIndex = 19;
-            this.dgv_msg.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_msg_CellDoubleClick);
-            // 
-            // id
-            // 
-            this.id.Frozen = true;
-            this.id.HeaderText = "Id";
-            this.id.Name = "id";
-            this.id.ReadOnly = true;
-            this.id.Width = 75;
-            // 
-            // type
-            // 
-            this.type.Frozen = true;
-            this.type.HeaderText = "类型";
-            this.type.Name = "type";
-            this.type.ReadOnly = true;
-            this.type.Width = 75;
-            // 
-            // user_id_send
-            // 
-            this.user_id_send.Frozen = true;
-            this.user_id_send.HeaderText = "发送者";
-            this.user_id_send.Name = "user_id_send";
-            this.user_id_send.ReadOnly = true;
-            this.user_id_send.Width = 75;
-            // 
-            // content
-            // 
-            this.content.Frozen = true;
-            this.content.HeaderText = "内容";
-            this.content.Name = "content";
-            this.content.ReadOnly = true;
-            this.content.Width = 200;
-            // 
-            // create_time
-            // 
-            this.create_time.Frozen = true;
-            this.create_time.HeaderText = "时间";
-            this.create_time.Name = "create_time";
-            this.create_time.ReadOnly = true;
             // 
             // mnu_strip
             // 
@@ -215,9 +108,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 339);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 481);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1178, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(906, 22);
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -225,16 +118,10 @@
             // 
             this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(1001, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(760, 17);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // toolStripStatusLabel2
             // 
@@ -243,14 +130,57 @@
             this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
             this.toolStripStatusLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // ChatListBox
+            // 
+            this.ChatListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.ChatListBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.ChatListBox.ForeColor = System.Drawing.Color.Black;
+            this.ChatListBox.FriendsMobile = false;
+            this.ChatListBox.ListSubItemMenu = null;
+            this.ChatListBox.Location = new System.Drawing.Point(0, 28);
+            this.ChatListBox.Name = "ChatListBox";
+            this.ChatListBox.SelectSubItem = null;
+            this.ChatListBox.Size = new System.Drawing.Size(271, 450);
+            this.ChatListBox.SubItemMenu = null;
+            this.ChatListBox.TabIndex = 21;
+            this.ChatListBox.Text = "chatListBox1";
+            this.ChatListBox.UpSubItem += new CCWin.SkinControl.ChatListBox.ChatListClickEventHandler(this.ChatListBox_UpSubItem);
+            this.ChatListBox.DoubleClickSubItem += new CCWin.SkinControl.ChatListBox.ChatListEventHandler(this.ChatListBox_DoubleClickSubItem);
+            // 
+            // sqLiteCommand1
+            // 
+            this.sqLiteCommand1.CommandText = null;
+            // 
+            // clb_unread_msg
+            // 
+            this.clb_unread_msg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.clb_unread_msg.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.clb_unread_msg.ForeColor = System.Drawing.Color.Black;
+            this.clb_unread_msg.FriendsMobile = true;
+            this.clb_unread_msg.ListSubItemMenu = null;
+            this.clb_unread_msg.Location = new System.Drawing.Point(469, 28);
+            this.clb_unread_msg.Name = "clb_unread_msg";
+            this.clb_unread_msg.SelectSubItem = null;
+            this.clb_unread_msg.Size = new System.Drawing.Size(271, 450);
+            this.clb_unread_msg.SubItemMenu = null;
+            this.clb_unread_msg.TabIndex = 22;
+            this.clb_unread_msg.Text = "chatListBox1";
+            this.clb_unread_msg.DoubleClickSubItem += new CCWin.SkinControl.ChatListBox.ChatListEventHandler(this.clb_unread_msg_DoubleClickSubItem);
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1178, 361);
+            this.ClientSize = new System.Drawing.Size(906, 503);
+            this.Controls.Add(this.clb_unread_msg);
+            this.Controls.Add(this.ChatListBox);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.dgv_msg);
-            this.Controls.Add(this.dgv_friend);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "frm_main";
@@ -259,8 +189,6 @@
             this.Load += new System.EventHandler(this.frm_main_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_friend)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_msg)).EndInit();
             this.mnu_strip.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
@@ -271,17 +199,8 @@
 
         #endregion
         private System.Windows.Forms.ToolStripMenuItem mnu_add_friend;
-        private System.Windows.Forms.DataGridView dgv_friend;
-        private System.Windows.Forms.DataGridViewTextBoxColumn user_id;
-        private System.Windows.Forms.DataGridViewTextBoxColumn status;
-        private System.Windows.Forms.DataGridView dgv_msg;
         private System.Windows.Forms.ContextMenuStrip mnu_strip;
         private System.Windows.Forms.ToolStripMenuItem mnu_del_friend;
-        private System.Windows.Forms.DataGridViewTextBoxColumn id;
-        private System.Windows.Forms.DataGridViewTextBoxColumn type;
-        private System.Windows.Forms.DataGridViewTextBoxColumn user_id_send;
-        private System.Windows.Forms.DataGridViewTextBoxColumn content;
-        private System.Windows.Forms.DataGridViewTextBoxColumn create_time;
         private System.Windows.Forms.ToolStripMenuItem mnu_stats;
         public System.Windows.Forms.ToolStripMenuItem mnu_online;
         public System.Windows.Forms.ToolStripMenuItem mnu_offline;
@@ -290,5 +209,8 @@
         private System.Windows.Forms.Timer timer1;
         public System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Data.SQLite.SQLiteCommand sqLiteCommand1;
+        public CCWin.SkinControl.ChatListBox ChatListBox;
+        public CCWin.SkinControl.ChatListBox clb_unread_msg;
     }
 }

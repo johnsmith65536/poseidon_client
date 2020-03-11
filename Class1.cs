@@ -12,6 +12,9 @@ using System.Collections;
 using System.Net;
 using Newtonsoft.Json;
 using Poseidon.infra.redis;
+using CCWin.SkinControl;
+using System.Drawing;
+using System.Threading;
 
 namespace Poseidon
 {
@@ -37,6 +40,13 @@ namespace Poseidon
 
         public static Dictionary<long, frm_chat> formChatPool = new Dictionary<long, frm_chat>();
 
+        public static Dictionary<long, ChatListSubItem> chatListSubItemPool = new Dictionary<long, ChatListSubItem>();
+        public static HashSet<long> onlineUserId = new HashSet<long>();
+        public static HashSet<long> offlineUserId = new HashSet<long>();
+
+        public static Dictionary<long, ChatListSubItem> unReadMsgItemPool = new Dictionary<long, ChatListSubItem>();
+
+
         public enum AddFriendStatus
         {
             Pending = 0,
@@ -47,7 +57,15 @@ namespace Poseidon
         public enum ContentType
         {
             Text = 0,
-            Object = 1
+            Object = 1,
+            Vibration = 2
+        }
+
+        public enum UnReadMsgType
+        {
+            Message = 0,
+            AddFriend = 1,
+            ReplyAddFriend = 2
         }
 
         delegate void MenuSetCheckCallBack(ToolStripMenuItem mnu, bool value);
@@ -168,6 +186,11 @@ namespace Poseidon
                         AccessToken = "";
                         UpdateStatusCheckBox(false);
                         InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
+                        foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
+                            frm_main.Invoke(new Action(() => {
+                                frm_main.ChatListBox.Items[1].SubItems.Add(item);
+                                frm_main.ChatListBox.Items[0].SubItems.Remove(item);
+                            }));
                         MessageBox.Show(statusMessage, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
@@ -276,6 +299,145 @@ namespace Poseidon
             IsOnline = false;
             InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
             AccessToken = "";
+            foreach(ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
+                frm_main.Invoke(new Action(() => {
+                    frm_main.ChatListBox.Items[1].SubItems.Add(item);
+                    frm_main.ChatListBox.Items[0].SubItems.Remove(item);
+                }));
+            
+        }
+
+        public static void appendRtfToMsgBox(frm_chat frmChat,string name, DateTime time, string content)
+        {
+            if (!frmChat.IsHandleCreated)
+            {
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                     new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                //frmChat.rtxt_message.AppendText("   ");
+                frmChat.rtxt_message.AppendRtf(content);
+
+            } else
+            {
+
+                frmChat.Invoke(new Action(() => {
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                         new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                    //frmChat.rtxt_message.AppendText("   ");
+                    frmChat.rtxt_message.AppendRtf(content);
+                }));
+            }
+
+        }
+        public static void appendFileToMsgBox(frm_chat frmChat, string name, DateTime time, string fileName, long objId)
+        {
+            if (!frmChat.IsHandleCreated)
+            {
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                     new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                //frmChat.rtxt_message.AppendText("   ");
+                frmChat.rtxt_message.AppendText(fileName);
+                frmChat.rtxt_message.AppendText("\n");
+                frmChat.rtxt_message.InsertLink("下载文件[" + objId + "]");
+                frmChat.rtxt_message.AppendText("\n");
+            }
+            else
+            {
+                frmChat.Invoke(new Action(() => {
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                         new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                    //frmChat.rtxt_message.AppendText("   ");
+                    frmChat.rtxt_message.AppendText(fileName);
+                    frmChat.rtxt_message.AppendText("\n");
+                    frmChat.rtxt_message.InsertLink("下载文件[" + objId + "]");
+                    frmChat.rtxt_message.AppendText("\n");
+                }));
+            }
+        }
+        public static void appendVibrationToMsgBox(frm_chat frmChat, string name, DateTime time)
+        {
+            string str;
+            if (long.Parse(name) == Class1.UserId)
+                str = "发送";
+            else
+                str = "收到";
+            if (!frmChat.IsHandleCreated)
+            {
+                frmChat.rtxt_message.AppendRichText(Class1.UserId + "  " + time.ToLongTimeString() + "\r\n",
+                new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                //rtxt_message.SelectionColor = Color.Red;
+                frmChat.rtxt_message.AppendText("您" + str + "了一个窗口抖动。\r\n");
+                frmChat.rtxt_message.ForeColor = Color.Black;
+            }
+            else
+            {
+                frmChat.Invoke(new Action(() => {
+                    frmChat.rtxt_message.AppendRichText(Class1.UserId + "  " + time.ToLongTimeString() + "\r\n",
+                new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                    //rtxt_message.SelectionColor = Color.Red;
+                    frmChat.rtxt_message.AppendText("您" + str + "了一个窗口抖动。\r\n");
+                    frmChat.rtxt_message.ForeColor = Color.Black;
+                }));
+            }
+        }
+        public static void Vibration(frm_chat frmChat)
+        {
+            frmChat.Invoke(new Action(() => {
+                Point pOld = frmChat.Location;//原来的位置
+                int radius = 3;//半径
+                for (int n = 0; n < 3; n++) //旋转圈数
+                {
+                    //右半圆逆时针
+                    for (int i = -radius; i <= radius; i++)
+                    {
+                        int x = Convert.ToInt32(Math.Sqrt(radius * radius - i * i));
+                        int y = -i;
+
+                        frmChat.Location = new Point(pOld.X + x, pOld.Y + y);
+                        Thread.Sleep(10);
+                    }
+                    //左半圆逆时针
+                    for (int j = radius; j >= -radius; j--)
+                    {
+                        int x = -Convert.ToInt32(Math.Sqrt(radius * radius - j * j));
+                        int y = -j;
+
+                        frmChat.Location = new Point(pOld.X + x, pOld.Y + y);
+                        Thread.Sleep(10);
+                    }
+                }
+                //抖动完成，恢复原来位置
+                frmChat.Location = pOld;
+            }));
+        }
+        public static void appendPersonalMsgToUnReadBox(long id, long userId, string content)
+        {
+            ChatListSubItem subItem;
+            if(unReadMsgItemPool.ContainsKey(userId))
+                subItem = unReadMsgItemPool[userId];
+            else
+            {
+                subItem = new ChatListSubItem("");
+                subItem.DisplayName = userId.ToString();
+                subItem.Tag = new Dictionary<string, object>{ { "type", (long)UnReadMsgType.Message },{"user_id_send",userId },{ "ids",new List<long>()} };
+                unReadMsgItemPool.Add(userId, subItem);
+                frm_main.clb_unread_msg.Items[0].SubItems.Add(subItem);
+            }
+            subItem.ID++;
+            subItem.NicName = subItem.ID + "条未读消息";
+            subItem.PersonalMsg = content;
+            ((List<long>)(((Dictionary<string, object>)subItem.Tag)["ids"])).Add(id);
+        }
+        public static void appendSystemMsgToUnReadBox(long id, long userId, string content, UnReadMsgType msgType)
+        {
+            var subItem = new ChatListSubItem(content);
+            subItem.Tag = new Dictionary<string, object> { { "type", (long)msgType }, { "user_id_send", userId }, { "id", id } };
+            frm_main.clb_unread_msg.Items[1].SubItems.Add(subItem);
+        }
+        public static string rtfToText(string rtfContent)
+        {
+            RichTextBox rtb = new RichTextBox();
+            rtb.Rtf = rtfContent;
+            return rtb.Text;
         }
     }
 }
