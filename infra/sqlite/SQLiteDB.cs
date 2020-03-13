@@ -149,6 +149,22 @@ namespace Poseidon.infra.sqlite
                 return false;
             }
         }
+        public bool ExecuteNonQueryWithBinary(string sql, byte[] param)
+        {
+            try
+            {
+                SQLiteCommand cmd;
+                cmd = new SQLiteCommand(sql, m_dbConnection);
+                cmd.Parameters.Add("@param", DbType.Binary).Value = param;
+                cmd.ExecuteNonQuery().ToString();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ExecuteNonQuery(" + sql + ")Err:" + ex);
+                return false;
+            }
+        }
 
 
 

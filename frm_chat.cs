@@ -56,7 +56,7 @@ namespace Poseidon
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 var userIdSend = (long)dt.Rows[i]["user_id_send"];
-                var content = (string)dt.Rows[i]["content"];
+                var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])dt.Rows[i]["content"]));
                 var createTime = (long)dt.Rows[i]["create_time"];
                 var contentType = (long)dt.Rows[i]["content_type"];
                 Console.WriteLine("content_type = " + contentType);
@@ -227,7 +227,7 @@ namespace Poseidon
                 {
                     UserIdSend = Class1.UserId,
                     IdRecv = userIdChat,
-                    Content = objId.ToString(),
+                    Content = objId.ToString() ,
                     ContentType = (int)Class1.ContentType.Object,
                     MessageType = 0
                 };
@@ -236,8 +236,9 @@ namespace Poseidon
                 //var sendMessageResp = rpc._Message.SendMessage(Class1.UserId, userIdChat, objId.ToString(), Class1.ContentType.Object, 0);
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
-                var ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, \"{objId}\", {createTime}, {(int)Class1.ContentType.Object}, 0, 0)");
+                var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Object}, 0, 0)", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -353,8 +354,9 @@ namespace Poseidon
                 MessageType = 0
             };
             var resp = http._Message.SendMessage(req);
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, \"{content}\", {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
+            var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -429,9 +431,12 @@ namespace Poseidon
                 ContentType = (int)Class1.ContentType.Vibration
             };
             var resp = http._Message.SendMessage(req);
-
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, \"\", {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 0)");
+            /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
+            var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(""));
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 0)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);

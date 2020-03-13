@@ -91,6 +91,7 @@ namespace Poseidon.http
         }
         public static SendMessageResp SendMessage(SendMessageReq req)
         {
+            req.Content = Convert.ToBase64String(Class1.Gzip(System.Text.Encoding.Default.GetBytes(req.Content)));
             var ret = Class1.DoHttpRequest("/message", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<SendMessageResp>(ret);
             return resp;
@@ -99,6 +100,23 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<SyncMessageResp>(ret);
+            for (int i = 0;i < resp.Messages.Count;i++)
+            {
+                var rawContent = System.Text.Encoding.Default.GetString(Class1.UnGzip(Convert.FromBase64String(resp.Messages[i].Content)));
+                var msg = new Message()
+                {
+                    Id = resp.Messages[i].Id,
+                    UserIdSend = resp.Messages[i].UserIdSend,
+                    UserIdRecv = resp.Messages[i].UserIdRecv,
+                    GroupId = resp.Messages[i].GroupId,
+                    Content = rawContent,
+                    CreateTime = resp.Messages[i].CreateTime,
+                    ContentType = resp.Messages[i].ContentType,
+                    MsgType = resp.Messages[i].MsgType,
+                    IsRead = resp.Messages[i].IsRead
+                };
+                resp.Messages[i] = msg;
+            }
             return resp;
         }
         public static UpdateMessageStatusResp UpdateMessageStatus(UpdateMessageStatusReq req)

@@ -15,6 +15,7 @@ using Poseidon.infra.redis;
 using CCWin.SkinControl;
 using System.Drawing;
 using System.Threading;
+using System.IO.Compression;
 
 namespace Poseidon
 {
@@ -239,7 +240,7 @@ namespace Poseidon
                   `user_id_send` INTEGER NOT NULL,
                   `user_id_recv` INTEGER NOT NULL,
                   `group_id` INTEGER NOT NULL,
-                  `content` TEXT,
+                  `content` BLOB NOT NULL,
                   `create_time` INTEGER NOT NULL,
                   `content_type` INTEGER NOT NULL,
                   `msg_type` INTEGER NOT NULL,
@@ -471,7 +472,7 @@ namespace Poseidon
             {
                 var id = long.Parse(row["id"].ToString());
                 var userIdSend = long.Parse(row["user_id_send"].ToString());
-                var content = row["content"].ToString();
+                var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])row["content"]));
                 var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
                 var contentType = long.Parse(row["content_type"].ToString());
                 //Console.WriteLine("content_type = ",contentType);
@@ -611,6 +612,33 @@ namespace Poseidon
                 UserRelationRequestIds = userRelationRequest
             };
             http._Message.UpdateMessageStatus(req);
+        }
+        public static byte[] Gzip(byte[] data)
+        {
+            using (var compressedStream = new MemoryStream())
+            {
+                using (var zipStream = new GZipStream(compressedStream, CompressionMode.Compress))
+                {
+                    zipStream.Write(data, 0, data.Length);
+                    zipStream.Close();
+                    return compressedStream.ToArray();
+                }
+            }
+        }
+        public static byte[] UnGzip(byte[] data)
+        {
+            using (var compressedStream = new MemoryStream(data))
+            {
+                using (var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
+                {
+                    using (var resultStream = new MemoryStream())
+                    {
+                        zipStream.CopyTo(resultStream);
+                        zipStream.Close();
+                        return resultStream.ToArray();
+                    }
+                }
+            }
         }
     }
 }

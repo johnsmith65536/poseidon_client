@@ -258,8 +258,12 @@ namespace Poseidon
 
                 foreach (var msg in messages)
                 {
-                    bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, \"{msg.Content}\", {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})");
+                    /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
+                    var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
+                    bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
+                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
                     if (!ret1)
                     {
                         MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -309,11 +313,12 @@ namespace Poseidon
                 case BroadcastMsgType.Chat:
                     {
                         var msg = JsonConvert.DeserializeObject<RedisMessage>(val.ToString());
-                        //var newText = txt_status.Text + "消息接受成功, msgId = " + msg.Id + ", content = " + msg.Content + Environment.NewLine;
-                        //SetText(txt_status, newText);
-                        //rpc._Message.MessageDelivered(msg.Id);
-                        bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
-                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, \"{msg.Content}\", {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})");
+                        /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
+                        var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
+                        bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
+                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
                         if (!ret)
                         {
                             MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
