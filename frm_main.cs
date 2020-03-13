@@ -11,7 +11,6 @@ using System.Threading;
 using StackExchange.Redis;
 using Poseidon.infra.redis;
 using Newtonsoft.Json;
-using Thrift.Collections;
 using CCWin.SkinControl;
 
 namespace Poseidon
@@ -19,6 +18,7 @@ namespace Poseidon
     public partial class frm_main : Form
     {
         private long delFriendUserId;
+        private int tick;
         private enum BroadcastMsgType
         {
             Chat = 0,
@@ -83,121 +83,7 @@ namespace Poseidon
             else
                 dgv.Rows.Clear();
         }
-        public void LoadUnReadMessage()
-        {
-
-            //InvokeGridClear(dgv_msg);
-            foreach(ChatListItem item in clb_unread_msg.Items)
-                item.SubItems.Clear();
-            Class1.unReadMsgItemPool.Clear();
-
-            DataTable dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
-            foreach (DataRow row in dt.Rows)
-            {
-                var id = long.Parse(row["id"].ToString());
-                var userIdSend = long.Parse(row["user_id_send"].ToString());
-                var content = row["content"].ToString();
-                var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                var contentType = long.Parse(row["content_type"].ToString());
-                //Console.WriteLine("content_type = ",contentType);
-                switch (contentType)
-                {
-                    case (int)Class1.ContentType.Text:
-                        {
-                           /* InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","消息"},
-            {"user_id_send",userIdSend},
-            {"content",Class1.rtfToText(content)},
-            {"create_time",createTime}
-        });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
-                            break;
-                        }
-                    case (int)Class1.ContentType.Object:
-                        {
-                            var objId = long.Parse(content);
-                            DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
-                            if (dt1.Rows.Count != 1)
-                            {
-                                Console.WriteLine("rowCount != 1");
-                                return;
-                            }
-                            /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","消息"},
-            {"user_id_send",userIdSend},
-            {"content","[文件]" + dt1.Rows[0]["name"].ToString()},
-            {"create_time",createTime}
-        });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
-                            break;
-                        }
-                    case (int)Class1.ContentType.Vibration:
-                        {
-                            /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","消息"},
-            {"user_id_send",userIdSend},
-            {"content","您收到了一个窗口抖动"},
-            {"create_time",createTime}
-        });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, "您收到了一个窗口抖动");
-                            break;
-                        }
-                }
-            }
-
-            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
-
-            foreach (DataRow row in dt.Rows)
-            {
-                var id = long.Parse(row["id"].ToString());
-                var userIdSend = long.Parse(row["user_id_send"].ToString());
-                var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                var parentId = long.Parse(row["parent_id"].ToString());
-                if (parentId == -1)
-                {
-                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","好友请求"},
-            {"user_id_send",userIdSend},
-            {"create_time",createTime}
-        });*/
-                    //clb_unread_msg.Items[1].SubItems.Add(new ChatListSubItem("来自" + userIdSend + "的好友请求"));
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, "来自" + userIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend);
-                }
-                else
-                {
-                    var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {parentId}");
-                    if (dt1.Rows.Count == 0)
-                    {
-                        Console.WriteLine("parentId 不存在");
-                        return;
-                    }
-                    var status = long.Parse(dt1.Rows[0]["status"].ToString());
-                    string statusString;
-                    if (status == (long)Class1.AddFriendStatus.Accepted)
-                        statusString = "请求通过";
-                    else if (status == (long)Class1.AddFriendStatus.Rejected)
-                        statusString = "请求被拒绝";
-                    else
-                    {
-                        Console.WriteLine("无效的status, status = " + status);
-                        return;
-                    }
-                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","好友请求回复"},
-            {"user_id_send",userIdSend},
-            {"create_time",createTime},
-            {"content",statusString}
-        });*/
-                    //clb_unread_msg.Items[1].SubItems.Add(new ChatListSubItem(userIdSend + (status== (long)Class1.AddFriendStatus.Accepted?"通过":"拒绝") + "了好友请求"));
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend);
-                }
-            }
-        }
+        
         public void LoadMain()
         {
             ChatListBox.Items.Clear();
@@ -209,9 +95,9 @@ namespace Poseidon
             Class1.offlineUserId.Clear();
 
 
-            clb_unread_msg.Items.Clear();
-            clb_unread_msg.Items.Add(new ChatListItem("个人消息", true));
-            clb_unread_msg.Items.Add(new ChatListItem("系统消息", true));
+            Class1.frmMsgBox.clb_unread_msg.Items.Clear();
+            Class1.frmMsgBox.clb_unread_msg.Items.Add(new ChatListItem("个人消息", true));
+            Class1.frmMsgBox.clb_unread_msg.Items.Add(new ChatListItem("系统消息", true));
 
 
             Thread t1 = new Thread(new ThreadStart(() =>
@@ -392,7 +278,7 @@ namespace Poseidon
                         return;
                     }
                 }
-                LoadUnReadMessage();
+                Class1.LoadUnReadMessage();
 
                 Console.WriteLine("fetch offline message done");
             }));
@@ -403,9 +289,13 @@ namespace Poseidon
             Class1.UpdateStatusCheckBox(Class1.IsOnline);
             Class1.InvokeToolStripStatusLabel(toolStripStatusLabel1, "在线");
             toolStripStatusLabel2.Text = Class1.FormatDateTime(DateTime.Now);
+            notifyIcon1.Text = Class1.UserId.ToString();
         }
         private void frm_main_Load(object sender, EventArgs e)
         {
+            Class1.frmMsgBox = new frm_msg_box();
+            Class1.frmMsgBox.Show();
+            Class1.frmMsgBox.Hide();
             LoadMain();
         }
         public void MessageChannel(RedisChannel cnl, RedisValue val)
@@ -540,7 +430,6 @@ namespace Poseidon
             {"content",""},
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
         });*/
-                        //clb_unread_msg.Items[1].SubItems.Add(new ChatListSubItem("来自" + msg.UserIdSend + "的好友请求"));
                         Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, "来自" + msg.UserIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend);
                         break;
                     }
@@ -581,7 +470,6 @@ namespace Poseidon
             {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
         });*/
 
-                        //clb_unread_msg.Items[1].SubItems.Add(new ChatListSubItem(msg.UserIdSend + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求"));
                         Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.UserIdSend + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend);
                         break;
                     }
@@ -592,9 +480,14 @@ namespace Poseidon
                         break;
                     }
             }
+            //Console.WriteLine("ping...");
+            Invoke(new Action(() =>
+            {
+                timer2.Enabled = true;
+            }));
+                
 
-
-            // Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
+             Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
         public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
         {
@@ -619,6 +512,7 @@ namespace Poseidon
                 };
                 http._Login.Logout(req);
             }
+            notifyIcon1.Dispose();
             Environment.Exit(0);
         }
         private static BroadcastMsgType GetBroadcastMsgType(string jsonString)
@@ -636,38 +530,9 @@ namespace Poseidon
                 return;
             }
             frm_search_user frm_search_user = new frm_search_user();
-            frm_search_user.ShowDialog();
+            frm_search_user.Show();
         }
-        private void UpdateMessageStatus(Dictionary<long, int> message, Dictionary<long, int> userRelationRequest)
-        {
-            if (!Class1.IsOnline) //离线时，为保证本地和远程数据一致性，不做已读状态更新
-                return;
-            foreach (var item in message)
-            {
-                bool ret = Class1.sql.ExecuteNonQuery($"UPDATE `message` SET `is_read` = {item.Value} WHERE `id` = {item.Key}");
-                if (!ret)
-                {
-                    MessageBox.Show("DB错误，UPDATE message", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-            }
-            foreach (var item in userRelationRequest)
-            {
-                bool ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {item.Value} WHERE `id` = {item.Key}");
-                if (!ret)
-                {
-                    MessageBox.Show("DB错误，UPDATE user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-            }
-            //rpc._Message.UpdateMessageStatus(message, userRelationRequest);
-            var req = new http._Message.UpdateMessageStatusReq()
-            {
-                MessageIds = message,
-                UserRelationRequestIds = userRelationRequest
-            };
-            http._Message.UpdateMessageStatus(req);
-        }
+        
 
         private void dgv_friend_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -894,8 +759,8 @@ namespace Poseidon
                 foreach (var id in ids)
                     readMessage.Add(id, 1);
             }
-            UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-            LoadUnReadMessage();
+            Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
+            Class1.LoadUnReadMessage();
 
         }
         private void ChatListBox_UpSubItem(object sender, ChatListClickEventArgs e, MouseEventArgs es)
@@ -945,8 +810,8 @@ namespace Poseidon
                         }*/
                         foreach (var msgId in ids)
                             readMessage.Add(msgId, 1);
-                        UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                        LoadUnReadMessage();
+                        Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
+                        Class1.LoadUnReadMessage();
                         break;
                     }
                 case (long)Class1.UnReadMsgType.AddFriend:
@@ -988,14 +853,14 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        LoadUnReadMessage();
+                        Class1.LoadUnReadMessage();
                         break;
                     }
                 case (long)Class1.UnReadMsgType.ReplyAddFriend:
                     {
                         var id = (long)dict["id"];
-                        UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
-                        LoadUnReadMessage();
+                        Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
+                        Class1.LoadUnReadMessage();
                         break;
                     }
                 default:
@@ -1004,6 +869,32 @@ namespace Poseidon
                         break;
                     }
             }
+        }
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            tick = (tick + 1) % 2;
+            if (tick % 2 == 0)
+                notifyIcon1.Icon = Properties.Resources.blank;
+            else
+                notifyIcon1.Icon = Properties.Resources.poseidon;
+        }
+
+        private void notifyIcon1_MouseMove(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            Class1.frmMsgBox.Location = icon.GetFormLocation(Class1.frmMsgBox, notifyIcon1);
+            var mousePos = MousePosition;
+            var iconPos = icon.GetIconRect(notifyIcon1);
+            var isInIcon = mousePos.X >= iconPos.Left && mousePos.X <= iconPos.Right && mousePos.Y >= iconPos.Top && mousePos.Y <= iconPos.Bottom;
+            var isInForm = Class1.frmMsgBox.Visible && mousePos.X >= Class1.frmMsgBox.Left && mousePos.X <= Class1.frmMsgBox.Right && mousePos.Y >= Class1.frmMsgBox.Top && mousePos.Y <= iconPos.Top;
+            var hasUnReadMsg = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count > 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count > 0;
+            if ((isInIcon || isInForm) && hasUnReadMsg)
+                    Class1.frmMsgBox.Visible = true;
+            else
+                    Class1.frmMsgBox.Visible = false;
         }
     }
 }

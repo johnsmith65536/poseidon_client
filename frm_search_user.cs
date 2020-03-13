@@ -36,7 +36,7 @@ namespace Poseidon
                 var index = dataGridView1.Rows.Add(new DataGridViewRow());
                 dataGridView1.Rows[index].Cells["user_id"].Value = user.Id.ToString();
                 dataGridView1.Rows[index].Cells["nick_name"].Value = user.NickName;
-                if (Class1.DateTimeToStamp(DateTime.UtcNow) - user.LastOnlineTime < 30)
+                if (Class1.DateTimeToStamp(DateTime.UtcNow) - user.LastOnlineTime < 5)
                     dataGridView1.Rows[index].Cells["last_online_time"].Value = "在线";
                 else
                     dataGridView1.Rows[index].Cells["last_online_time"].Value = Class1.FormatDateTime(Class1.StampToDateTime(user.LastOnlineTime));

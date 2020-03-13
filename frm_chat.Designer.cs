@@ -42,13 +42,6 @@
             this.toolCountenance = new System.Windows.Forms.ToolStripButton();
             this.toolVibration = new System.Windows.Forms.ToolStripButton();
             this.toolImgFile = new System.Windows.Forms.ToolStripButton();
-            this.toolPrintScreen = new System.Windows.Forms.ToolStripSplitButton();
-            this.ToolItemPrint = new System.Windows.Forms.ToolStripMenuItem();
-            this.录制视屏动画ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.捕捉视屏图像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.显示截图编辑工具栏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.截图时隐藏当前窗口ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripDropDownButton4 = new System.Windows.Forms.ToolStripSplitButton();
             this.显示消息记录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,13 +59,20 @@
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.清屏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.消息管理器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolPrintScreen = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolItemPrint = new System.Windows.Forms.ToolStripMenuItem();
+            this.录制视屏动画ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.捕捉视屏图像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.显示截图编辑工具栏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.截图时隐藏当前窗口ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.skToolMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // btn_send_file
             // 
-            this.btn_send_file.Location = new System.Drawing.Point(1187, 531);
+            this.btn_send_file.Location = new System.Drawing.Point(579, 479);
             this.btn_send_file.Name = "btn_send_file";
             this.btn_send_file.Size = new System.Drawing.Size(75, 23);
             this.btn_send_file.TabIndex = 21;
@@ -100,7 +100,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(1187, 585);
+            this.button2.Location = new System.Drawing.Point(480, 569);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 26;
@@ -142,6 +142,7 @@
             this.rtxt_send.Size = new System.Drawing.Size(547, 128);
             this.rtxt_send.TabIndex = 28;
             this.rtxt_send.Text = "";
+            this.rtxt_send.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rtxt_send_KeyDown);
             // 
             // skToolMenu
             // 
@@ -253,60 +254,6 @@
             this.toolImgFile.Text = "toolStripButton7";
             this.toolImgFile.ToolTipText = "发送图片";
             // 
-            // toolPrintScreen
-            // 
-            this.toolPrintScreen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolPrintScreen.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolItemPrint,
-            this.录制视屏动画ToolStripMenuItem,
-            this.捕捉视屏图像ToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.显示截图编辑工具栏ToolStripMenuItem,
-            this.截图时隐藏当前窗口ToolStripMenuItem});
-            this.toolPrintScreen.Image = global::Poseidon.Properties.Resources.aio_quickbar_cut;
-            this.toolPrintScreen.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolPrintScreen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolPrintScreen.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
-            this.toolPrintScreen.Name = "toolPrintScreen";
-            this.toolPrintScreen.Size = new System.Drawing.Size(36, 24);
-            this.toolPrintScreen.Text = "toolStripButton8";
-            this.toolPrintScreen.ToolTipText = "屏幕截图 Ctrl + Alt + A";
-            // 
-            // ToolItemPrint
-            // 
-            this.ToolItemPrint.Name = "ToolItemPrint";
-            this.ToolItemPrint.Size = new System.Drawing.Size(185, 22);
-            this.ToolItemPrint.Text = "屏幕截图Ctrl+Alt+A";
-            // 
-            // 录制视屏动画ToolStripMenuItem
-            // 
-            this.录制视屏动画ToolStripMenuItem.Name = "录制视屏动画ToolStripMenuItem";
-            this.录制视屏动画ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.录制视屏动画ToolStripMenuItem.Text = "录制视屏动画";
-            // 
-            // 捕捉视屏图像ToolStripMenuItem
-            // 
-            this.捕捉视屏图像ToolStripMenuItem.Name = "捕捉视屏图像ToolStripMenuItem";
-            this.捕捉视屏图像ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.捕捉视屏图像ToolStripMenuItem.Text = "捕捉视屏图像";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(182, 6);
-            // 
-            // 显示截图编辑工具栏ToolStripMenuItem
-            // 
-            this.显示截图编辑工具栏ToolStripMenuItem.Name = "显示截图编辑工具栏ToolStripMenuItem";
-            this.显示截图编辑工具栏ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.显示截图编辑工具栏ToolStripMenuItem.Text = "显示截图编辑工具栏";
-            // 
-            // 截图时隐藏当前窗口ToolStripMenuItem
-            // 
-            this.截图时隐藏当前窗口ToolStripMenuItem.Name = "截图时隐藏当前窗口ToolStripMenuItem";
-            this.截图时隐藏当前窗口ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.截图时隐藏当前窗口ToolStripMenuItem.Text = "截图时隐藏当前窗口";
-            // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.AutoSize = false;
@@ -341,7 +288,7 @@
             // 显示消息记录ToolStripMenuItem
             // 
             this.显示消息记录ToolStripMenuItem.Name = "显示消息记录ToolStripMenuItem";
-            this.显示消息记录ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.显示消息记录ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.显示消息记录ToolStripMenuItem.Text = "显示消息记录";
             // 
             // 显示比例ToolStripMenuItem
@@ -358,7 +305,7 @@
             this.toolStripMenuItem13,
             this.toolStripMenuItem14});
             this.显示比例ToolStripMenuItem.Name = "显示比例ToolStripMenuItem";
-            this.显示比例ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.显示比例ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.显示比例ToolStripMenuItem.Text = "显示比例";
             // 
             // 放大Ctrl滚轮ToolStripMenuItem
@@ -423,19 +370,73 @@
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(177, 6);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(145, 6);
             // 
             // 清屏ToolStripMenuItem
             // 
             this.清屏ToolStripMenuItem.Name = "清屏ToolStripMenuItem";
-            this.清屏ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.清屏ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.清屏ToolStripMenuItem.Text = "清屏";
             // 
             // 消息管理器ToolStripMenuItem
             // 
             this.消息管理器ToolStripMenuItem.Name = "消息管理器ToolStripMenuItem";
-            this.消息管理器ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.消息管理器ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.消息管理器ToolStripMenuItem.Text = "消息管理器";
+            // 
+            // toolPrintScreen
+            // 
+            this.toolPrintScreen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolPrintScreen.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolItemPrint,
+            this.录制视屏动画ToolStripMenuItem,
+            this.捕捉视屏图像ToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.显示截图编辑工具栏ToolStripMenuItem,
+            this.截图时隐藏当前窗口ToolStripMenuItem});
+            this.toolPrintScreen.Image = global::Poseidon.Properties.Resources.aio_quickbar_cut;
+            this.toolPrintScreen.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolPrintScreen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolPrintScreen.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
+            this.toolPrintScreen.Name = "toolPrintScreen";
+            this.toolPrintScreen.Size = new System.Drawing.Size(36, 24);
+            this.toolPrintScreen.Text = "toolStripButton8";
+            this.toolPrintScreen.ToolTipText = "屏幕截图 Ctrl + Alt + A";
+            // 
+            // ToolItemPrint
+            // 
+            this.ToolItemPrint.Name = "ToolItemPrint";
+            this.ToolItemPrint.Size = new System.Drawing.Size(185, 22);
+            this.ToolItemPrint.Text = "屏幕截图Ctrl+Alt+A";
+            // 
+            // 录制视屏动画ToolStripMenuItem
+            // 
+            this.录制视屏动画ToolStripMenuItem.Name = "录制视屏动画ToolStripMenuItem";
+            this.录制视屏动画ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.录制视屏动画ToolStripMenuItem.Text = "录制视屏动画";
+            // 
+            // 捕捉视屏图像ToolStripMenuItem
+            // 
+            this.捕捉视屏图像ToolStripMenuItem.Name = "捕捉视屏图像ToolStripMenuItem";
+            this.捕捉视屏图像ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.捕捉视屏图像ToolStripMenuItem.Text = "捕捉视屏图像";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(182, 6);
+            // 
+            // 显示截图编辑工具栏ToolStripMenuItem
+            // 
+            this.显示截图编辑工具栏ToolStripMenuItem.Name = "显示截图编辑工具栏ToolStripMenuItem";
+            this.显示截图编辑工具栏ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.显示截图编辑工具栏ToolStripMenuItem.Text = "显示截图编辑工具栏";
+            // 
+            // 截图时隐藏当前窗口ToolStripMenuItem
+            // 
+            this.截图时隐藏当前窗口ToolStripMenuItem.Name = "截图时隐藏当前窗口ToolStripMenuItem";
+            this.截图时隐藏当前窗口ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.截图时隐藏当前窗口ToolStripMenuItem.Text = "截图时隐藏当前窗口";
             // 
             // frm_chat
             // 

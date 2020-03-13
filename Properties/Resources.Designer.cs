@@ -431,6 +431,16 @@ namespace Poseidon.Properties {
         }
         
         /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon blank {
+            get {
+                object obj = ResourceManager.GetObject("blank", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
         internal static System.Drawing.Bitmap btn_close_disable {
@@ -737,16 +747,6 @@ namespace Poseidon.Properties {
             get {
                 object obj = ResourceManager.GetObject("common_state_leave_b", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
-        /// </summary>
-        internal static System.Drawing.Icon common_success {
-            get {
-                object obj = ResourceManager.GetObject("common_success", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
             }
         }
         
@@ -1407,6 +1407,16 @@ namespace Poseidon.Properties {
             get {
                 object obj = ResourceManager.GetObject("pictureBox1_Image", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似于 (图标) 的 System.Drawing.Icon 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Icon poseidon {
+            get {
+                object obj = ResourceManager.GetObject("poseidon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
         

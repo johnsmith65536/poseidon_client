@@ -368,10 +368,7 @@ namespace Poseidon
         });*/
 
             Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(),DateTime.Now,content);
-            rtxt_message.Select(rtxt_message.Text.Length, 0);
-            rtxt_message.ScrollToCaret();
-            rtxt_send.Text = string.Empty;
-            rtxt_send.Focus();
+            rtxt_send.Rtf = string.Empty;
         }
         
 
@@ -388,8 +385,8 @@ namespace Poseidon
                 return;
             }
             var text = e.LinkText;
-            var left = text.IndexOf('[');
-            var right = text.IndexOf(']');
+            var left = text.LastIndexOf("[");
+            var right = text.LastIndexOf(']');
             var objId = long.Parse(text.Substring(left + 1, right - left - 1));
 
 
@@ -460,6 +457,35 @@ namespace Poseidon
             rtxt_send.Focus();
             Class1.Vibration(this);
         }
-        
+
+        private void rtxt_send_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.V)
+            {
+                // suspend layout to avoid blinking
+                rtxt_send.SuspendLayout();
+
+                // get insertion point
+                int insPt = rtxt_send.SelectionStart;
+
+                // preserve text from after insertion pont to end of RTF content
+                string postRTFContent = rtxt_send.Text.Substring(insPt);
+
+                // remove the content after the insertion point
+                rtxt_send.Text = rtxt_send.Text.Substring(0, insPt);
+
+                // add the clipboard content and then the preserved postRTF content
+                rtxt_send.Text += (string)Clipboard.GetData("Text") + postRTFContent;
+
+                // adjust the insertion point to just after the inserted text
+                rtxt_send.SelectionStart = rtxt_send.TextLength - postRTFContent.Length;
+
+                // restore layout
+                rtxt_send.ResumeLayout();
+
+                // cancel the paste
+                e.Handled = true;
+            }
+        }
     }
 }

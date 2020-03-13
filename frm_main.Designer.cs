@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_main));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnu_add_friend = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_stats = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +43,9 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.ChatListBox = new CCWin.SkinControl.ChatListBox();
             this.sqLiteCommand1 = new System.Data.SQLite.SQLiteCommand();
-            this.clb_unread_msg = new CCWin.SkinControl.ChatListBox();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
+            this.timer3 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1.SuspendLayout();
             this.mnu_strip.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -55,7 +58,7 @@
             this.mnu_stats});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(906, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(274, 25);
             this.menuStrip1.TabIndex = 17;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -108,9 +111,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 481);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 477);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(906, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(274, 22);
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -118,7 +121,7 @@
             // 
             this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(760, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(128, 17);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -157,28 +160,28 @@
             // 
             this.sqLiteCommand1.CommandText = null;
             // 
-            // clb_unread_msg
+            // notifyIcon1
             // 
-            this.clb_unread_msg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.clb_unread_msg.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.clb_unread_msg.ForeColor = System.Drawing.Color.Black;
-            this.clb_unread_msg.FriendsMobile = true;
-            this.clb_unread_msg.ListSubItemMenu = null;
-            this.clb_unread_msg.Location = new System.Drawing.Point(469, 28);
-            this.clb_unread_msg.Name = "clb_unread_msg";
-            this.clb_unread_msg.SelectSubItem = null;
-            this.clb_unread_msg.Size = new System.Drawing.Size(271, 450);
-            this.clb_unread_msg.SubItemMenu = null;
-            this.clb_unread_msg.TabIndex = 22;
-            this.clb_unread_msg.Text = "chatListBox1";
-            this.clb_unread_msg.DoubleClickSubItem += new CCWin.SkinControl.ChatListBox.ChatListEventHandler(this.clb_unread_msg_DoubleClickSubItem);
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseMove);
+            // 
+            // timer2
+            // 
+            this.timer2.Interval = 500;
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
+            // timer3
+            // 
+            this.timer3.Enabled = true;
+            this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(906, 503);
-            this.Controls.Add(this.clb_unread_msg);
+            this.ClientSize = new System.Drawing.Size(274, 499);
             this.Controls.Add(this.ChatListBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
@@ -211,6 +214,8 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Data.SQLite.SQLiteCommand sqLiteCommand1;
         public CCWin.SkinControl.ChatListBox ChatListBox;
-        public CCWin.SkinControl.ChatListBox clb_unread_msg;
+        public System.Windows.Forms.NotifyIcon notifyIcon1;
+        public System.Windows.Forms.Timer timer2;
+        private System.Windows.Forms.Timer timer3;
     }
 }

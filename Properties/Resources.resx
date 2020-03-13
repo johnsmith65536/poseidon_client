@@ -226,6 +226,9 @@
   <data name="Big_9" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Big_9.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="blank" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\blank.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="btn_close_disable" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\btn_close_disable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -318,9 +321,6 @@
   </data>
   <data name="common_state_leave_b" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\common_state_leave_b.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="common_success" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\common_success.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="common_success1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\common_success.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -519,6 +519,9 @@
   </data>
   <data name="pictureBox1_Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pictureBox1.Image.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="poseidon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\poseidon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Qme__2_" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Qme (2).png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
