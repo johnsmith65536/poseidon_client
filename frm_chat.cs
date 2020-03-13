@@ -428,6 +428,7 @@ namespace Poseidon
             {
                 UserIdSend = Class1.UserId,
                 IdRecv = userIdChat,
+                Content = "vibration",
                 ContentType = (int)Class1.ContentType.Vibration
             };
             var resp = http._Message.SendMessage(req);
