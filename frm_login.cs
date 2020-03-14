@@ -35,10 +35,5 @@ namespace Poseidon
             this.Hide();
             Class1.frm_main.Show();
         }
-
-        private void frm_login_Load(object sender, EventArgs e)
-        {
-            //rpc._Init.InitRpcClient();
-        }
     }
 }

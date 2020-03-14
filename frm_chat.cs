@@ -24,19 +24,6 @@ namespace Poseidon
         }
 
         delegate void ProgressBarSetValueCallBackCallBack(ProgressBar pgb, int value); 
-        delegate void GridAddCallBack(DataGridView dgv, Dictionary<string, object> dict);
-        delegate void GridClearCallBack(DataGridView dgv);
-
-        private void InvokeGridAdd(DataGridView dgv, Dictionary<string, object> dict)
-        {
-            if (dgv.InvokeRequired)
-            {
-                GridAddCallBack stcb = new GridAddCallBack(InvokeGridAdd);
-                this.Invoke(stcb, new object[] { dgv, dict });
-            }
-            else
-                Class1.GridAdd(dgv, dict);
-        }
         private void InvokeProgressBarSetValue(ProgressBar pgb, int value)
         {
             if (pgb.InvokeRequired)
@@ -59,17 +46,11 @@ namespace Poseidon
                 var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])dt.Rows[i]["content"]));
                 var createTime = (long)dt.Rows[i]["create_time"];
                 var contentType = (long)dt.Rows[i]["content_type"];
-                Console.WriteLine("content_type = " + contentType);
-
+                //Console.WriteLine("content_type = " + contentType);
                 switch (contentType)
                 {
                     case (int)Class1.ContentType.Text:
                         {
-                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-        {"user_id",userIdSend},
-        {"content",content},
-        {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))}
-    });*/
                             Class1.appendRtfToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), content);
                             break;
                         }
@@ -77,28 +58,30 @@ namespace Poseidon
                         {
                             var objId = long.Parse(content);
                             DataTable dt1 = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
-                            if (dt1.Rows.Count != 1)
+                            if (dt1 == null || dt1.Rows.Count != 1)
                             {
                                 Console.WriteLine("rowCount != 1, rowCount = " +dt1.Rows.Count);
                                 return;
                             }
-                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-        {"user_id",userIdSend},
-        {"content","[文件]" + dt1.Rows[0]["name"].ToString()},
-        {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))},
-        {"e_tag",dt1.Rows[0]["e_tag"].ToString()},
-    });*/
                             Class1.appendFileToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
                             break;
                         }
                     case (int)Class1.ContentType.Vibration:
                         {
-                            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-        {"user_id",userIdSend},
-        {"content",content},
-        {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))}
-    });*/
                             Class1.appendVibrationToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime));
+                            break;
+                        }
+                    case (int)Class1.ContentType.Image:
+                        {
+                            var eTag = content;
+                            DataTable dt1 = Class1.sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
+                            if (dt1 == null || dt1.Rows.Count != 1)
+                            {
+                                Console.WriteLine("rowCount != 1");
+                                return;
+                            }
+                            var imageData = Class1.UnGzip((byte[])dt1.Rows[0]["content"]);
+                            Class1.appendImageToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), imageData);
                             break;
                         }
                     default:
@@ -109,39 +92,6 @@ namespace Poseidon
                 }   
             }
         }
-
-        /*private void btn_send_Click(object sender, EventArgs e)
-        {
-            if (!Class1.IsOnline)
-            {
-                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            var content = txt_send.Text;
-            var req = new http._Message.SendMessageReq()
-            {
-                UserIdSend = Class1.UserId,
-                IdRecv = userIdChat,
-                Content = content,
-                ContentType = (int)Class1.ContentType.Text,
-                MessageType = 0
-            };
-            var resp = http._Message.SendMessage(req);
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, \"{content}\", {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)");
-            if (!ret)
-            {
-                MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-            {"user_id",Class1.UserId},
-            {"content",content},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
-        });
-            txt_send.Text = "";
-        }*/
         private void frm_chat_FormClosed(object sender, FormClosedEventArgs e)
         {
             Class1.formChatPool.Remove(userIdChat);
@@ -149,19 +99,7 @@ namespace Poseidon
 
         private void btn_send_file_Click(object sender, EventArgs e)
         {
-            if (!Class1.IsOnline)
-            {
-                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                var localFileName = openFileDialog1.FileName;
-                InvokeProgressBarSetValue(pgb_upload, 0);
-                UploadFile(localFileName);
-                InvokeProgressBarSetValue(pgb_upload, 100);
-
-            }
+            
         }
         private void UploadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
@@ -213,14 +151,6 @@ namespace Poseidon
                 };
                 var createObjectResp = http._Object.CreateObject(createObjectReq);
                 var objId = createObjectResp.Id;
-
-                /*bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({objId}, " +
-                            $"'{eTag}', '{name}')");
-                if (!ret)
-                {
-                    //MessageBox.Show("DB错误，INSERT INTO object失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    //return;
-                }*/
                 Class1.InsertObject(objId, eTag, name);
 
                 var sendMessageReq = new http._Message.SendMessageReq()
@@ -232,8 +162,6 @@ namespace Poseidon
                     MessageType = 0
                 };
                 var sendMessageResp = http._Message.SendMessage(sendMessageReq);
-
-                //var sendMessageResp = rpc._Message.SendMessage(Class1.UserId, userIdChat, objId.ToString(), Class1.ContentType.Object, 0);
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
@@ -244,43 +172,9 @@ namespace Poseidon
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
-           /*     InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"user_id",Class1.UserId},
-            {"content","[文件]" + name},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(createTime))},
-            {"e_tag",eTag}
-        });*/
                 Class1.appendFileToMsgBox(this, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), "[文件]" + name, objId);
             }));
             t.Start();
-        }
-
-        private void dgv_msg_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-           /* if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                var eTag = dgv_msg.Rows[e.RowIndex].Cells["e_tag"].Value;
-                var objectName = dgv_msg.Rows[e.RowIndex].Cells["content"].Value.ToString();
-                dgv_msg.ClearSelection();
-                dgv_msg.Rows[e.RowIndex].Selected = true;
-                dgv_msg.CurrentCell = dgv_msg.Rows[e.RowIndex].Cells[e.ColumnIndex];
-                if (eTag == null)
-                    return;
-                if (!Class1.IsOnline)
-                {
-                    MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    return;
-                }
-                saveFileDialog1.FileName = objectName.Substring(4);
-                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    var localFileName = saveFileDialog1.FileName;
-                    InvokeProgressBarSetValue(pgb_download, 0);
-                    DownloadFile(eTag.ToString(),localFileName);
-                    InvokeProgressBarSetValue(pgb_download, 100);
-                }
-            }*/
         }
         private void DownloadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
@@ -295,7 +189,6 @@ namespace Poseidon
                 UserId = Class1.UserId
             };
             var resp = http._Oss.GetSTSInfo(req);
-            //var resp = rpc._Oss.GetSTSInfo(Class1.UserId);
             Thread t = new Thread(new ThreadStart(() =>
             {
                 // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
@@ -362,13 +255,6 @@ namespace Poseidon
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            /*Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-            {"user_id",Class1.UserId},
-            {"content",content},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
-        });*/
-
             Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(),DateTime.Now,content);
             rtxt_send.Rtf = string.Empty;
         }
@@ -393,7 +279,7 @@ namespace Poseidon
 
 
             var dt = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
-            if(dt.Rows.Count != 1) 
+            if(dt == null || dt.Rows.Count != 1) 
                 throw new Exception("rowCount != 1");
             var eTag = dt.Rows[0]["e_tag"].ToString();
             var name = dt.Rows[0]["name"].ToString();
@@ -432,9 +318,6 @@ namespace Poseidon
                 ContentType = (int)Class1.ContentType.Vibration
             };
             var resp = http._Message.SendMessage(req);
-            /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(""));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
                             $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 0)", param);
@@ -443,19 +326,6 @@ namespace Poseidon
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            /*    Class1.GridAdd(dgv_msg, new Dictionary<string, object> {
-                {"user_id",Class1.UserId},
-                {"content",content},
-                {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(resp.CreateTime))}
-            });*/
-
-            /*  Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(), DateTime.Now, content);
-              rtxt_message.Select(rtxt_message.Text.Length, 0);
-              rtxt_message.ScrollToCaret();
-              rtxt_send.Text = string.Empty;
-              rtxt_send.Focus();*/
-
 
             Class1.appendVibrationToMsgBox(this, Class1.UserId.ToString(), DateTime.Now);
             rtxt_message.Select(rtxt_message.Text.Length, 0);
@@ -491,6 +361,107 @@ namespace Poseidon
 
                 // cancel the paste
                 e.Handled = true;
+            }
+        }
+
+        private void toolImgFile_Click(object sender, EventArgs e)
+        {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            openFileDialog1.Filter = "图片文件|*.jpg;*.bmp;*.png";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                var localFileName = openFileDialog1.FileName;
+                InvokeProgressBarSetValue(pgb_upload, 0);
+                UploadImage(localFileName);
+                InvokeProgressBarSetValue(pgb_upload, 100);
+            }
+        }
+
+        private void UploadImage(string localFileName)
+        {
+            var eTag = Class1.GenerateMD5WithFilePath(localFileName);
+            var req = new http._Oss.GetSTSInfoReq()
+            {
+                UserId = Class1.UserId
+            };
+            var resp = http._Oss.GetSTSInfo(req);
+
+            Thread t = new Thread(new ThreadStart(() =>
+            {
+                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
+                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
+                if (!client.DoesObjectExist(Class1.BucketName, eTag))
+                {
+                    try
+                    {
+                        using (var fs = File.Open(localFileName, FileMode.Open))
+                        {
+                            var putObjectRequest = new PutObjectRequest(Class1.BucketName, eTag, fs);
+                            putObjectRequest.StreamTransferProgress += UploadProgressCallback;
+                            client.PutObject(putObjectRequest);
+                        }
+                        Console.WriteLine("Put object:{0} succeeded", eTag);
+                    }
+                    catch (OssException ex)
+                    {
+                        Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID: {2}\tHostID: {3}",
+                            ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed with error info: {0}", ex.Message);
+                    }
+                }
+
+                var name = Path.GetFileName(localFileName);
+
+                var sendMessageReq = new http._Message.SendMessageReq()
+                {
+                    UserIdSend = Class1.UserId,
+                    IdRecv = userIdChat,
+                    Content = eTag,
+                    ContentType = (int)Class1.ContentType.Image,
+                    MessageType = 0
+                };
+                var sendMessageResp = http._Message.SendMessage(sendMessageReq);
+
+                var messageId = sendMessageResp.Id;
+                var createTime = sendMessageResp.CreateTime;
+                var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(eTag));
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Image}, 0, 0)", param);
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                var imageData = Class1.LoadFile(localFileName);
+                var imageParam = Class1.Gzip(imageData);
+                Class1.InsertImage(eTag, imageParam);
+                Class1.appendImageToMsgBox(this, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), imageData);
+            }));
+            t.Start();
+        }
+
+        private void toolfile_Click(object sender, EventArgs e)
+        {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            openFileDialog1.Filter = "所有文件|*.*";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                var localFileName = openFileDialog1.FileName;
+                InvokeProgressBarSetValue(pgb_upload, 0);
+                UploadFile(localFileName);
+                InvokeProgressBarSetValue(pgb_upload, 100);
+
             }
         }
     }

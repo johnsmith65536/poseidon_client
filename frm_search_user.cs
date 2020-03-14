@@ -41,7 +41,6 @@ namespace Poseidon
                 else
                     dataGridView1.Rows[index].Cells["last_online_time"].Value = Class1.FormatDateTime(Class1.StampToDateTime(user.LastOnlineTime));
                 dataGridView1.Rows[index].Cells["is_friend"].Value = user.IsFriend;
-
             }
         }
         private void mnu_add_friend_Click(object sender, EventArgs e)
@@ -57,7 +56,6 @@ namespace Poseidon
                 UserIdRecv = userIdRecv
             };
             var resp = http._Relation.AddFriend(req);
-            //var resp = rpc._Relation.AddFriend(Class1.UserId,userIdRecv);
             var id = resp.Id;
             var createTime = resp.CreateTime;
             var statusCode = resp.StatusCode;

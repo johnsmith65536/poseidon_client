@@ -61,7 +61,8 @@ namespace Poseidon
         {
             Text = 0,
             Object = 1,
-            Vibration = 2
+            Vibration = 2,
+            Image = 3
         }
 
         public enum UnReadMsgType
@@ -143,19 +144,31 @@ namespace Poseidon
             return dateTime.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        public static void InsertObject(long id,string eTag,string name)
+        public static void InsertObject(long id, string eTag, string name)
         {
-            DataTable dt = Class1.sql.SqlTable($"SELECT * FROM `object` WHERE id = {id}");
-            if (dt.Rows.Count != 0)
+            DataTable dt = sql.SqlTable($"SELECT * FROM `object` WHERE id = {id}");
+            if (dt != null && dt.Rows.Count != 0)
                 return;
-            bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({id},'{eTag}', '{name}')");
+            bool ret = sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({id},'{eTag}', '{name}')");
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO object失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
         }
-        public static string DoHttpRequest(string url, string method, Dictionary<string,string> header, string data = null)
+        public static void InsertImage(string eTag, byte[] imageParam)
+        {
+            DataTable dt = sql.SqlTable($"SELECT * FROM `image` WHERE e_tag = {eTag}");
+            if (dt != null && dt.Rows.Count != 0)
+                return;
+            bool ret = sql.ExecuteNonQueryWithBinary($"INSERT INTO `image`(e_tag, content) VALUES(\"{eTag}\", @param)", imageParam);
+            if (!ret)
+            {
+                MessageBox.Show("DB错误，INSERT INTO image", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+        }
+        public static string DoHttpRequest(string url, string method, Dictionary<string, string> header, string data = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://" + Class1.Ip + Class1.HttpPort + url);
             request.Method = method;
@@ -179,7 +192,7 @@ namespace Poseidon
             var status = GetStatus(re);
             var statusCode = status.Item1;
             var statusMessage = status.Item2;
-            switch(statusCode)
+            switch (statusCode)
             {
                 case 254:
                     {
@@ -190,7 +203,8 @@ namespace Poseidon
                         UpdateStatusCheckBox(false);
                         InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
                         foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
-                            frm_main.Invoke(new Action(() => {
+                            frm_main.Invoke(new Action(() =>
+                            {
                                 frm_main.ChatListBox.Items[1].SubItems.Add(item);
                                 frm_main.ChatListBox.Items[0].SubItems.Remove(item);
                             }));
@@ -206,19 +220,17 @@ namespace Poseidon
             return re;
         }
 
-        public static Tuple<int,string> GetStatus(string jsonString)
+        public static Tuple<int, string> GetStatus(string jsonString)
         {
             Console.WriteLine(jsonString);
             var obj = JsonConvert.DeserializeObject<dynamic>(jsonString);
-            return new Tuple<int,string>((int)obj.StatusCode, (string)obj.StatusMessage);
+            return new Tuple<int, string>((int)obj.StatusCode, (string)obj.StatusMessage);
         }
 
         public static void UpdateStatusCheckBox(bool isOnline)
         {
             InvokeMenuSetCheck(frm_main.mnu_online, isOnline);
             InvokeMenuSetCheck(frm_main.mnu_offline, !isOnline);
-            //frm_main.mnu_online.Checked = isOnline;
-            //frm_main.mnu_offline.Checked = !isOnline;
         }
 
         public static bool Login(long userId, string password)
@@ -280,6 +292,18 @@ namespace Poseidon
                     return false;
                 }
 
+                ret = sql.ExecuteNonQuery(@"CREATE TABLE IF NOT EXISTS `image` (
+                  `e_tag` TEXT NOT NULL,
+                  `content` BLOB NOT NULL,
+                  PRIMARY KEY (`e_tag`)
+                ); ");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，建表失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return false;
+                }
+
+
                 UserId = userId;
                 Password = password;
                 AccessToken = resp.AccessToken;
@@ -302,15 +326,16 @@ namespace Poseidon
             IsOnline = false;
             InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
             AccessToken = "";
-            foreach(ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
-                frm_main.Invoke(new Action(() => {
+            foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
+                frm_main.Invoke(new Action(() =>
+                {
                     frm_main.ChatListBox.Items[1].SubItems.Add(item);
                     frm_main.ChatListBox.Items[0].SubItems.Remove(item);
                 }));
-            
+
         }
 
-        public static void appendRtfToMsgBox(frm_chat frmChat,string name, DateTime time, string content)
+        public static void appendRtfToMsgBox(frm_chat frmChat, string name, DateTime time, string content)
         {
             if (!frmChat.IsHandleCreated)
             {
@@ -322,10 +347,12 @@ namespace Poseidon
                 frmChat.rtxt_message.ScrollToCaret();
                 frmChat.rtxt_send.Focus();
 
-            } else
+            }
+            else
             {
 
-                frmChat.Invoke(new Action(() => {
+                frmChat.Invoke(new Action(() =>
+                {
                     frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
                          new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     //frmChat.rtxt_message.AppendText("   ");
@@ -354,7 +381,8 @@ namespace Poseidon
             }
             else
             {
-                frmChat.Invoke(new Action(() => {
+                frmChat.Invoke(new Action(() =>
+                {
                     frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
                          new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     //frmChat.rtxt_message.AppendText("   ");
@@ -388,7 +416,8 @@ namespace Poseidon
             }
             else
             {
-                frmChat.Invoke(new Action(() => {
+                frmChat.Invoke(new Action(() =>
+                {
                     frmChat.rtxt_message.AppendRichText(Class1.UserId + "  " + time.ToLongTimeString() + "\r\n",
                 new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     //rtxt_message.SelectionColor = Color.Red;
@@ -400,9 +429,40 @@ namespace Poseidon
                 }));
             }
         }
+        public static void appendImageToMsgBox(frm_chat frmChat, string name, DateTime time, byte[] imageData)
+        {
+            if (!frmChat.IsHandleCreated)
+            {
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                     new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                frmChat.rtxt_message.InsertImage(Image.FromStream(new MemoryStream(imageData)));
+                frmChat.rtxt_message.AppendText("\n");
+
+
+                frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
+                frmChat.rtxt_message.ScrollToCaret();
+                frmChat.rtxt_send.Focus();
+            }
+            else
+            {
+                frmChat.Invoke(new Action(() =>
+                {
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                        new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                    frmChat.rtxt_message.InsertImage(Image.FromStream(new MemoryStream(imageData)));
+                    frmChat.rtxt_message.AppendText("\n");
+
+
+                    frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
+                    frmChat.rtxt_message.ScrollToCaret();
+                    frmChat.rtxt_send.Focus();
+                }));
+            }
+        }
         public static void Vibration(frm_chat frmChat)
         {
-            frmChat.Invoke(new Action(() => {
+            frmChat.Invoke(new Action(() =>
+            {
                 Point pOld = frmChat.Location;//原来的位置
                 int radius = 3;//半径
                 for (int n = 0; n < 3; n++) //旋转圈数
@@ -433,13 +493,13 @@ namespace Poseidon
         public static void appendPersonalMsgToUnReadBox(long id, long userId, string content)
         {
             ChatListSubItem subItem;
-            if(unReadMsgItemPool.ContainsKey(userId))
+            if (unReadMsgItemPool.ContainsKey(userId))
                 subItem = unReadMsgItemPool[userId];
             else
             {
                 subItem = new ChatListSubItem("");
                 subItem.DisplayName = userId.ToString();
-                subItem.Tag = new Dictionary<string, object>{ { "type", (long)UnReadMsgType.Message },{"user_id_send",userId },{ "ids",new List<long>()} };
+                subItem.Tag = new Dictionary<string, object> { { "type", (long)UnReadMsgType.Message }, { "user_id_send", userId }, { "ids", new List<long>() } };
                 unReadMsgItemPool.Add(userId, subItem);
                 frmMsgBox.clb_unread_msg.Items[0].SubItems.Add(subItem);
             }
@@ -478,47 +538,36 @@ namespace Poseidon
                 //Console.WriteLine("content_type = ",contentType);
                 switch (contentType)
                 {
-                    case (int)Class1.ContentType.Text:
+                    case (int)ContentType.Text:
                         {
-                            /* InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-             {"id",id},
-             {"type","消息"},
-             {"user_id_send",userIdSend},
-             {"content",Class1.rtfToText(content)},
-             {"create_time",createTime}
-         });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
+                            appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
                             break;
                         }
-                    case (int)Class1.ContentType.Object:
+                    case (int)ContentType.Object:
                         {
                             var objId = long.Parse(content);
-                            DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
-                            if (dt1.Rows.Count != 1)
+                            DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                            if (dt1 == null || dt1.Rows.Count != 1)
                             {
                                 Console.WriteLine("rowCount != 1");
                                 return;
                             }
-                            /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","消息"},
-            {"user_id_send",userIdSend},
-            {"content","[文件]" + dt1.Rows[0]["name"].ToString()},
-            {"create_time",createTime}
-        });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
+                            appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
                             break;
                         }
-                    case (int)Class1.ContentType.Vibration:
+                    case (int)ContentType.Vibration:
                         {
-                            /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","消息"},
-            {"user_id_send",userIdSend},
-            {"content","您收到了一个窗口抖动"},
-            {"create_time",createTime}
-        });*/
-                            Class1.appendPersonalMsgToUnReadBox(id, userIdSend, "您收到了一个窗口抖动");
+                            appendPersonalMsgToUnReadBox(id, userIdSend, "您收到了一个窗口抖动");
+                            break;
+                        }
+                    case (int)ContentType.Image:
+                        {
+                            appendPersonalMsgToUnReadBox(id, userIdSend, "[图片]");
+                            break;
+                        }
+                    default:
+                        {
+                            Console.WriteLine("unknown content_type " + contentType);
                             break;
                         }
                 }
@@ -534,18 +583,12 @@ namespace Poseidon
                 var parentId = long.Parse(row["parent_id"].ToString());
                 if (parentId == -1)
                 {
-                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","好友请求"},
-            {"user_id_send",userIdSend},
-            {"create_time",createTime}
-        });*/
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, "来自" + userIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend);
                 }
                 else
                 {
                     var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {parentId}");
-                    if (dt1.Rows.Count == 0)
+                    if (dt1 == null || dt1.Rows.Count == 0)
                     {
                         Console.WriteLine("parentId 不存在");
                         return;
@@ -561,13 +604,6 @@ namespace Poseidon
                         Console.WriteLine("无效的status, status = " + status);
                         return;
                     }
-                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",id},
-            {"type","好友请求回复"},
-            {"user_id_send",userIdSend},
-            {"create_time",createTime},
-            {"content",statusString}
-        });*/
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend);
                 }
             }
@@ -639,6 +675,35 @@ namespace Poseidon
                     }
                 }
             }
+        }
+        public static byte[] LoadFile(string localFileName)
+        {
+            byte[] data = new byte[0];
+            try
+            {
+                FileStream fs = new FileStream(localFileName, FileMode.Open);
+                if (File.Exists(localFileName))
+                {
+                    using (BinaryReader br = new BinaryReader(fs))//将文件流内容存放到BinaryReader的对象br中
+                    {
+                        var buf = new byte[1024 * 1024];
+                        int count;
+                        while ((count = br.Read(buf, 0, 1024 * 1024)) > 0)
+                            data = data.Concat(buf.Take(count)).ToArray();
+                        br.Close();
+                    }
+                    fs.Close();
+                }
+                else
+                {
+                    MessageBox.Show("[" + localFileName + "]不存在.", "读取失败");
+                }
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show("错误消息:" + ex.Message, "IOException异常");
+            }
+            return data;
         }
     }
 }

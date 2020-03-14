@@ -44,17 +44,6 @@ namespace Poseidon
                             frm_chat.Show();
                         }
                         Dictionary<long, int> readMessage = new Dictionary<long, int>();
-                        /*
-                        foreach (DataGridViewRow row in dgv_msg.Rows)
-                        {
-                            var _type = row.Cells["type"].Value.ToString();
-                            var _userIdSend = long.Parse(row.Cells["user_id_send"].Value.ToString());
-                            if (_type == "消息" && userIdSend == _userIdSend)
-                            {
-                                var _id = long.Parse(row.Cells["id"].Value.ToString());
-                                readMessage.Add(_id, 1);
-                            }
-                        }*/
                         foreach (var msgId in ids)
                             readMessage.Add(msgId, 1);
                         Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
@@ -78,7 +67,6 @@ namespace Poseidon
                         else
                             return;
 
-                        //var resp = rpc._Relation.ReplyAddFriend(id, status);
                         var req = new http._Relation.ReplyAddFriendReq()
                         {
                             Id = id,

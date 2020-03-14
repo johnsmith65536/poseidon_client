@@ -12,6 +12,9 @@ using StackExchange.Redis;
 using Poseidon.infra.redis;
 using Newtonsoft.Json;
 using CCWin.SkinControl;
+using Aliyun.OSS;
+using Aliyun.OSS.Common;
+using System.IO;
 
 namespace Poseidon
 {
@@ -104,7 +107,6 @@ namespace Poseidon
             {
                 while (Class1.IsOnline)
                 {
-                    //InvokeGridClear(dgv_friend);
                     var req = new http._Relation.FetchFriendListReq()
                     {
                         UserId = Class1.UserId
@@ -112,16 +114,6 @@ namespace Poseidon
                     var resp = http._Relation.FetchFriendList(req);
                     if (resp.StatusCode == 254)
                         return;
-             /*       foreach (long userId in resp.OnlineUserIds)
-                        InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
-            {"user_id",userId},
-            {"status","online"}
-        });
-                    foreach (long userId in resp.OfflineUserIds)
-                        InvokeGridAdd(dgv_friend, new Dictionary<string, object> {
-            {"user_id",userId},
-            {"status","offline"}
-        });*/
 
                     var oldOnlineUserId = Class1.onlineUserId;
                     var oldOfflineUserId = Class1.offlineUserId;
@@ -194,7 +186,6 @@ namespace Poseidon
                         if (parentId != -1)
                             queryIds.Add(parentId);
                     }
-                    //var resp = rpc._Message.FetchMessageStatus(new List<long>(), queryIds);
                     var fetchMessageStatusReq = new http._Message.FetchMessageStatusReq()
                     {
                         MessageIds = new List<long>(),
@@ -215,7 +206,6 @@ namespace Poseidon
                         }
                     }
 
-
                     Thread.Sleep(2 * 1000);
                 };
             }));
@@ -230,7 +220,6 @@ namespace Poseidon
                 dt = Class1.sql.SqlTable($"SELECT count(*) as count, MAX(id) as id FROM `user_relation_request` WHERE (`user_id_send` = {Class1.UserId} OR `user_id_recv` = {Class1.UserId})");
                 if (dt != null && dt.Rows.Count == 1 && (long)dt.Rows[0]["count"] > 0)
                     userRelationId = (long)dt.Rows[0]["id"];
-                //var resp = rpc._Message.SyncMessage(Class1.UserId, messageId, userRelationId);
                 var req = new http._Message.SyncMessageReq()
                 {
                     UserId = Class1.UserId,
@@ -241,26 +230,19 @@ namespace Poseidon
                 var messages = resp.Messages;
                 var userRelations = resp.UserRelations;
                 var objects = resp.Objects;
-                var lastOnlineTime = resp.LastOnlineTime;
                 //消息落库
 
                 foreach (var obj in objects)
-                {
-                    /*bool ret1 = Class1.sql.ExecuteNonQuery($"INSERT INTO `object`(id, e_tag, name) VALUES({obj.Id}, '{obj.ETag}', '{obj.Name}')");
-                    if (!ret1)
-                    {
-                        //MessageBox.Show("DB错误，INSERT INTO object失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        //return;
-                    }*/
-
                     Class1.InsertObject(obj.Id, obj.ETag, obj.Name);
-                }
 
                 foreach (var msg in messages)
                 {
-                    /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
+                    if(msg.ContentType == (int)Class1.ContentType.Image)
+                    {
+                        var imageData = GetImage(msg.Content);
+                        var imageParam = Class1.Gzip(imageData);
+                        Class1.InsertImage(msg.Content, imageParam);
+                    }
                     var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
                     bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
                         $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
@@ -270,7 +252,6 @@ namespace Poseidon
                         return;
                     }
                 }
-
 
                 foreach (var msg in userRelations)
                 {
@@ -313,9 +294,7 @@ namespace Poseidon
                 case BroadcastMsgType.Chat:
                     {
                         var msg = JsonConvert.DeserializeObject<RedisMessage>(val.ToString());
-                        /*var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);*/
+                        byte[] imageData = new byte[0];
                         var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
                         bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
                             $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
@@ -324,18 +303,10 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        //ListAdd(lbx_msg, $"[新消息]来自{msg.UserIdSend}，内容:{msg.Content}");
                         switch (msg.ContentType)
                         {
                             case (int)Class1.ContentType.Text:
                                 {
-                                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","消息"},
-            {"user_id_send",msg.UserIdSend},
-            {"content",Class1.rtfToText(msg.Content)},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
                                     Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, Class1.rtfToText(msg.Content));
                                     break;
                                 }
@@ -343,26 +314,21 @@ namespace Poseidon
                                 {
                                     var objId = long.Parse(msg.Content);
                                     Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
-                                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","消息"},
-            {"user_id_send",msg.UserIdSend},
-            {"content","[文件]" + msg.ObjectName},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
                                     Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[文件]" + msg.ObjectName);
                                     break;
                                 }
                             case (int)Class1.ContentType.Vibration:
                                 {
-                                    /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","消息"},
-            {"user_id_send",msg.UserIdSend},
-            {"content","您收到了一个窗口抖动"},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
                                     Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "您收到了一个窗口抖动");
+                                    break;
+                                }
+                            case (int)Class1.ContentType.Image:
+                                {
+                                    var eTag = msg.Content;
+                                    imageData = GetImage(eTag);
+                                    var imageParam = Class1.Gzip(imageData);
+                                    Class1.InsertImage(eTag, imageParam);
+                                    Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[图片]");
                                     break;
                                 }
                             default:
@@ -378,23 +344,11 @@ namespace Poseidon
                             {
                                 case (int)Class1.ContentType.Text:
                                     {
-                                       /* InvokeGridAdd(frm_chat.dgv_msg, new Dictionary<string, object> {
-            {"user_id",msg.UserIdSend},
-            {"content",msg.Content},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
                                         Class1.appendRtfToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), msg.Content);
                                         break;
                                     }
                                 case (int)Class1.ContentType.Object:
                                     {
-                                   /*     InvokeGridAdd(frm_chat.dgv_msg, new Dictionary<string, object> {
-            {"user_id",msg.UserIdSend},
-            {"content","[文件]" + msg.ObjectName},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))},
-            {"e_tag",msg.ObjectETag}
-        });*/
-
                                         Class1.appendFileToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), "[文件]" + msg.ObjectName, long.Parse(msg.Content));
                                         break;
                                     }
@@ -402,6 +356,11 @@ namespace Poseidon
                                     {
                                         Class1.appendVibrationToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime));
                                         Class1.Vibration(frm_chat);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Image:
+                                    {
+                                        Class1.appendImageToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), imageData);
                                         break;
                                     }
                                 default:
@@ -417,9 +376,6 @@ namespace Poseidon
                 case BroadcastMsgType.AddFriend:
                     {
                         var msg = JsonConvert.DeserializeObject<RedisAddFriend>(val.ToString());
-                        //var newText = txt_status.Text + "用户" + msg.UserIdSend + "请求添加你为好友, msgId = " + msg.Id + Environment.NewLine;
-                        //SetText(txt_status, newText);
-                        //SetText(txt_add_friend_id, msg.Id.ToString());
                         bool ret = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({msg.Id}, " +
                             $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.CreateTime}, 0, -1)");
                         if (!ret)
@@ -427,14 +383,6 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO user_relation_request失败888", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        //ListAdd(lbx_msg, $"[好友请求]来自{msg.UserIdSend}的好友请求");
-                        /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","好友请求"},
-            {"user_id_send",msg.UserIdSend},
-            {"content",""},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
                         Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, "来自" + msg.UserIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend);
                         break;
                     }
@@ -455,7 +403,6 @@ namespace Poseidon
                             return;
                         }
 
-
                         string statusString;
                         if (msg.Status == (long)Class1.AddFriendStatus.Accepted)
                             statusString = "请求通过";
@@ -467,14 +414,6 @@ namespace Poseidon
                             return;
                         }
 
-                        /*InvokeGridAdd(dgv_msg, new Dictionary<string, object> {
-            {"id",msg.Id},
-            {"type","好友请求回复"},
-            {"user_id_send",msg.UserIdSend},
-            {"content",statusString},
-            {"create_time",Class1.FormatDateTime(Class1.StampToDateTime(msg.CreateTime))}
-        });*/
-
                         Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.UserIdSend + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend);
                         break;
                     }
@@ -485,25 +424,21 @@ namespace Poseidon
                         break;
                     }
             }
-            //Console.WriteLine("ping...");
             Invoke(new Action(() =>
             {
                 timer2.Enabled = true;
             }));
-                
 
              Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
         public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
         {
-            //rpc._Heart_Beat.HeartBeat(Class1.UserId);
             var req = new http._Heart_Beat.HeartBeatReq()
             {
                 UserId = Class1.UserId
             };
             http._Heart_Beat.HeartBeat(req);
             Console.WriteLine("Send HeartBeat");
-            //Console.WriteLine("频道：" + cnl + "\t收到消息:" + val); ;
             // Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
         private void frm_main_FormClosed(object sender, FormClosedEventArgs e)
@@ -537,152 +472,6 @@ namespace Poseidon
             frm_search_user frm_search_user = new frm_search_user();
             frm_search_user.Show();
         }
-        
-
-        private void dgv_friend_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-        /*    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                //Console.WriteLine(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value);
-                var userId = long.Parse(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value.ToString());
-                dgv_friend.ClearSelection();
-                dgv_friend.Rows[e.RowIndex].Selected = true;
-                dgv_friend.CurrentCell = dgv_friend.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-                frm_chat frm_chat;
-                if (Class1.formChatPool.ContainsKey(userId))
-                {
-                    frm_chat = Class1.formChatPool[userId];
-                    frm_chat.Activate();
-                }
-                else
-                {
-                    frm_chat = new frm_chat(userId);
-                    Class1.formChatPool.Add(userId, frm_chat);
-                    frm_chat.Show();
-                }
-                Dictionary<long, int> readMessage = new Dictionary<long, int>();
-                foreach (DataGridViewRow row in dgv_msg.Rows)
-                {
-                    var type = row.Cells["type"].Value.ToString();
-                    var userIdSend = long.Parse(row.Cells["user_id_send"].Value.ToString());
-                    if (type == "消息" && userIdSend == userId)
-                    {
-                        var id = long.Parse(row.Cells["id"].Value.ToString());
-                        readMessage.Add(id, 1);
-                    }
-                }
-                UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                LoadUnReadMessage();
-            }*/
-        }
-
-        private void dgv_msg_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            /*if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                //Console.WriteLine(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value);
-                var type = dgv_msg.Rows[e.RowIndex].Cells["type"].Value.ToString();
-                dgv_msg.ClearSelection();
-                dgv_msg.Rows[e.RowIndex].Selected = true;
-                dgv_msg.CurrentCell = dgv_msg.Rows[e.RowIndex].Cells[e.ColumnIndex];
-                var userIdSend = long.Parse(dgv_msg.Rows[e.RowIndex].Cells["user_id_send"].Value.ToString());
-                var id = long.Parse(dgv_msg.Rows[e.RowIndex].Cells["id"].Value.ToString());
-                if (type == "消息")
-                {
-                    frm_chat frm_chat;
-                    if (Class1.formChatPool.ContainsKey(userIdSend))
-                    {
-                        frm_chat = Class1.formChatPool[userIdSend];
-                        frm_chat.Activate();
-                    }
-                    else
-                    {
-                        frm_chat = new frm_chat(userIdSend);
-                        Class1.formChatPool.Add(userIdSend, frm_chat);
-                        frm_chat.Show();
-                    }
-                    Dictionary<long, int> readMessage = new Dictionary<long, int>();
-                    foreach (DataGridViewRow row in dgv_msg.Rows)
-                    {
-                        var _type = row.Cells["type"].Value.ToString();
-                        var _userIdSend = long.Parse(row.Cells["user_id_send"].Value.ToString());
-                        if (_type == "消息" && userIdSend == _userIdSend)
-                        {
-                            var _id = long.Parse(row.Cells["id"].Value.ToString());
-                            readMessage.Add(_id, 1);
-                        }
-                    }
-                    UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                    LoadUnReadMessage();
-                }
-                else if (type == "好友请求")
-                {
-                    if (!Class1.IsOnline)
-                    {
-                        MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return;
-                    }
-                    var ret = MessageBox.Show(userIdSend + "请求添加为好友，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
-                    int status;
-                    if (ret == DialogResult.Yes)
-                        status = (int)Class1.AddFriendStatus.Accepted;
-                    else if (ret == DialogResult.No)
-                        status = (int)Class1.AddFriendStatus.Rejected;
-                    else
-                        return;
-
-                    //var resp = rpc._Relation.ReplyAddFriend(id, status);
-                    var req = new http._Relation.ReplyAddFriendReq()
-                    {
-                        Id = id,
-                        Status = status
-                    };
-                    var resp = http._Relation.ReplyAddFriend(req);
-                    var replyId = resp.Id;
-                    var createTime = resp.CreateTime;
-                    bool ok = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {status} WHERE `id` = {id}");
-                    if (!ok)
-                    {
-                        MessageBox.Show("DB错误，UPDATE user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-                    ok = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({replyId}, " +
-                        $"{Class1.UserId}, {userIdSend}, {createTime}, 0, {id})");
-                    if (!ok)
-                    {
-                        MessageBox.Show("DB错误，INSERT INTO user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-                    LoadUnReadMessage();
-                }
-                else if (type == "好友请求回复")
-                {
-                    UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
-                    LoadUnReadMessage();
-                }
-                else
-                {
-                    Console.WriteLine("unknown type");
-                }
-
-            }*/
-        }
-        private void dgv_friend_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
-        {
-  /*          if (e.Button == MouseButtons.Right)
-            {
-                if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-                {
-                    delFriendUserId = long.Parse(dgv_friend.Rows[e.RowIndex].Cells["user_id"].Value.ToString());
-                    dgv_friend.ClearSelection();
-                    dgv_friend.Rows[e.RowIndex].Selected = true;
-                    dgv_friend.CurrentCell = dgv_friend.Rows[e.RowIndex].Cells[e.ColumnIndex];
-                    mnu_strip.Show(MousePosition.X, MousePosition.Y);
-                }
-            }*/
-        }
-
         private void mnu_del_friend_Click(object sender, EventArgs e)
         {
             if (!Class1.IsOnline)
@@ -702,8 +491,6 @@ namespace Poseidon
         {
             if (Class1.IsOnline)
                 return;
-
-
             var ok = Class1.Login(Class1.UserId, Class1.Password);
             if (!ok)
             {
@@ -746,17 +533,6 @@ namespace Poseidon
                 frm_chat.Show();
             }
             Dictionary<long, int> readMessage = new Dictionary<long, int>();
-            /*
-            foreach (DataGridViewRow row in dgv_msg.Rows)
-            {
-                var type = row.Cells["type"].Value.ToString();
-                var userIdSend = long.Parse(row.Cells["user_id_send"].Value.ToString());
-                if (type == "消息" && userIdSend == userId)
-                {
-                    var id = long.Parse(row.Cells["id"].Value.ToString());
-                    readMessage.Add(id, 1);
-                }
-            }*/
             if(Class1.unReadMsgItemPool.ContainsKey(userId))
             {
                 var subItem = Class1.unReadMsgItemPool[userId];
@@ -776,105 +552,6 @@ namespace Poseidon
                 mnu_strip.Show(MousePosition.X, MousePosition.Y);
             }
         }
-
-        private void clb_unread_msg_DoubleClickSubItem(object sender, ChatListEventArgs e, MouseEventArgs es)
-        {
-            var dict = (Dictionary<string, object>)e.MouseOnSubItem.Tag;
-            var type = (long)dict["type"];
-            var userIdSend = (long)dict["user_id_send"];
-
-
-            switch(type)
-            {
-                case (long)Class1.UnReadMsgType.Message:
-                    {
-                        var ids = (List<long>)dict["ids"];
-                        frm_chat frm_chat;
-                        if (Class1.formChatPool.ContainsKey(userIdSend))
-                        {
-                            frm_chat = Class1.formChatPool[userIdSend];
-                            frm_chat.Activate();
-                        }
-                        else
-                        {
-                            frm_chat = new frm_chat(userIdSend);
-                            Class1.formChatPool.Add(userIdSend, frm_chat);
-                            frm_chat.Show();
-                        }
-                        Dictionary<long, int> readMessage = new Dictionary<long, int>();
-                        /*
-                        foreach (DataGridViewRow row in dgv_msg.Rows)
-                        {
-                            var _type = row.Cells["type"].Value.ToString();
-                            var _userIdSend = long.Parse(row.Cells["user_id_send"].Value.ToString());
-                            if (_type == "消息" && userIdSend == _userIdSend)
-                            {
-                                var _id = long.Parse(row.Cells["id"].Value.ToString());
-                                readMessage.Add(_id, 1);
-                            }
-                        }*/
-                        foreach (var msgId in ids)
-                            readMessage.Add(msgId, 1);
-                        Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                        Class1.LoadUnReadMessage();
-                        break;
-                    }
-                case (long)Class1.UnReadMsgType.AddFriend:
-                    {
-                        if (!Class1.IsOnline)
-                        {
-                            MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                            return;
-                        }
-                        var id = (long)dict["id"];
-                        var ret = MessageBox.Show(userIdSend + "请求添加为好友，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
-                        int status;
-                        if (ret == DialogResult.Yes)
-                            status = (int)Class1.AddFriendStatus.Accepted;
-                        else if (ret == DialogResult.No)
-                            status = (int)Class1.AddFriendStatus.Rejected;
-                        else
-                            return;
-
-                        //var resp = rpc._Relation.ReplyAddFriend(id, status);
-                        var req = new http._Relation.ReplyAddFriendReq()
-                        {
-                            Id = id,
-                            Status = status
-                        };
-                        var resp = http._Relation.ReplyAddFriend(req);
-                        var replyId = resp.Id;
-                        var createTime = resp.CreateTime;
-                        bool ok = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {status} WHERE `id` = {id}");
-                        if (!ok)
-                        {
-                            MessageBox.Show("DB错误，UPDATE user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-                        ok = Class1.sql.ExecuteNonQuery($"INSERT INTO `user_relation_request`(id, user_id_send, user_id_recv, create_time, status, parent_id) VALUES({replyId}, " +
-                            $"{Class1.UserId}, {userIdSend}, {createTime}, 0, {id})");
-                        if (!ok)
-                        {
-                            MessageBox.Show("DB错误，INSERT INTO user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-                        Class1.LoadUnReadMessage();
-                        break;
-                    }
-                case (long)Class1.UnReadMsgType.ReplyAddFriend:
-                    {
-                        var id = (long)dict["id"];
-                        Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
-                        Class1.LoadUnReadMessage();
-                        break;
-                    }
-                default:
-                    {
-                        Console.WriteLine("unknown type");
-                        break;
-                    }
-            }
-        }
         private void timer2_Tick(object sender, EventArgs e)
         {
             tick = (tick + 1) % 2;
@@ -883,11 +560,6 @@ namespace Poseidon
             else
                 notifyIcon1.Icon = Properties.Resources.poseidon;
         }
-
-        private void notifyIcon1_MouseMove(object sender, MouseEventArgs e)
-        {
-        }
-
         private void timer3_Tick(object sender, EventArgs e)
         {
             Class1.frmMsgBox.Location = icon.GetFormLocation(Class1.frmMsgBox, notifyIcon1);
@@ -900,6 +572,52 @@ namespace Poseidon
                     Class1.frmMsgBox.Visible = true;
             else
                     Class1.frmMsgBox.Visible = false;
+        }
+        private byte[] GetImage(string eTag)
+        {
+            //先从本地加载，没有再从云端下载
+            DataTable dt = Class1.sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = {eTag}");
+            if(dt != null && dt.Rows.Count != 0 )
+                return Class1.UnGzip((byte[])dt.Rows[0]["content"]);
+            else
+            {
+                byte[] imageData = new byte[0];
+                var req = new http._Oss.GetSTSInfoReq()
+                {
+                    UserId = Class1.UserId
+                };
+                var resp = http._Oss.GetSTSInfo(req);
+                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
+                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
+                try
+                {
+                    var getObjectRequest = new GetObjectRequest(Class1.BucketName, eTag);
+                    //getObjectRequest.StreamTransferProgress += DownloadProgressCallback;
+                    // 下载文件。
+                    var ossObject = client.GetObject(getObjectRequest);
+                    using (var stream = ossObject.Content)
+                    {
+                        var buffer = new byte[1024 * 1024];
+                        var bytesRead = 0;
+                        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                            imageData = imageData.Concat(buffer.Take(bytesRead)).ToArray();
+                    }
+                    Console.WriteLine("Get object:{0} succeeded", eTag);
+                    return imageData;
+                }
+                catch (OssException ex)
+                {
+                    Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID:{2}\tHostID:{3}",
+                        ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed with error info: {0}", ex.Message);
+                    return null;
+                }
+            }
+            
         }
     }
 }

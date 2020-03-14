@@ -30,7 +30,6 @@ namespace Poseidon
 
         private void btn_accept_Click(object sender, EventArgs e)
         {
-            //rpc._Relation.ReplyAddFriend(id, (int)Class1.AddFriendStatus.Accepted);
             var req = new http._Relation.ReplyAddFriendReq()
             {
                 Id = id,
@@ -41,7 +40,6 @@ namespace Poseidon
 
         private void btn_reject_Click(object sender, EventArgs e)
         {
-            //rpc._Relation.ReplyAddFriend(id, (int)Class1.AddFriendStatus.Rejected);
             var req = new http._Relation.ReplyAddFriendReq()
             {
                 Id = id,

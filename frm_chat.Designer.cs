@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_chat));
-            this.btn_send_file = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pgb_upload = new System.Windows.Forms.ProgressBar();
             this.pgb_download = new System.Windows.Forms.ProgressBar();
@@ -42,7 +41,7 @@
             this.toolCountenance = new System.Windows.Forms.ToolStripButton();
             this.toolVibration = new System.Windows.Forms.ToolStripButton();
             this.toolImgFile = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolfile = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton4 = new System.Windows.Forms.ToolStripSplitButton();
             this.显示消息记录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.显示比例ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,16 +68,6 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.skToolMenu.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btn_send_file
-            // 
-            this.btn_send_file.Location = new System.Drawing.Point(579, 479);
-            this.btn_send_file.Name = "btn_send_file";
-            this.btn_send_file.Size = new System.Drawing.Size(75, 23);
-            this.btn_send_file.TabIndex = 21;
-            this.btn_send_file.Text = "发送文件";
-            this.btn_send_file.UseVisualStyleBackColor = true;
-            this.btn_send_file.Click += new System.EventHandler(this.btn_send_file_Click);
             // 
             // openFileDialog1
             // 
@@ -134,7 +123,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rtxt_send.BackColor = System.Drawing.Color.White;
             this.rtxt_send.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxt_send.Location = new System.Drawing.Point(8, 374);
+            this.rtxt_send.Location = new System.Drawing.Point(8, 379);
             this.rtxt_send.Name = "rtxt_send";
             this.rtxt_send.SelectControl = null;
             this.rtxt_send.SelectControlIndex = 0;
@@ -191,13 +180,13 @@
             this.toolCountenance,
             this.toolVibration,
             this.toolImgFile,
-            this.toolStripLabel1,
+            this.toolfile,
             this.toolStripDropDownButton4,
             this.toolPrintScreen});
             this.skToolMenu.Location = new System.Drawing.Point(8, 344);
             this.skToolMenu.Name = "skToolMenu";
             this.skToolMenu.RadiusStyle = CCWin.SkinClass.RoundStyle.All;
-            this.skToolMenu.Size = new System.Drawing.Size(547, 27);
+            this.skToolMenu.Size = new System.Drawing.Size(547, 32);
             this.skToolMenu.SkinAllColor = true;
             this.skToolMenu.TabIndex = 122;
             this.skToolMenu.Text = "skinToolStrip1";
@@ -209,11 +198,11 @@
             // toolFont
             // 
             this.toolFont.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolFont.Image = global::Poseidon.Properties.Resources.aio_quickbar_font;
+            this.toolFont.Image = ((System.Drawing.Image)(resources.GetObject("toolFont.Image")));
             this.toolFont.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolFont.Margin = new System.Windows.Forms.Padding(4, 1, 0, 2);
             this.toolFont.Name = "toolFont";
-            this.toolFont.Size = new System.Drawing.Size(23, 24);
+            this.toolFont.Size = new System.Drawing.Size(23, 29);
             this.toolFont.Text = "toolStripButton1";
             this.toolFont.ToolTipText = "字体选择工具栏";
             this.toolFont.Click += new System.EventHandler(this.toolFont_Click);
@@ -221,24 +210,22 @@
             // toolCountenance
             // 
             this.toolCountenance.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolCountenance.Image = global::Poseidon.Properties.Resources.aio_quickbar_face;
-            this.toolCountenance.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolCountenance.Image = ((System.Drawing.Image)(resources.GetObject("toolCountenance.Image")));
             this.toolCountenance.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolCountenance.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
             this.toolCountenance.Name = "toolCountenance";
-            this.toolCountenance.Size = new System.Drawing.Size(24, 24);
+            this.toolCountenance.Size = new System.Drawing.Size(23, 29);
             this.toolCountenance.Text = "toolStripButton2";
             this.toolCountenance.ToolTipText = "选择表情";
             // 
             // toolVibration
             // 
             this.toolVibration.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolVibration.Image = global::Poseidon.Properties.Resources.aio_quickbar_twitter;
-            this.toolVibration.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolVibration.Image = ((System.Drawing.Image)(resources.GetObject("toolVibration.Image")));
             this.toolVibration.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolVibration.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
             this.toolVibration.Name = "toolVibration";
-            this.toolVibration.Size = new System.Drawing.Size(24, 24);
+            this.toolVibration.Size = new System.Drawing.Size(23, 29);
             this.toolVibration.Text = "toolStripButton4";
             this.toolVibration.ToolTipText = "向好友发送窗口抖动";
             this.toolVibration.Click += new System.EventHandler(this.toolVibration_Click);
@@ -246,24 +233,23 @@
             // toolImgFile
             // 
             this.toolImgFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolImgFile.Image = global::Poseidon.Properties.Resources.aio_quickbar_sendpic;
-            this.toolImgFile.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolImgFile.Image = ((System.Drawing.Image)(resources.GetObject("toolImgFile.Image")));
             this.toolImgFile.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolImgFile.Name = "toolImgFile";
-            this.toolImgFile.Size = new System.Drawing.Size(24, 24);
+            this.toolImgFile.Size = new System.Drawing.Size(23, 29);
             this.toolImgFile.Text = "toolStripButton7";
             this.toolImgFile.ToolTipText = "发送图片";
+            this.toolImgFile.Click += new System.EventHandler(this.toolImgFile_Click);
             // 
-            // toolStripLabel1
+            // toolfile
             // 
-            this.toolStripLabel1.AutoSize = false;
-            this.toolStripLabel1.BackColor = System.Drawing.Color.Transparent;
-            this.toolStripLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripLabel1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolStripLabel1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(5, 24);
-            this.toolStripLabel1.Text = "toolStripButton9";
+            this.toolfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolfile.Image = ((System.Drawing.Image)(resources.GetObject("toolfile.Image")));
+            this.toolfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolfile.Name = "toolfile";
+            this.toolfile.Size = new System.Drawing.Size(23, 29);
+            this.toolfile.Text = "发送文件";
+            this.toolfile.Click += new System.EventHandler(this.toolfile_Click);
             // 
             // toolStripDropDownButton4
             // 
@@ -387,19 +373,11 @@
             // toolPrintScreen
             // 
             this.toolPrintScreen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolPrintScreen.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolItemPrint,
-            this.录制视屏动画ToolStripMenuItem,
-            this.捕捉视屏图像ToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.显示截图编辑工具栏ToolStripMenuItem,
-            this.截图时隐藏当前窗口ToolStripMenuItem});
-            this.toolPrintScreen.Image = global::Poseidon.Properties.Resources.aio_quickbar_cut;
             this.toolPrintScreen.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolPrintScreen.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolPrintScreen.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
             this.toolPrintScreen.Name = "toolPrintScreen";
-            this.toolPrintScreen.Size = new System.Drawing.Size(36, 24);
+            this.toolPrintScreen.Size = new System.Drawing.Size(16, 29);
             this.toolPrintScreen.Text = "toolStripButton8";
             this.toolPrintScreen.ToolTipText = "屏幕截图 Ctrl + Alt + A";
             // 
@@ -449,7 +427,6 @@
             this.Controls.Add(this.button2);
             this.Controls.Add(this.pgb_download);
             this.Controls.Add(this.pgb_upload);
-            this.Controls.Add(this.btn_send_file);
             this.Name = "frm_chat";
             this.Text = "frm_chat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frm_chat_FormClosed);
@@ -461,7 +438,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button btn_send_file;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ProgressBar pgb_upload;
         private System.Windows.Forms.ProgressBar pgb_download;
@@ -481,7 +457,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem 显示截图编辑工具栏ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 截图时隐藏当前窗口ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripSplitButton toolStripDropDownButton4;
         private System.Windows.Forms.ToolStripMenuItem 显示消息记录ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 显示比例ToolStripMenuItem;
@@ -499,5 +474,6 @@
         private System.Windows.Forms.ToolStripMenuItem 清屏ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 消息管理器ToolStripMenuItem;
         private System.Windows.Forms.FontDialog fontDialog1;
+        private System.Windows.Forms.ToolStripButton toolfile;
     }
 }
