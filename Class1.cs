@@ -16,6 +16,8 @@ using CCWin.SkinControl;
 using System.Drawing;
 using System.Threading;
 using System.IO.Compression;
+using Aliyun.OSS.Common;
+using Aliyun.OSS;
 
 namespace Poseidon
 {
@@ -156,15 +158,127 @@ namespace Poseidon
                 return;
             }
         }
-        public static void InsertImage(string eTag, byte[] imageParam)
+        public static void UploadImage(string localFileName, long idRecv, frm_chat frmChat)
         {
-            DataTable dt = sql.SqlTable($"SELECT * FROM `image` WHERE e_tag = {eTag}");
+            var eTag = Class1.GenerateMD5WithFilePath(localFileName);
+            var req = new http._Oss.GetSTSInfoReq()
+            {
+                UserId = Class1.UserId
+            };
+            var resp = http._Oss.GetSTSInfo(req);
+
+            Thread t = new Thread(new ThreadStart(() =>
+            {
+                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
+                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
+                if (!client.DoesObjectExist(Class1.BucketName, eTag))
+                {
+                    try
+                    {
+                        using (var fs = File.Open(localFileName, FileMode.Open))
+                        {
+                            var putObjectRequest = new PutObjectRequest(Class1.BucketName, eTag, fs);
+                            //putObjectRequest.StreamTransferProgress += UploadProgressCallback;
+                            client.PutObject(putObjectRequest);
+                        }
+                        Console.WriteLine("Put object:{0} succeeded", eTag);
+                    }
+                    catch (OssException ex)
+                    {
+                        Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID: {2}\tHostID: {3}",
+                            ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed with error info: {0}", ex.Message);
+                    }
+                }
+
+                var name = Path.GetFileName(localFileName);
+
+                var sendMessageReq = new http._Message.SendMessageReq()
+                {
+                    UserIdSend = Class1.UserId,
+                    IdRecv = idRecv,
+                    Content = eTag,
+                    ContentType = (int)Class1.ContentType.Image,
+                    MessageType = 0
+                };
+                var sendMessageResp = http._Message.SendMessage(sendMessageReq);
+
+                var messageId = sendMessageResp.Id;
+                var createTime = sendMessageResp.CreateTime;
+                var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(eTag));
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
+                            $"{Class1.UserId}, {idRecv}, 0, @param, {createTime}, {(int)Class1.ContentType.Image}, 0, 0)", param);
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                var imageData = Class1.LoadFile(localFileName);
+                var imageParam = Class1.Gzip(imageData);
+                Class1.InsertImage(eTag, imageParam);
+                Class1.appendImageToMsgBox(frmChat, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), imageData);
+            }));
+            t.Start();
+        }
+        public static byte[] FetchImage(string eTag)
+        {
+            //先从本地加载，没有再从云端下载
+            DataTable dt = Class1.sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
+            if (dt != null && dt.Rows.Count != 0)
+                return Class1.UnGzip((byte[])dt.Rows[0]["content"]);
+            else
+            {
+                byte[] imageData = new byte[0];
+                var req = new http._Oss.GetSTSInfoReq()
+                {
+                    UserId = Class1.UserId
+                };
+                var resp = http._Oss.GetSTSInfo(req);
+                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
+                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
+                try
+                {
+                    var getObjectRequest = new GetObjectRequest(Class1.BucketName, eTag);
+                    //getObjectRequest.StreamTransferProgress += DownloadProgressCallback;
+                    // 下载文件。
+                    var ossObject = client.GetObject(getObjectRequest);
+                    using (var stream = ossObject.Content)
+                    {
+                        var buffer = new byte[1024 * 1024];
+                        var bytesRead = 0;
+                        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                            imageData = imageData.Concat(buffer.Take(bytesRead)).ToArray();
+                    }
+                    Console.WriteLine("Get object:{0} succeeded", eTag);
+                    InsertImage(eTag, Gzip(imageData)); //持久化
+                    return imageData;
+                }
+                catch (OssException ex)
+                {
+                    Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID:{2}\tHostID:{3}",
+                        ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed with error info: {0}", ex.Message);
+                    return null;
+                }
+            }
+
+        }
+        private static void InsertImage(string eTag, byte[] imageParam)
+        {
+            DataTable dt = sql.SqlTable($"SELECT * FROM `image` WHERE e_tag = \"{eTag}\"");
             if (dt != null && dt.Rows.Count != 0)
                 return;
             bool ret = sql.ExecuteNonQueryWithBinary($"INSERT INTO `image`(e_tag, content) VALUES(\"{eTag}\", @param)", imageParam);
             if (!ret)
             {
-                MessageBox.Show("DB错误，INSERT INTO image", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("DB错误，INSERT INTO image666", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
         }

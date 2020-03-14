@@ -238,11 +238,7 @@ namespace Poseidon
                 foreach (var msg in messages)
                 {
                     if(msg.ContentType == (int)Class1.ContentType.Image)
-                    {
-                        var imageData = GetImage(msg.Content);
-                        var imageParam = Class1.Gzip(imageData);
-                        Class1.InsertImage(msg.Content, imageParam);
-                    }
+                        Class1.FetchImage(msg.Content);
                     var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
                     bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
                         $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
@@ -294,7 +290,6 @@ namespace Poseidon
                 case BroadcastMsgType.Chat:
                     {
                         var msg = JsonConvert.DeserializeObject<RedisMessage>(val.ToString());
-                        byte[] imageData = new byte[0];
                         var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
                         bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
                             $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
@@ -303,40 +298,9 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        switch (msg.ContentType)
-                        {
-                            case (int)Class1.ContentType.Text:
-                                {
-                                    Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, Class1.rtfToText(msg.Content));
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Object:
-                                {
-                                    var objId = long.Parse(msg.Content);
-                                    Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
-                                    Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[文件]" + msg.ObjectName);
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Vibration:
-                                {
-                                    Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "您收到了一个窗口抖动");
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Image:
-                                {
-                                    var eTag = msg.Content;
-                                    imageData = GetImage(eTag);
-                                    var imageParam = Class1.Gzip(imageData);
-                                    Class1.InsertImage(eTag, imageParam);
-                                    Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[图片]");
-                                    break;
-                                }
-                            default:
-                                {
-                                    Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
-                                    break;
-                                }
-                        }
+                        byte[] imageData = null;
+                        if(msg.ContentType == (int)Class1.ContentType.Image)
+                            imageData = Class1.FetchImage(msg.Content);
                         if (Class1.formChatPool.ContainsKey(msg.UserIdSend))
                         {
                             var frm_chat = Class1.formChatPool[msg.UserIdSend];
@@ -369,7 +333,46 @@ namespace Poseidon
                                         break;
                                     }
                             }
+
+                            //消息已读
+                            Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id,1} }, new Dictionary<long, int>());
                         }
+                        else
+                        {
+                            switch (msg.ContentType)
+                            {
+                                case (int)Class1.ContentType.Text:
+                                    {
+                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, Class1.rtfToText(msg.Content));
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Object:
+                                    {
+                                        var objId = long.Parse(msg.Content);
+                                        Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
+                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[文件]" + msg.ObjectName);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Vibration:
+                                    {
+                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "您收到了一个窗口抖动");
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Image:
+                                    {
+                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[图片]");
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
+                                        break;
+                                    }
+                            }
+                        }
+
+                        
+                        
 
                         break;
                     }
@@ -426,7 +429,7 @@ namespace Poseidon
             }
             Invoke(new Action(() =>
             {
-                timer2.Enabled = true;
+                timer2.Enabled = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count != 0;
             }));
 
              Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
@@ -573,51 +576,6 @@ namespace Poseidon
             else
                     Class1.frmMsgBox.Visible = false;
         }
-        private byte[] GetImage(string eTag)
-        {
-            //先从本地加载，没有再从云端下载
-            DataTable dt = Class1.sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = {eTag}");
-            if(dt != null && dt.Rows.Count != 0 )
-                return Class1.UnGzip((byte[])dt.Rows[0]["content"]);
-            else
-            {
-                byte[] imageData = new byte[0];
-                var req = new http._Oss.GetSTSInfoReq()
-                {
-                    UserId = Class1.UserId
-                };
-                var resp = http._Oss.GetSTSInfo(req);
-                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
-                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
-                try
-                {
-                    var getObjectRequest = new GetObjectRequest(Class1.BucketName, eTag);
-                    //getObjectRequest.StreamTransferProgress += DownloadProgressCallback;
-                    // 下载文件。
-                    var ossObject = client.GetObject(getObjectRequest);
-                    using (var stream = ossObject.Content)
-                    {
-                        var buffer = new byte[1024 * 1024];
-                        var bytesRead = 0;
-                        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                            imageData = imageData.Concat(buffer.Take(bytesRead)).ToArray();
-                    }
-                    Console.WriteLine("Get object:{0} succeeded", eTag);
-                    return imageData;
-                }
-                catch (OssException ex)
-                {
-                    Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID:{2}\tHostID:{3}",
-                        ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Failed with error info: {0}", ex.Message);
-                    return null;
-                }
-            }
-            
-        }
+        
     }
 }

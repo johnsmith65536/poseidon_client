@@ -376,77 +376,10 @@ namespace Poseidon
             {
                 var localFileName = openFileDialog1.FileName;
                 InvokeProgressBarSetValue(pgb_upload, 0);
-                UploadImage(localFileName);
+                Class1.UploadImage(localFileName, userIdChat, this);
                 InvokeProgressBarSetValue(pgb_upload, 100);
             }
         }
-
-        private void UploadImage(string localFileName)
-        {
-            var eTag = Class1.GenerateMD5WithFilePath(localFileName);
-            var req = new http._Oss.GetSTSInfoReq()
-            {
-                UserId = Class1.UserId
-            };
-            var resp = http._Oss.GetSTSInfo(req);
-
-            Thread t = new Thread(new ThreadStart(() =>
-            {
-                // 拿到STS临时凭证后，通过其中的安全令牌（SecurityToken）和临时访问密钥（AccessKeyId和AccessKeySecret）生成OSSClient。
-                var client = new OssClient(Class1.EndPoint, resp.AccessKeyId, resp.AccessKeySecret, resp.SecurityToken);
-                if (!client.DoesObjectExist(Class1.BucketName, eTag))
-                {
-                    try
-                    {
-                        using (var fs = File.Open(localFileName, FileMode.Open))
-                        {
-                            var putObjectRequest = new PutObjectRequest(Class1.BucketName, eTag, fs);
-                            putObjectRequest.StreamTransferProgress += UploadProgressCallback;
-                            client.PutObject(putObjectRequest);
-                        }
-                        Console.WriteLine("Put object:{0} succeeded", eTag);
-                    }
-                    catch (OssException ex)
-                    {
-                        Console.WriteLine("Failed with error code: {0}; Error info: {1}. \nRequestID: {2}\tHostID: {3}",
-                            ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Failed with error info: {0}", ex.Message);
-                    }
-                }
-
-                var name = Path.GetFileName(localFileName);
-
-                var sendMessageReq = new http._Message.SendMessageReq()
-                {
-                    UserIdSend = Class1.UserId,
-                    IdRecv = userIdChat,
-                    Content = eTag,
-                    ContentType = (int)Class1.ContentType.Image,
-                    MessageType = 0
-                };
-                var sendMessageResp = http._Message.SendMessage(sendMessageReq);
-
-                var messageId = sendMessageResp.Id;
-                var createTime = sendMessageResp.CreateTime;
-                var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(eTag));
-                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Image}, 0, 0)", param);
-                if (!ret)
-                {
-                    MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                var imageData = Class1.LoadFile(localFileName);
-                var imageParam = Class1.Gzip(imageData);
-                Class1.InsertImage(eTag, imageParam);
-                Class1.appendImageToMsgBox(this, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), imageData);
-            }));
-            t.Start();
-        }
-
         private void toolfile_Click(object sender, EventArgs e)
         {
             if (!Class1.IsOnline)
