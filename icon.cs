@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CCWin.SkinControl;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -70,6 +71,18 @@ namespace Poseidon
         {
             if (idField == null) throw new InvalidOperationException("[Useful error message]");
             return (int)idField.GetValue(icon);
+        }
+        public static void ChangeIconState()
+        {
+            Class1.frm_main.Invoke(new Action(() =>
+            {
+                var val = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count != 0;
+                Class1.frm_main.timer2.Enabled = val;
+                if(!val)
+                    Class1.frm_main.notifyIcon1.Icon = Properties.Resources.poseidon;
+                foreach(var item in Class1.chatListSubItemPool)
+                    Class1.chatListSubItemPool[item.Key].IsTwinkle = Class1.unReadMsgItemPool.ContainsKey(item.Key);
+            }));
         }
     }
 }

@@ -175,6 +175,7 @@ namespace Poseidon
                     foreach (var userId in oldTotalUserId)
                         if (!newTotalUserId.Contains(userId))
                             Class1.chatListSubItemPool.Remove(userId);
+                    icon.ChangeIconState();
 
                     var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
 
@@ -427,12 +428,10 @@ namespace Poseidon
                         break;
                     }
             }
-            Invoke(new Action(() =>
-            {
-                timer2.Enabled = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count != 0;
-            }));
 
-             Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
+            icon.ChangeIconState();
+
+            Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
         public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
         {
@@ -535,16 +534,20 @@ namespace Poseidon
                 Class1.formChatPool.Add(userId, frm_chat);
                 frm_chat.Show();
             }
-            Dictionary<long, int> readMessage = new Dictionary<long, int>();
             if(Class1.unReadMsgItemPool.ContainsKey(userId))
             {
+                Dictionary<long, int> readMessage = new Dictionary<long, int>();
                 var subItem = Class1.unReadMsgItemPool[userId];
                 var ids = ((List<long>)(((Dictionary<string, object>)subItem.Tag)["ids"]));
                 foreach (var id in ids)
                     readMessage.Add(id, 1);
+                Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
+
+                Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Remove(subItem);
+                Class1.unReadMsgItemPool.Remove(userId);
+                icon.ChangeIconState();
             }
-            Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-            Class1.LoadUnReadMessage();
+            //Class1.LoadUnReadMessage();
 
         }
         private void ChatListBox_UpSubItem(object sender, ChatListClickEventArgs e, MouseEventArgs es)

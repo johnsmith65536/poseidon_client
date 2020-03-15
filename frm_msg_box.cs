@@ -47,7 +47,10 @@ namespace Poseidon
                         foreach (var msgId in ids)
                             readMessage.Add(msgId, 1);
                         Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                        Class1.LoadUnReadMessage();
+                        //Class1.LoadUnReadMessage();
+                        var subItem = Class1.unReadMsgItemPool[userIdSend];
+                        clb_unread_msg.Items[0].SubItems.Remove(subItem);
+                        Class1.unReadMsgItemPool.Remove(userIdSend);
                         break;
                     }
                 case (long)Class1.UnReadMsgType.AddFriend:
@@ -88,14 +91,16 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO user_relation_request", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        Class1.LoadUnReadMessage();
+                        //Class1.LoadUnReadMessage();
+                        clb_unread_msg.Items[1].SubItems.Remove(e.SelectSubItem);
                         break;
                     }
                 case (long)Class1.UnReadMsgType.ReplyAddFriend:
                     {
                         var id = (long)dict["id"];
                         Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
-                        Class1.LoadUnReadMessage();
+                        //Class1.LoadUnReadMessage();
+                        clb_unread_msg.Items[1].SubItems.Remove(e.SelectSubItem);
                         break;
                     }
                 default:
@@ -104,6 +109,12 @@ namespace Poseidon
                         break;
                     }
             }
+            icon.ChangeIconState();
+        }
+
+        private void clb_unread_msg_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

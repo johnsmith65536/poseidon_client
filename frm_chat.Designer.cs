@@ -115,6 +115,7 @@
             this.rtxt_message.TabIndex = 27;
             this.rtxt_message.Text = "";
             this.rtxt_message.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtxt_message_LinkClicked);
+            this.rtxt_message.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.rtxt_message_MouseDoubleClick);
             // 
             // rtxt_send
             // 

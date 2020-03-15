@@ -22,7 +22,7 @@ namespace Poseidon
         {
             InitializeComponent();
         }
-
+        HashSet<Image> imagePool = new HashSet<Image>();
         delegate void ProgressBarSetValueCallBackCallBack(ProgressBar pgb, int value); 
         private void InvokeProgressBarSetValue(ProgressBar pgb, int value)
         {
@@ -37,16 +37,26 @@ namespace Poseidon
         public frm_chat(long userId)
         {
             InitializeComponent();
-            userIdChat = userId;
             this.Text = "与" + userId + "的会话";
-            DataTable dt = Class1.sql.SqlTable($"SELECT user_id_send, content, create_time, content_type FROM `message` WHERE (`user_id_send` = {Class1.UserId} AND `user_id_recv` = {userId}) OR (`user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId})");
+            userIdChat = userId;
+            DataTable dt;
+            dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
+            if (dt == null || dt.Rows.Count != 1)
+                throw new Exception("select count(*) from message failed");
+            var unReadCount = long.Parse(dt.Rows[0]["count"].ToString());
+            //加载历史消息，数量为page_size和未读消息数的较大者
+            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type, is_read FROM `message` WHERE (`user_id_send` = {Class1.UserId} AND `user_id_recv` = {userId}) OR (`user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}) ORDER BY `id` DESC LIMIT 0,{Math.Max(unReadCount, Class1.PageSize)}");
+            dt.DefaultView.Sort = "id ASC";
+            dt = dt.DefaultView.ToTable();
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 var userIdSend = (long)dt.Rows[i]["user_id_send"];
                 var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])dt.Rows[i]["content"]));
                 var createTime = (long)dt.Rows[i]["create_time"];
                 var contentType = (long)dt.Rows[i]["content_type"];
-                //Console.WriteLine("content_type = " + contentType);
+                var isRead = (long)dt.Rows[i]["is_read"];
+                if (userIdSend != Class1.UserId && isRead == 0 && (i == 0 || (long)dt.Rows[i - 1]["is_read"] == 1))
+                    Class1.appendCenteralText(this, "以下为新消息");
                 switch (contentType)
                 {
                     case (int)Class1.ContentType.Text:
@@ -60,7 +70,7 @@ namespace Poseidon
                             DataTable dt1 = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
                             if (dt1 == null || dt1.Rows.Count != 1)
                             {
-                                Console.WriteLine("rowCount != 1, rowCount = " +dt1.Rows.Count);
+                                Console.WriteLine("rowCount != 1, rowCount = " + dt1.Rows.Count);
                                 return;
                             }
                             Class1.appendFileToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
@@ -81,7 +91,8 @@ namespace Poseidon
                                 return;
                             }
                             var imageData = Class1.UnGzip((byte[])dt1.Rows[0]["content"]);
-                            Class1.appendImageToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), imageData);
+                            var stream = Class1.appendImageToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), imageData);
+                            imagePool.Add(stream);
                             break;
                         }
                     default:
@@ -89,12 +100,14 @@ namespace Poseidon
                             Console.WriteLine("unknown content_type, content_type = ", contentType);
                             break;
                         }
-                }   
+                }
             }
         }
         private void frm_chat_FormClosed(object sender, FormClosedEventArgs e)
         {
             Class1.formChatPool.Remove(userIdChat);
+            foreach (var image in imagePool)
+                image.Dispose();
         }
 
         private void btn_send_file_Click(object sender, EventArgs e)
@@ -166,7 +179,7 @@ namespace Poseidon
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
                 var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Object}, 0, 0)", param);
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Object}, 0, 1)", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -249,7 +262,7 @@ namespace Poseidon
             var resp = http._Message.SendMessage(req);
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 0)", param);
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 1)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -320,7 +333,7 @@ namespace Poseidon
             var resp = http._Message.SendMessage(req);
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(""));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 0)", param);
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 1)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -396,6 +409,11 @@ namespace Poseidon
                 InvokeProgressBarSetValue(pgb_upload, 100);
 
             }
+        }
+
+        private void rtxt_message_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }
