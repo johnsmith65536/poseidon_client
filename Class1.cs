@@ -207,6 +207,17 @@ namespace Poseidon
                     MessageType = 0
                 };
                 var sendMessageResp = http._Message.SendMessage(sendMessageReq);
+                var statusCode = sendMessageResp.StatusCode;
+
+                switch (statusCode)
+                {
+                    case 1:
+                        {
+                            Class1.appendSysMsgToMsgBox(frmChat, "你与" + idRecv + "未成为好友，无法发送消息", DateTime.Now);
+                            return;
+                        }
+                }
+
 
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
@@ -512,7 +523,7 @@ namespace Poseidon
                 }));
             }
         }
-        public static void appendVibrationToMsgBox(frm_chat frmChat, string name, DateTime time)
+      /*  public static void appendVibrationToMsgBox(frm_chat frmChat, string name, DateTime time)
         {
             string str;
             if (long.Parse(name) == Class1.UserId)
@@ -521,10 +532,10 @@ namespace Poseidon
                 str = "收到";
             if (!frmChat.IsHandleCreated)
             {
-                frmChat.rtxt_message.AppendRichText(Class1.UserId + "  " + time.ToLongTimeString() + "\r\n",
-                new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
                 //rtxt_message.SelectionColor = Color.Red;
-                frmChat.rtxt_message.AppendText("您" + str + "了一个窗口抖动。\r\n");
+                frmChat.rtxt_message.AppendText("你" + str + "了一个窗口抖动。\r\n");
                 frmChat.rtxt_message.ForeColor = Color.Black;
                 frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
                 frmChat.rtxt_message.ScrollToCaret();
@@ -534,10 +545,36 @@ namespace Poseidon
             {
                 frmChat.Invoke(new Action(() =>
                 {
-                    frmChat.rtxt_message.AppendRichText(Class1.UserId + "  " + time.ToLongTimeString() + "\r\n",
-                new Font(frmChat.Font, FontStyle.Regular), Color.Green);
+                    frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                    new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
                     //rtxt_message.SelectionColor = Color.Red;
-                    frmChat.rtxt_message.AppendText("您" + str + "了一个窗口抖动。\r\n");
+                    frmChat.rtxt_message.AppendText("你" + str + "了一个窗口抖动。\r\n");
+                    frmChat.rtxt_message.ForeColor = Color.Black;
+                    frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
+                    frmChat.rtxt_message.ScrollToCaret();
+                    frmChat.rtxt_send.Focus();
+                }));
+            }
+        }*/
+        public static void appendSysMsgToMsgBox(frm_chat frmChat, string content, DateTime time)
+        {
+            if (!frmChat.IsHandleCreated)
+            {
+                frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
+                frmChat.rtxt_message.AppendText(content + "\r\n");
+                frmChat.rtxt_message.ForeColor = Color.Black;
+                frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
+                frmChat.rtxt_message.ScrollToCaret();
+                frmChat.rtxt_send.Focus();
+            }
+            else
+            {
+                frmChat.Invoke(new Action(() =>
+                {
+                    frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
+                    frmChat.rtxt_message.AppendText(content + "\r\n");
                     frmChat.rtxt_message.ForeColor = Color.Black;
                     frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
                     frmChat.rtxt_message.ScrollToCaret();
@@ -686,7 +723,8 @@ namespace Poseidon
                             }
                         case (int)Class1.ContentType.Vibration:
                             {
-                                Class1.appendVibrationToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                                //Class1.appendSystemMsgToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                                Class1.appendSysMsgToMsgBox(frm_chat, "你" + (userIdSend == UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
                                 Class1.Vibration(frm_chat);
                                 break;
                             }
@@ -731,7 +769,7 @@ namespace Poseidon
                             }
                         case (int)ContentType.Vibration:
                             {
-                                appendPersonalMsgToUnReadBox(id, userIdSend, "您收到了一个窗口抖动");
+                                appendPersonalMsgToUnReadBox(id, userIdSend, "你收到了一个窗口抖动");
                                 break;
                             }
                         case (int)ContentType.Image:

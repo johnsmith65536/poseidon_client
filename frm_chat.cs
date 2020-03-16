@@ -78,7 +78,8 @@ namespace Poseidon
                         }
                     case (int)Class1.ContentType.Vibration:
                         {
-                            Class1.appendVibrationToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime));
+                            //Class1.appendSystemMsgToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime));
+                            Class1.appendSysMsgToMsgBox(this, "你" + (userIdSend == Class1.UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(createTime));
                             break;
                         }
                     case (int)Class1.ContentType.Image:
@@ -175,6 +176,17 @@ namespace Poseidon
                     MessageType = 0
                 };
                 var sendMessageResp = http._Message.SendMessage(sendMessageReq);
+                var statusCode = sendMessageResp.StatusCode;
+
+                switch (statusCode)
+                {
+                    case 1:
+                        {
+                            Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                            return;
+                        }
+                }
+
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
@@ -260,6 +272,17 @@ namespace Poseidon
                 MessageType = 0
             };
             var resp = http._Message.SendMessage(req);
+            var statusCode = resp.StatusCode;
+
+            switch (statusCode)
+            {
+                case 1:
+                    {
+                        Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                        return;
+                    }
+            }
+
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
                             $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 1)", param);
@@ -331,6 +354,17 @@ namespace Poseidon
                 ContentType = (int)Class1.ContentType.Vibration
             };
             var resp = http._Message.SendMessage(req);
+            var statusCode = resp.StatusCode;
+
+            switch (statusCode)
+            {
+                case 1:
+                    {
+                        Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                        return;
+                    }
+            }
+
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(""));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
                             $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 1)", param);
@@ -340,7 +374,8 @@ namespace Poseidon
                 return;
             }
 
-            Class1.appendVibrationToMsgBox(this, Class1.UserId.ToString(), DateTime.Now);
+            //Class1.appendSystemMsgToMsgBox(this, Class1.UserId.ToString(), DateTime.Now);
+            Class1.appendSysMsgToMsgBox(this, "你发送了一个窗口抖动。\r\n", DateTime.Now);
             rtxt_message.Select(rtxt_message.Text.Length, 0);
             rtxt_message.ScrollToCaret();
             rtxt_send.Focus();

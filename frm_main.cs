@@ -319,7 +319,8 @@ namespace Poseidon
                                     }
                                 case (int)Class1.ContentType.Vibration:
                                     {
-                                        Class1.appendVibrationToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime));
+                                        //Class1.appendSystemMsgToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime));
+                                        Class1.appendSysMsgToMsgBox(frm_chat, "你" + (msg.UserIdSend == Class1.UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(msg.CreateTime));
                                         Class1.Vibration(frm_chat);
                                         break;
                                     }
@@ -356,7 +357,7 @@ namespace Poseidon
                                     }
                                 case (int)Class1.ContentType.Vibration:
                                     {
-                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "您收到了一个窗口抖动");
+                                        Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "你收到了一个窗口抖动");
                                         break;
                                     }
                                 case (int)Class1.ContentType.Image:
