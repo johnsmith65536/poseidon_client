@@ -88,11 +88,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="cls_group.cs" />
     <Compile Include="frm_chat.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frm_chat.Designer.cs">
       <DependentUpon>frm_chat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_create_group.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_create_group.Designer.cs">
+      <DependentUpon>frm_create_group.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frm_group.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_group.Designer.cs">
+      <DependentUpon>frm_group.cs</DependentUpon>
     </Compile>
     <Compile Include="frm_login.cs">
       <SubType>Form</SubType>
@@ -118,12 +131,20 @@
     <Compile Include="frm_reply_add_friend.Designer.cs">
       <DependentUpon>frm_reply_add_friend.cs</DependentUpon>
     </Compile>
+    <Compile Include="frm_search_group.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frm_search_group.Designer.cs">
+      <DependentUpon>frm_search_group.cs</DependentUpon>
+    </Compile>
     <Compile Include="frm_search_user.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frm_search_user.Designer.cs">
       <DependentUpon>frm_search_user.cs</DependentUpon>
     </Compile>
+    <Compile Include="http\_Group.cs" />
+    <Compile Include="http\_Group_User.cs" />
     <Compile Include="http\_Heart_Beat.cs" />
     <Compile Include="http\_Login.cs" />
     <Compile Include="http\_Message.cs" />
@@ -139,6 +160,12 @@
     <EmbeddedResource Include="frm_chat.resx">
       <DependentUpon>frm_chat.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frm_create_group.resx">
+      <DependentUpon>frm_create_group.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_group.resx">
+      <DependentUpon>frm_group.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frm_login.resx">
       <DependentUpon>frm_login.cs</DependentUpon>
     </EmbeddedResource>
@@ -150,6 +177,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frm_reply_add_friend.resx">
       <DependentUpon>frm_reply_add_friend.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frm_search_group.resx">
+      <DependentUpon>frm_search_group.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frm_search_user.resx">
       <DependentUpon>frm_search_user.cs</DependentUpon>

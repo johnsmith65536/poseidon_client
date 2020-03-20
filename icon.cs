@@ -76,12 +76,12 @@ namespace Poseidon
         {
             Class1.frm_main.Invoke(new Action(() =>
             {
-                var val = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count != 0;
+                var val = Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[1].SubItems.Count != 0 || Class1.frmMsgBox.clb_unread_msg.Items[2].SubItems.Count != 0;
                 Class1.frm_main.timer2.Enabled = val;
                 if(!val)
                     Class1.frm_main.notifyIcon1.Icon = Properties.Resources.poseidon;
                 foreach(var item in Class1.chatListSubItemPool)
-                    Class1.chatListSubItemPool[item.Key].IsTwinkle = Class1.unReadMsgItemPool.ContainsKey(item.Key);
+                    Class1.chatListSubItemPool[item.Key].IsTwinkle = Class1.unReadPrivateMsgItemPool.ContainsKey(item.Key);
             }));
         }
     }

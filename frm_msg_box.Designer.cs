@@ -46,7 +46,6 @@
             this.clb_unread_msg.TabIndex = 23;
             this.clb_unread_msg.Text = "chatListBox1";
             this.clb_unread_msg.ClickSubItem += new CCWin.SkinControl.ChatListBox.ChatListClickEventHandler(this.clb_unread_msg_ClickSubItem);
-            this.clb_unread_msg.Click += new System.EventHandler(this.clb_unread_msg_Click);
             // 
             // frm_msg_box
             // 

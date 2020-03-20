@@ -110,11 +110,6 @@ namespace Poseidon
             foreach (var image in imagePool)
                 image.Dispose();
         }
-
-        private void btn_send_file_Click(object sender, EventArgs e)
-        {
-            
-        }
         private void UploadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
             //System.Console.WriteLine("ProgressCallback - Progress: {0}%, TotalBytes:{1}, TransferredBytes:{2} ",
@@ -269,7 +264,7 @@ namespace Poseidon
                 IdRecv = userIdChat,
                 Content = content,
                 ContentType = (int)Class1.ContentType.Text,
-                MessageType = 0
+                MessageType = (int)Class1.MsgType.PrivateChat
             };
             var resp = http._Message.SendMessage(req);
             var statusCode = resp.StatusCode;
@@ -446,9 +441,5 @@ namespace Poseidon
             }
         }
 
-        private void rtxt_message_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-
-        }
     }
 }

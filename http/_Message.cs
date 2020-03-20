@@ -30,6 +30,17 @@ namespace Poseidon.http
             public int Status;
             public long ParentId;
         }
+        public struct GroupUserRequest
+        {
+            public long Id;
+            public long UserIdSend;
+            public long UserIdRecv;
+            public long GroupId;
+            public long CreateTime;
+            public int Status;
+            public long ParentId;
+            public int Type;
+        }
         public struct Object
         {
             public long Id;
@@ -56,12 +67,14 @@ namespace Poseidon.http
             public long UserId;
             public long MessageId;
             public long UserRelationId;
+            public long GroupUserId;
         }
         public struct SyncMessageResp
         {
             public List<Message> Messages;
             public List<UserRelationRequest> UserRelations;
             public List<Object> Objects;
+            public List<GroupUserRequest> GroupUsers;
             public long LastOnlineTime;
             public int StatusCode;
             public string StatusMessage;
@@ -71,6 +84,8 @@ namespace Poseidon.http
         {
             public Dictionary<long, int> MessageIds;
             public Dictionary<long, int> UserRelationRequestIds;
+            public Dictionary<long, int> GroupUserRequestIds;
+
         }
         public struct UpdateMessageStatusResp
         {
@@ -81,11 +96,13 @@ namespace Poseidon.http
         {
             public List<long> MessageIds;
             public List<long> UserRelationRequestIds;
+            public List<long> GroupUserRequestIds;
         }
         public struct FetchMessageStatusResp
         {
             public Dictionary<long, int> MessageIds;
             public Dictionary<long, int> UserRelationRequestIds;
+            public Dictionary<long, int> GroupUserRequestIds;
             public int StatusCode;
             public string StatusMessage;
         }
@@ -98,7 +115,7 @@ namespace Poseidon.http
         }
         public static SyncMessageResp SyncMessage(SyncMessageReq req)
         {
-            var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
+            var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}&group_user_id={req.GroupUserId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<SyncMessageResp>(ret);
             for (int i = 0;i < resp.Messages.Count;i++)
             {
@@ -132,6 +149,8 @@ namespace Poseidon.http
                 url += "message_ids=" + messageId + "&";
             foreach (var userRelationRequestId in req.UserRelationRequestIds)
                 url += "user_relation_request_ids=" + userRelationRequestId + "&";
+            foreach (var groupUserRequestIds in req.GroupUserRequestIds)
+                url += "group_user_request_ids=" + groupUserRequestIds + "&";
             var ret = Class1.DoHttpRequest(url, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<FetchMessageStatusResp>(ret);
             return resp;

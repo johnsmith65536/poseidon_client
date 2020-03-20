@@ -35,6 +35,8 @@
             this.mnu_stats = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_online = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_offline = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_create_group = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_join_group = new System.Windows.Forms.ToolStripMenuItem();
             this.mnu_strip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnu_del_friend = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -55,10 +57,12 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnu_add_friend,
-            this.mnu_stats});
+            this.mnu_stats,
+            this.mnu_create_group,
+            this.mnu_join_group});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(274, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(269, 25);
             this.menuStrip1.TabIndex = 17;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -92,6 +96,20 @@
             this.mnu_offline.Text = "离线";
             this.mnu_offline.Click += new System.EventHandler(this.mnu_offline_Click);
             // 
+            // mnu_create_group
+            // 
+            this.mnu_create_group.Name = "mnu_create_group";
+            this.mnu_create_group.Size = new System.Drawing.Size(56, 21);
+            this.mnu_create_group.Text = "创建群";
+            this.mnu_create_group.Click += new System.EventHandler(this.mnu_create_group_Click);
+            // 
+            // mnu_join_group
+            // 
+            this.mnu_join_group.Name = "mnu_join_group";
+            this.mnu_join_group.Size = new System.Drawing.Size(56, 21);
+            this.mnu_join_group.Text = "加入群";
+            this.mnu_join_group.Click += new System.EventHandler(this.mnu_join_group_Click);
+            // 
             // mnu_strip
             // 
             this.mnu_strip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -113,7 +131,7 @@
             this.toolStripStatusLabel2});
             this.statusStrip1.Location = new System.Drawing.Point(0, 477);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(274, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(269, 22);
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -121,7 +139,7 @@
             // 
             this.toolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(259, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(254, 17);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -165,6 +183,7 @@
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
             // timer2
             // 
@@ -180,7 +199,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(274, 499);
+            this.ClientSize = new System.Drawing.Size(269, 499);
             this.Controls.Add(this.ChatListBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
@@ -216,5 +235,7 @@
         public System.Windows.Forms.NotifyIcon notifyIcon1;
         public System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Timer timer3;
+        private System.Windows.Forms.ToolStripMenuItem mnu_create_group;
+        private System.Windows.Forms.ToolStripMenuItem mnu_join_group;
     }
 }
