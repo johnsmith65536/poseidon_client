@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_group));
             this.skToolMenu = new CCWin.SkinControl.SkinToolStrip();
             this.toolFont = new System.Windows.Forms.ToolStripButton();
@@ -59,7 +60,10 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.pgb_download = new System.Windows.Forms.ProgressBar();
+            this.mnu_strip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnu_quit_group = new System.Windows.Forms.ToolStripMenuItem();
             this.skToolMenu.SuspendLayout();
+            this.mnu_strip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // skToolMenu
@@ -360,6 +364,8 @@
             this.clb_member.SubItemMenu = null;
             this.clb_member.TabIndex = 144;
             this.clb_member.VipFontColor = System.Drawing.Color.Empty;
+            this.clb_member.UpSubItem += new CCWin.SkinControl.ChatListBox.ChatListClickEventHandler(this.clb_member_UpSubItem);
+            this.clb_member.DoubleClickSubItem += new CCWin.SkinControl.ChatListBox.ChatListEventHandler(this.clb_member_DoubleClickSubItem);
             // 
             // openFileDialog1
             // 
@@ -371,6 +377,20 @@
             this.pgb_download.Name = "pgb_download";
             this.pgb_download.Size = new System.Drawing.Size(96, 23);
             this.pgb_download.TabIndex = 145;
+            // 
+            // mnu_strip1
+            // 
+            this.mnu_strip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnu_quit_group});
+            this.mnu_strip1.Name = "mnu_strip";
+            this.mnu_strip1.Size = new System.Drawing.Size(181, 48);
+            // 
+            // mnu_quit_group
+            // 
+            this.mnu_quit_group.Name = "mnu_quit_group";
+            this.mnu_quit_group.Size = new System.Drawing.Size(180, 22);
+            this.mnu_quit_group.Text = "移出群聊";
+            this.mnu_quit_group.Click += new System.EventHandler(this.mnu_quit_group_Click);
             // 
             // frm_group
             // 
@@ -389,6 +409,7 @@
             this.Load += new System.EventHandler(this.frm_group_Load);
             this.skToolMenu.ResumeLayout(false);
             this.skToolMenu.PerformLayout();
+            this.mnu_strip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -425,5 +446,7 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.FontDialog fontDialog1;
         private System.Windows.Forms.ProgressBar pgb_download;
+        private System.Windows.Forms.ContextMenuStrip mnu_strip1;
+        private System.Windows.Forms.ToolStripMenuItem mnu_quit_group;
     }
 }

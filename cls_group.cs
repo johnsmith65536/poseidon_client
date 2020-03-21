@@ -187,7 +187,7 @@ namespace Poseidon
                 {
                     case 1:
                         {
-                            cls_group.appendSysMsgToMsgBox(frmGroup, "你未加入群聊，无法发送消息", DateTime.Now);
+                            cls_group.appendSysMsgToMsgBox(frmGroup, "你尚未加入群聊，无法发送消息", DateTime.Now);
                             return;
                         }
                 }

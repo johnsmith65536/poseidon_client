@@ -20,7 +20,7 @@ namespace Poseidon
 {
     public partial class frm_main : Form
     {
-        private long delFriendUserId;
+        private long selectId;
         private int tick;
         private enum BroadcastMsgType
         {
@@ -224,12 +224,16 @@ namespace Poseidon
 
                     var oldGroupIds = new HashSet<long>();
                     var newGroupIds = new HashSet<long>();
+                    Class1.GroupId2Group = new Dictionary<long, Class1.Group>();
 
                     foreach (var item in Class1.groupItemPool)
                         oldGroupIds.Add(item.Key);
 
-                    foreach (var groupId in fetchGroupListResp.GroupIds)
-                        newGroupIds.Add(groupId);
+                    foreach (var group in fetchGroupListResp.Groups)
+                    {
+                        newGroupIds.Add(group.Id);
+                        Class1.GroupId2Group.Add(group.Id, group);
+                    }
 
                     foreach (var groupId in oldGroupIds)
                     {
@@ -248,7 +252,7 @@ namespace Poseidon
                     {
                         if (!oldGroupIds.Contains(groupId))
                         {
-                            var subItem = new ChatListSubItem(groupId.ToString());
+                            var subItem = new ChatListSubItem(Class1.GroupId2Group[groupId].Name);
                             subItem.ID = (uint)groupId;
                             Invoke(new Action(() =>
                             {
@@ -326,8 +330,11 @@ namespace Poseidon
                     UserId = Class1.UserId
                 };
                 var fetchGroupListResp = http._Group_User.FetchGroupList(fetchGroupListReq);
+                var groupIds = new List<long>();
+                foreach (var group in fetchGroupListResp.Groups)
+                    groupIds.Add(group.Id);
                 long messageId = -1, userRelationId = -1, groupUserId = -1;
-                DataTable dt = Class1.sql.SqlTable($"SELECT count(*) as count, MAX(id) as id FROM `message` WHERE (`user_id_send` = {Class1.UserId} OR `user_id_recv` = {Class1.UserId} OR `group_id` IN ({String.Join(",", fetchGroupListResp.GroupIds)}))");
+                DataTable dt = Class1.sql.SqlTable($"SELECT count(*) as count, MAX(id) as id FROM `message` WHERE (`user_id_send` = {Class1.UserId} OR `user_id_recv` = {Class1.UserId} OR `group_id` IN ({String.Join(",", groupIds)}))");
                 if (dt != null && dt.Rows.Count == 1 && (long)dt.Rows[0]["count"] > 0)
                     messageId = (long)dt.Rows[0]["id"];
                 dt = Class1.sql.SqlTable($"SELECT count(*) as count, MAX(id) as id FROM `user_relation_request` WHERE (`user_id_send` = {Class1.UserId} OR `user_id_recv` = {Class1.UserId})");
@@ -402,6 +409,7 @@ namespace Poseidon
             Class1.InvokeToolStripStatusLabel(toolStripStatusLabel1, "在线");
             toolStripStatusLabel2.Text = Class1.FormatDateTime(DateTime.Now);
             notifyIcon1.Text = Class1.UserId.ToString();
+            this.Text = Class1.UserId.ToString();
 
             foreach (var item in Class1.formGroupPool)
             {
@@ -713,7 +721,7 @@ namespace Poseidon
             var req = new http._Relation.DeleteFriendReq()
             {
                 UserIdSend = Class1.UserId,
-                UserIdRecv = delFriendUserId
+                UserIdRecv = selectId
             };
             http._Relation.DeleteFriend(req);
             MessageBox.Show("好友删除成功", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -793,7 +801,7 @@ namespace Poseidon
                 }
                 else
                 {
-                    frmGroup = new frm_group(groupId);
+                    frmGroup = new frm_group(Class1.GroupId2Group[groupId]);
                     Class1.formGroupPool.Add(groupId, frmGroup);
                     frmGroup.Show();
                 }
@@ -821,15 +829,17 @@ namespace Poseidon
         {
             if (es.Button != MouseButtons.Right)
                 return;
-            var itemId = e.SelectSubItem.ID;
-            if (Class1.chatListSubItemPool.ContainsKey(itemId) && Class1.chatListSubItemPool[itemId] == e.SelectSubItem)
+            selectId = e.SelectSubItem.ID;
+            if (Class1.chatListSubItemPool.ContainsKey(selectId) && Class1.chatListSubItemPool[selectId] == e.SelectSubItem)
             {
-                delFriendUserId = itemId;
                 mnu_strip.Show(MousePosition.X, MousePosition.Y);
             }
-            else if (Class1.groupItemPool.ContainsKey(itemId) && Class1.groupItemPool[itemId] == e.SelectSubItem)
+            else if (Class1.groupItemPool.ContainsKey(selectId) && Class1.groupItemPool[selectId] == e.SelectSubItem)
             {
-
+                if(Class1.GroupId2Group[selectId].Owner == Class1.UserId)
+                    mnu_strip1.Show(MousePosition.X, MousePosition.Y);
+                else
+                    mnu_strip2.Show(MousePosition.X, MousePosition.Y);
             }
         }
         private void timer2_Tick(object sender, EventArgs e)
@@ -874,6 +884,33 @@ namespace Poseidon
             }
             var frmSearchGroup = new frm_search_group();
             frmSearchGroup.ShowDialog();
+        }
+
+        private void mnu_dissolve_group_Click(object sender, EventArgs e)
+        {
+            var ret = MessageBox.Show("确定要解散群聊吗?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            if (ret != DialogResult.Yes)
+                return;
+            var req = new http._Group.DeleteGroupReq()
+            {
+                GroupId = selectId,
+                UserId = Class1.UserId
+            };
+            http._Group.DeleteGroup(req);
+        }
+
+        private void mnu_quit_group_Click(object sender, EventArgs e)
+        {
+            var ret = MessageBox.Show("确定要退出群聊吗?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            if (ret != DialogResult.Yes)
+                return;
+            var req = new http._Group_User.DeleteMemberReq()
+            {
+                Operator = Class1.UserId,
+                GroupId = selectId,
+                UserId = Class1.UserId
+            };
+            http._Group_User.DeleteMember(req);
         }
     }
 }

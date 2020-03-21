@@ -48,9 +48,15 @@
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.timer3 = new System.Windows.Forms.Timer(this.components);
+            this.mnu_strip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnu_dissolve_group = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_strip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnu_quit_group = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.mnu_strip.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.mnu_strip1.SuspendLayout();
+            this.mnu_strip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -195,6 +201,34 @@
             this.timer3.Enabled = true;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
+            // mnu_strip1
+            // 
+            this.mnu_strip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnu_dissolve_group});
+            this.mnu_strip1.Name = "mnu_strip";
+            this.mnu_strip1.Size = new System.Drawing.Size(125, 26);
+            // 
+            // mnu_dissolve_group
+            // 
+            this.mnu_dissolve_group.Name = "mnu_dissolve_group";
+            this.mnu_dissolve_group.Size = new System.Drawing.Size(180, 22);
+            this.mnu_dissolve_group.Text = "解散群聊";
+            this.mnu_dissolve_group.Click += new System.EventHandler(this.mnu_dissolve_group_Click);
+            // 
+            // mnu_strip2
+            // 
+            this.mnu_strip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnu_quit_group});
+            this.mnu_strip2.Name = "mnu_strip";
+            this.mnu_strip2.Size = new System.Drawing.Size(181, 48);
+            // 
+            // mnu_quit_group
+            // 
+            this.mnu_quit_group.Name = "mnu_quit_group";
+            this.mnu_quit_group.Size = new System.Drawing.Size(180, 22);
+            this.mnu_quit_group.Text = "退出群聊";
+            this.mnu_quit_group.Click += new System.EventHandler(this.mnu_quit_group_Click);
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -213,6 +247,8 @@
             this.mnu_strip.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.mnu_strip1.ResumeLayout(false);
+            this.mnu_strip2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -237,5 +273,9 @@
         private System.Windows.Forms.Timer timer3;
         private System.Windows.Forms.ToolStripMenuItem mnu_create_group;
         private System.Windows.Forms.ToolStripMenuItem mnu_join_group;
+        private System.Windows.Forms.ContextMenuStrip mnu_strip1;
+        private System.Windows.Forms.ToolStripMenuItem mnu_dissolve_group;
+        private System.Windows.Forms.ContextMenuStrip mnu_strip2;
+        private System.Windows.Forms.ToolStripMenuItem mnu_quit_group;
     }
 }

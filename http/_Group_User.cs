@@ -9,13 +9,15 @@ namespace Poseidon.http
 {
     class _Group_User
     {
+        
+
         public struct FetchGroupListReq
         {
             public long UserId;
         }
         public struct FetchGroupListResp
         {
-            public long[] GroupIds;
+            public Class1.Group[] Groups;
             public int StatusCode;
             public string StatusMessage;
         }
@@ -79,6 +81,18 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct DeleteMemberReq
+        {
+            public long Operator;
+            public long GroupId;
+            public long UserId;
+        }
+
+        public struct DeleteMemberResp
+        {
+            public int StatusCode;
+            public string StatusMessage;
+        }
         public static FetchGroupListResp FetchGroupList(FetchGroupListReq req)
         {
             var ret = Class1.DoHttpRequest("/group/list/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
@@ -113,6 +127,12 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest("/group/member/add/reply", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<ReplyAddGroupResp>(ret);
+            return resp;
+        }
+        public static DeleteMemberResp DeleteMember(DeleteMemberReq req)
+        {
+            var ret = Class1.DoHttpRequest("/group/member", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
+            var resp = JsonConvert.DeserializeObject<DeleteMemberResp>(ret);
             return resp;
         }
     }

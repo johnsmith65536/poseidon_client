@@ -17,10 +17,12 @@ namespace Poseidon
 {
     public partial class frm_group : Form
     {
-        public static long groupIdChat;
+        //public static long groupIdChat;
+        private static Class1.Group groupChat;
         private Dictionary<long, ChatListSubItem> memberPool = new Dictionary<long, ChatListSubItem>();
         private HashSet<long> onlineUserId = new HashSet<long>();
         private HashSet<long> offlineUserId = new HashSet<long>();
+        private long selectId;
 
         HashSet<Image> imagePool = new HashSet<Image>();
         public frm_group()
@@ -40,7 +42,7 @@ namespace Poseidon
                 {
                     var req = new http._Group_User.FetchMemberListReq()
                     {
-                        GroupId = groupIdChat
+                        GroupId = groupChat.Id
                     };
                     var resp = http._Group_User.FetchMemberList(req);
 
@@ -94,11 +96,11 @@ namespace Poseidon
             }));
             t.Start();
         }
-        public frm_group(long groupId)
+        public frm_group(Class1.Group group)
         {
             InitializeComponent();
-            this.Text = "群" + groupId;
-            groupIdChat = groupId;
+            this.Text = $"{group.Name}({group.Id})";
+            groupChat = group;
             login();
             LoadMessage();
         }
@@ -109,17 +111,17 @@ namespace Poseidon
                 UserId = Class1.UserId
             };
             var resp = http._Group_User.GetLastReadMsgId(req);
-            var lastReadMsgId = resp.LastReadMsgId[groupIdChat];
+            var lastReadMsgId = resp.LastReadMsgId[groupChat.Id];
 
 
             DataTable dt;
-            dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `group_id` = {groupIdChat}");
+            dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `group_id` = {groupChat.Id}");
             if (dt == null || dt.Rows.Count != 1)
                 throw new Exception("select count(*) from message failed");
             var unReadCount = long.Parse(dt.Rows[0]["count"].ToString());
 
             //加载历史消息，数量为page_size和未读消息数的较大者
-            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `group_id` = {groupIdChat} ORDER BY `id` DESC LIMIT 0,{Math.Max(unReadCount, Class1.PageSize)}");
+            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `group_id` = {groupChat.Id} ORDER BY `id` DESC LIMIT 0,{Math.Max(unReadCount, Class1.PageSize)}");
             dt.DefaultView.Sort = "id ASC";
             dt = dt.DefaultView.ToTable();
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -170,7 +172,7 @@ namespace Poseidon
 
         private void frm_group_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Class1.formGroupPool.Remove(groupIdChat);
+            Class1.formGroupPool.Remove(groupChat.Id);
             foreach (var image in imagePool)
                 image.Dispose();
         }
@@ -186,26 +188,26 @@ namespace Poseidon
             var req = new http._Message.SendMessageReq()
             {
                 UserIdSend = Class1.UserId,
-                IdRecv = groupIdChat,
+                IdRecv = groupChat.Id,
                 Content = content,
                 ContentType = (int)Class1.ContentType.Text,
                 MessageType = (int)Class1.MsgType.GroupChat
             };
             var resp = http._Message.SendMessage(req);
-            /*var statusCode = resp.StatusCode;
+            var statusCode = resp.StatusCode;
 
             switch (statusCode)
             {
                 case 1:
                     {
-                        Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                        cls_group.appendSysMsgToMsgBox(this, "你尚未加入群聊，无法发送消息", DateTime.Now);
                         return;
                     }
-            }*/
+            }
 
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
             bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, 0, {groupIdChat}, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, {(int)Class1.MsgType.GroupChat}, 1)", param);
+                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, {(int)Class1.MsgType.GroupChat}, 1)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -236,7 +238,7 @@ namespace Poseidon
             {
                 var localFileName = openFileDialog1.FileName;
                 //InvokeProgressBarSetValue(pgb_upload, 0);
-                cls_group.UploadImage(localFileName, groupIdChat, this);
+                cls_group.UploadImage(localFileName, groupChat.Id, this);
                 //InvokeProgressBarSetValue(pgb_upload, 100);
             }
         }
@@ -305,19 +307,19 @@ namespace Poseidon
                 var sendMessageReq = new http._Message.SendMessageReq()
                 {
                     UserIdSend = Class1.UserId,
-                    IdRecv = groupIdChat,
+                    IdRecv = groupChat.Id,
                     Content = objId.ToString(),
                     ContentType = (int)Class1.ContentType.Object,
                     MessageType = (int)Class1.MsgType.GroupChat
                 };
                 var sendMessageResp = http._Message.SendMessage(sendMessageReq);
-                var statusCode = sendMessageResp.StatusCode;
+                var statusCode = resp.StatusCode;
 
                 switch (statusCode)
                 {
                     case 1:
                         {
-                            cls_group.appendSysMsgToMsgBox(this, "你未加入群聊，无法发送消息", DateTime.Now);
+                            cls_group.appendSysMsgToMsgBox(this, "你尚未加入群聊，无法发送消息", DateTime.Now);
                             return;
                         }
                 }
@@ -326,7 +328,7 @@ namespace Poseidon
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
                 var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, 0, {groupIdChat}, @param, {createTime}, {(int)Class1.ContentType.Object}, {(int)Class1.MsgType.GroupChat}, 1)", param);
+                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {createTime}, {(int)Class1.ContentType.Object}, {(int)Class1.MsgType.GroupChat}, 1)", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -418,6 +420,63 @@ namespace Poseidon
                 }
             }));
             t.Start();
+        }
+
+        private void clb_member_DoubleClickSubItem(object sender, ChatListEventArgs e, MouseEventArgs es)
+        {
+            var userId = (long)e.SelectSubItem.ID;
+            if (userId == Class1.UserId)
+                return;
+            frm_chat frm_chat;
+            if (Class1.formChatPool.ContainsKey(userId))
+            {
+                frm_chat = Class1.formChatPool[userId];
+                frm_chat.Activate();
+            }
+            else
+            {
+                frm_chat = new frm_chat(userId);
+                Class1.formChatPool.Add(userId, frm_chat);
+                frm_chat.Show();
+            }
+            if (Class1.unReadPrivateMsgItemPool.ContainsKey(userId))
+            {
+                Dictionary<long, int> readMessage = new Dictionary<long, int>();
+                var subItem = Class1.unReadPrivateMsgItemPool[userId];
+                var ids = ((List<long>)(((Dictionary<string, object>)subItem.Tag)["ids"]));
+                foreach (var id in ids)
+                    readMessage.Add(id, 1);
+                Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
+
+                Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Remove(subItem);
+                Class1.unReadPrivateMsgItemPool.Remove(userId);
+                icon.ChangeIconState();
+            }
+        }
+
+        private void clb_member_UpSubItem(object sender, ChatListClickEventArgs e, MouseEventArgs es)
+        {
+            if (es.Button != MouseButtons.Right)
+                return;
+            var userId = e.SelectSubItem.ID;
+            if (Class1.UserId != groupChat.Owner || userId == Class1.UserId)
+                return;
+            selectId = userId;
+            mnu_strip1.Show(MousePosition.X, MousePosition.Y);
+        }
+
+        private void mnu_quit_group_Click(object sender, EventArgs e)
+        {
+            var ret = MessageBox.Show($"确定将{selectId}移出群聊吗?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            if (ret != DialogResult.Yes)
+                return;
+            var req = new http._Group_User.DeleteMemberReq()
+            {
+                Operator = Class1.UserId,
+                GroupId = groupChat.Id,
+                UserId = selectId
+            };
+            http._Group_User.DeleteMember(req);
         }
     }
 }

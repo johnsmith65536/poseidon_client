@@ -80,8 +80,10 @@ namespace Poseidon
                 Class1.frm_main.timer2.Enabled = val;
                 if(!val)
                     Class1.frm_main.notifyIcon1.Icon = Properties.Resources.poseidon;
-                foreach(var item in Class1.chatListSubItemPool)
+                foreach (var item in Class1.chatListSubItemPool)
                     Class1.chatListSubItemPool[item.Key].IsTwinkle = Class1.unReadPrivateMsgItemPool.ContainsKey(item.Key);
+                foreach (var item in Class1.groupItemPool)
+                    Class1.groupItemPool[item.Key].IsTwinkle = Class1.unReadGroupMsgItemPool.ContainsKey(item.Key);
             }));
         }
     }

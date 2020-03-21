@@ -39,6 +39,16 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct DeleteGroupReq
+        {
+            public long UserId;
+            public long GroupId;
+        }
+        public struct DeleteGroupResp
+        {
+            public int StatusCode;
+            public string StatusMessage;
+        }
         public static CreateGroupResp CreateGroup(CreateGroupReq req)
         {
             var ret = Class1.DoHttpRequest("/group", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
@@ -49,6 +59,12 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest("/group/search?user_id=" + req.UserId + "&data=" + req.Data, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<SearchGroupResp>(ret);
+            return resp;
+        }
+        public static DeleteGroupResp DeleteGroup(DeleteGroupReq req)
+        {
+            var ret = Class1.DoHttpRequest("/group", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
+            var resp = JsonConvert.DeserializeObject<DeleteGroupResp>(ret);
             return resp;
         }
     }

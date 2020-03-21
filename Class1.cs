@@ -57,8 +57,16 @@ namespace Poseidon
         
 
         public static Dictionary<long, ChatListSubItem> groupItemPool = new Dictionary<long, ChatListSubItem>();
-        
 
+        public static Dictionary<long, Group> GroupId2Group;
+
+        public struct Group
+        {
+            public long Id;
+            public string Name;
+            public long Owner;
+            public long CreateTime;
+        }
 
         public enum AddFriendStatus
         {

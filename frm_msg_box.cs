@@ -68,7 +68,7 @@ namespace Poseidon
                                     }
                                     else
                                     {
-                                        frmGroup = new frm_group(groupId);
+                                        frmGroup = new frm_group(Class1.GroupId2Group[groupId]);
                                         Class1.formGroupPool.Add(groupId, frmGroup);
                                         frmGroup.Show();
                                     }

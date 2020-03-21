@@ -69,16 +69,12 @@ namespace Poseidon
                             var objId = long.Parse(content);
                             DataTable dt1 = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
                             if (dt1 == null || dt1.Rows.Count != 1)
-                            {
-                                Console.WriteLine("rowCount != 1, rowCount = " + dt1.Rows.Count);
-                                return;
-                            }
+                                throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
                             Class1.appendFileToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
                             break;
                         }
                     case (int)Class1.ContentType.Vibration:
                         {
-                            //Class1.appendSystemMsgToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime));
                             Class1.appendSysMsgToMsgBox(this, "你" + (userIdSend == Class1.UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(createTime));
                             break;
                         }
@@ -87,20 +83,14 @@ namespace Poseidon
                             var eTag = content;
                             DataTable dt1 = Class1.sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
                             if (dt1 == null || dt1.Rows.Count != 1)
-                            {
-                                Console.WriteLine("rowCount != 1");
-                                return;
-                            }
+                                throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
                             var imageData = Class1.UnGzip((byte[])dt1.Rows[0]["content"]);
                             var stream = Class1.appendImageToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), imageData);
                             imagePool.Add(stream);
                             break;
                         }
                     default:
-                        {
-                            Console.WriteLine("unknown content_type, content_type = ", contentType);
-                            break;
-                        }
+                            throw new Exception("unknown content_type, content_type = " + contentType);
                 }
             }
         }
