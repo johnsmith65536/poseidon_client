@@ -50,12 +50,12 @@ namespace Poseidon
                 MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            var req = new http._Relation.AddFriendReq()
+            var req = new http._User_Relation.AddFriendReq()
             {
                 UserIdSend = Class1.UserId,
                 UserIdRecv = userIdRecv
             };
-            var resp = http._Relation.AddFriend(req);
+            var resp = http._User_Relation.AddFriend(req);
             var id = resp.Id;
             var createTime = resp.CreateTime;
             var statusCode = resp.StatusCode;

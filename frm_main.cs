@@ -137,11 +137,11 @@ namespace Poseidon
                     /*
                      * 拉取好友列表
                      */
-                    var req = new http._Relation.FetchFriendListReq()
+                    var req = new http._User_Relation.FetchFriendListReq()
                     {
                         UserId = Class1.UserId
                     };
-                    var resp = http._Relation.FetchFriendList(req);
+                    var resp = http._User_Relation.FetchFriendList(req);
                     if (resp.StatusCode == 254)
                         return;
 
@@ -269,7 +269,7 @@ namespace Poseidon
                      */
                     var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
 
-                    // 同步最新UserRelationRequest & GroupUserRequest的status，message暂不同步
+                    // 同步最新UserRelationRequest & GroupUserRequest的status
                     List<long> userRelationQueryIds = new List<long>();
                     List<long> groupUserQueryIds = new List<long>();
                     foreach (DataRow row in dt.Rows)
@@ -285,16 +285,15 @@ namespace Poseidon
                         groupUserQueryIds.Add(parentId);
                     }
 
-                    var fetchMessageStatusReq = new http._Message.FetchMessageStatusReq()
+                    var fetchRequestStatusReq = new http._Request.FetchRequestStatusReq()
                     {
-                        MessageIds = new List<long>(),
                         UserRelationRequestIds = userRelationQueryIds,
                         GroupUserRequestIds = groupUserQueryIds
                     };
-                    var fetchMessageStatusResp = http._Message.FetchMessageStatus(fetchMessageStatusReq);
-                    if (fetchMessageStatusResp.StatusCode == 254)
+                    var fetchRequestStatusResp = http._Request.FetchRequestStatus(fetchRequestStatusReq);
+                    if (fetchRequestStatusResp.StatusCode == 254)
                         return;
-                    foreach (var item in fetchMessageStatusResp.UserRelationRequestIds)
+                    foreach (var item in fetchRequestStatusResp.UserRelationRequestIds)
                     {
                         var id = item.Key;
                         var status = item.Value;
@@ -306,7 +305,7 @@ namespace Poseidon
                         }
                     }
 
-                    foreach (var item in fetchMessageStatusResp.GroupUserRequestIds)
+                    foreach (var item in fetchRequestStatusResp.GroupUserRequestIds)
                     {
                         var id = item.Key;
                         var status = item.Value;
@@ -365,8 +364,8 @@ namespace Poseidon
                     if (msg.ContentType == (int)Class1.ContentType.Image)
                         Class1.FetchImage(msg.Content);
                     var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
-                    bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
+                    bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({msg.Id}, " +
+                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType})", param);
                     if (!ret1)
                     {
                         MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -436,8 +435,8 @@ namespace Poseidon
                     {
                         var msg = JsonConvert.DeserializeObject<RedisMessage>(val.ToString());
                         var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
-                        bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({msg.Id}, " +
-                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType}, {msg.IsRead})", param);
+                        bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({msg.Id}, " +
+                            $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType})", param);
                         if (!ret)
                         {
                             MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -483,7 +482,14 @@ namespace Poseidon
                                                 }
                                         }
                                         //消息已读
-                                        Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>(), new Dictionary<long, int>());
+                                        //Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>(), new Dictionary<long, int>());
+                                        var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
+                                        {
+                                            UserId = Class1.UserId,
+                                            LastReadMsgId = new Dictionary<long, long>()
+                                        };
+                                        updateFriendLastReadMsgIdReq.LastReadMsgId.Add(msg.UserIdSend, msg.Id);
+                                        http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
                                     }
                                     else
                                     {
@@ -547,12 +553,12 @@ namespace Poseidon
                                         }
                                         //消息已读
                                         //Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>());
-                                        var req = new http._Group_User.UpdateLastReadMsgIdReq()
+                                        var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                                         {
                                             UserId = Class1.UserId,
                                             LastReadMsgId = new Dictionary<long, long>() { { msg.GroupId, msg.Id } }
                                         };
-                                        http._Group_User.UpdateLastReadMsgId(req);
+                                        http._Group_User.UpdateGroupLastReadMsgId(req);
                                     }
                                     else
                                     {
@@ -718,12 +724,12 @@ namespace Poseidon
                 MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            var req = new http._Relation.DeleteFriendReq()
+            var req = new http._User_Relation.DeleteFriendReq()
             {
                 UserIdSend = Class1.UserId,
                 UserIdRecv = selectId
             };
-            http._Relation.DeleteFriend(req);
+            http._User_Relation.DeleteFriend(req);
             MessageBox.Show("好友删除成功", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void mnu_online_Click(object sender, EventArgs e)
@@ -778,12 +784,21 @@ namespace Poseidon
                 }
                 if (Class1.unReadPrivateMsgItemPool.ContainsKey(userId))
                 {
-                    Dictionary<long, int> readMessage = new Dictionary<long, int>();
+                    var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
+                    {
+                        UserId = Class1.UserId,
+                        LastReadMsgId = new Dictionary<long, long>()
+                    };
                     var subItem = Class1.unReadPrivateMsgItemPool[userId];
                     var ids = ((List<long>)(((Dictionary<string, object>)subItem.Tag)["ids"]));
                     foreach (var id in ids)
-                        readMessage.Add(id, 1);
-                    Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
+                    {
+                        if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(userId))
+                            updateFriendLastReadMsgIdReq.LastReadMsgId[userId] = Math.Max(updateFriendLastReadMsgIdReq.LastReadMsgId[userId], id);
+                        else
+                            updateFriendLastReadMsgIdReq.LastReadMsgId.Add(userId, id);
+                    }
+                    http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
 
                     Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Remove(subItem);
                     Class1.unReadPrivateMsgItemPool.Remove(userId);
@@ -811,12 +826,12 @@ namespace Poseidon
                     var subItem = Class1.unReadGroupMsgItemPool[groupId];
                     var maxId = (long)((Dictionary<string, object>)subItem.Tag)["max_id"];
                     //Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                    var req = new http._Group_User.UpdateLastReadMsgIdReq()
+                    var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                     {
                         UserId = Class1.UserId,
                         LastReadMsgId = new Dictionary<long, long>() { { groupId, maxId } }
                     };
-                    http._Group_User.UpdateLastReadMsgId(req);
+                    http._Group_User.UpdateGroupLastReadMsgId(req);
 
                     Class1.frmMsgBox.clb_unread_msg.Items[2].SubItems.Remove(subItem);
                     Class1.unReadGroupMsgItemPool.Remove(groupId);

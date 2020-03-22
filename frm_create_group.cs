@@ -19,11 +19,11 @@ namespace Poseidon
 
         private void frm_create_group_Load(object sender, EventArgs e)
         {
-            var req = new http._Relation.FetchFriendListReq()
+            var req = new http._User_Relation.FetchFriendListReq()
             {
                 UserId = Class1.UserId
             };
-            var resp = http._Relation.FetchFriendList(req);
+            var resp = http._User_Relation.FetchFriendList(req);
             foreach (var userId in resp.OnlineUserIds)
                 clb_friend.Items.Add(userId, false);
             foreach (var userId in resp.OfflineUserIds)

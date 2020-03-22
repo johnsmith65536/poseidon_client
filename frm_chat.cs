@@ -40,22 +40,32 @@ namespace Poseidon
             this.Text = "与" + userId + "的会话";
             userIdChat = userId;
             DataTable dt;
-            dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
+
+
+            var getFriendLastReadMsgIdReq = new http._User_Relation.GetFriendLastReadMsgIdReq()
+            {
+                UserId = Class1.UserId
+            };
+            var getFriendLastReadMsgIdResp = http._User_Relation.GetFriendLastReadMsgId(getFriendLastReadMsgIdReq);
+            var lastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId[userId];
+
+            dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}");
             if (dt == null || dt.Rows.Count != 1)
                 throw new Exception("select count(*) from message failed");
+
             var unReadCount = long.Parse(dt.Rows[0]["count"].ToString());
             //加载历史消息，数量为page_size和未读消息数的较大者
-            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type, is_read FROM `message` WHERE (`user_id_send` = {Class1.UserId} AND `user_id_recv` = {userId}) OR (`user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}) ORDER BY `id` DESC LIMIT 0,{Math.Max(unReadCount, Class1.PageSize)}");
+            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE (`user_id_send` = {Class1.UserId} AND `user_id_recv` = {userId}) OR (`user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}) ORDER BY `id` DESC LIMIT 0,{Math.Max(unReadCount, Class1.PageSize)}");
             dt.DefaultView.Sort = "id ASC";
             dt = dt.DefaultView.ToTable();
             for (int i = 0; i < dt.Rows.Count; i++)
             {
+                var id = (long)dt.Rows[i]["id"];
                 var userIdSend = (long)dt.Rows[i]["user_id_send"];
                 var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])dt.Rows[i]["content"]));
                 var createTime = (long)dt.Rows[i]["create_time"];
                 var contentType = (long)dt.Rows[i]["content_type"];
-                var isRead = (long)dt.Rows[i]["is_read"];
-                if (userIdSend != Class1.UserId && isRead == 0 && (i == 0 || (long)dt.Rows[i - 1]["is_read"] == 1))
+                if (id > lastReadMsgId && (i == 0 || (long)dt.Rows[i - 1]["id"] <= lastReadMsgId))
                     Class1.appendCenteralText(this, "以下为新消息");
                 switch (contentType)
                 {
@@ -175,8 +185,8 @@ namespace Poseidon
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
-                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Object}, 0, 1)", param);
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({messageId}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {createTime}, {(int)Class1.ContentType.Object}, 0)", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -269,8 +279,8 @@ namespace Poseidon
             }
 
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0, 1)", param);
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, 0)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -351,8 +361,8 @@ namespace Poseidon
             }
 
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(""));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0, 1)", param);
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, {userIdChat}, 0, @param, {resp.CreateTime}, {(int)Class1.ContentType.Vibration}, 0)", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);

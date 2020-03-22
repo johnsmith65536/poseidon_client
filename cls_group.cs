@@ -196,8 +196,8 @@ namespace Poseidon
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(eTag));
-                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, 0, {groupId}, @param, {createTime}, {(int)Class1.ContentType.Image}, {(int)Class1.MsgType.GroupChat}, 1)", param);
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({messageId}, " +
+                            $"{Class1.UserId}, 0, {groupId}, @param, {createTime}, {(int)Class1.ContentType.Image}, {(int)Class1.MsgType.GroupChat})", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);

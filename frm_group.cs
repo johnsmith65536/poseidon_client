@@ -106,11 +106,11 @@ namespace Poseidon
         }
         private void LoadMessage()
         {
-            var req = new http._Group_User.GetLastReadMsgIdReq()
+            var req = new http._Group_User.GetGroupLastReadMsgIdReq()
             {
                 UserId = Class1.UserId
             };
-            var resp = http._Group_User.GetLastReadMsgId(req);
+            var resp = http._Group_User.GetGroupLastReadMsgId(req);
             var lastReadMsgId = resp.LastReadMsgId[groupChat.Id];
 
 
@@ -131,7 +131,7 @@ namespace Poseidon
                 var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])dt.Rows[i]["content"]));
                 var createTime = (long)dt.Rows[i]["create_time"];
                 var contentType = (long)dt.Rows[i]["content_type"];
-                if (userIdSend != Class1.UserId && id > lastReadMsgId && (i == 0 || (long)dt.Rows[i-1]["id"] <= lastReadMsgId))
+                if (id > lastReadMsgId && (i == 0 || (long)dt.Rows[i-1]["id"] <= lastReadMsgId))
                     cls_group.appendCenteralText(this, "以下为新消息");
                 switch (contentType)
                 {
@@ -206,8 +206,8 @@ namespace Poseidon
             }
 
             var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(content));
-            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({resp.Id}, " +
-                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, {(int)Class1.MsgType.GroupChat}, 1)", param);
+            bool ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({resp.Id}, " +
+                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {resp.CreateTime}, {(int)Class1.ContentType.Text}, {(int)Class1.MsgType.GroupChat})", param);
             if (!ret)
             {
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -327,8 +327,8 @@ namespace Poseidon
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(objId.ToString()));
-                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {createTime}, {(int)Class1.ContentType.Object}, {(int)Class1.MsgType.GroupChat}, 1)", param);
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({messageId}, " +
+                            $"{Class1.UserId}, 0, {groupChat.Id}, @param, {createTime}, {(int)Class1.ContentType.Object}, {(int)Class1.MsgType.GroupChat})", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -441,12 +441,21 @@ namespace Poseidon
             }
             if (Class1.unReadPrivateMsgItemPool.ContainsKey(userId))
             {
-                Dictionary<long, int> readMessage = new Dictionary<long, int>();
+                var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
+                {
+                    UserId = Class1.UserId,
+                    LastReadMsgId = new Dictionary<long, long>()
+                };
                 var subItem = Class1.unReadPrivateMsgItemPool[userId];
                 var ids = ((List<long>)(((Dictionary<string, object>)subItem.Tag)["ids"]));
                 foreach (var id in ids)
-                    readMessage.Add(id, 1);
-                Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
+                {
+                    if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(userId))
+                        updateFriendLastReadMsgIdReq.LastReadMsgId[userId] = Math.Max(updateFriendLastReadMsgIdReq.LastReadMsgId[userId], id);
+                    else
+                        updateFriendLastReadMsgIdReq.LastReadMsgId.Add(userId, id);
+                }
+                http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
 
                 Class1.frmMsgBox.clb_unread_msg.Items[0].SubItems.Remove(subItem);
                 Class1.unReadPrivateMsgItemPool.Remove(userId);

@@ -33,6 +33,7 @@ namespace Poseidon
                         {
                             case (int)Class1.MsgType.PrivateChat:
                                 {
+                                    
                                     var ids = (List<long>)dict["ids"];
                                     var userIdSend = (long)dict["user_id_send"];
                                     frm_chat frm_chat;
@@ -47,10 +48,21 @@ namespace Poseidon
                                         Class1.formChatPool.Add(userIdSend, frm_chat);
                                         frm_chat.Show();
                                     }
-                                    Dictionary<long, int> readMessage = new Dictionary<long, int>();
-                                    foreach (var msgId in ids)
-                                        readMessage.Add(msgId, 1);
-                                    Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
+                                    var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
+                                    {
+                                        UserId = Class1.UserId,
+                                        LastReadMsgId = new Dictionary<long, long>()
+                                    };
+                                    foreach (var id in ids)
+                                    {
+                                        if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(userIdSend))
+                                            updateFriendLastReadMsgIdReq.LastReadMsgId[userIdSend] = Math.Max(updateFriendLastReadMsgIdReq.LastReadMsgId[userIdSend], id);
+                                        else
+                                            updateFriendLastReadMsgIdReq.LastReadMsgId.Add(userIdSend, id);
+                                    }
+                                    http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
+
+
                                     var subItem = Class1.unReadPrivateMsgItemPool[userIdSend];
                                     clb_unread_msg.Items[0].SubItems.Remove(subItem);
                                     Class1.unReadPrivateMsgItemPool.Remove(userIdSend);
@@ -73,12 +85,12 @@ namespace Poseidon
                                         frmGroup.Show();
                                     }
                                     //Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
-                                    var req = new http._Group_User.UpdateLastReadMsgIdReq()
+                                    var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                                     {
                                         UserId = Class1.UserId,
                                         LastReadMsgId = new Dictionary<long, long>() { { groupId, maxId } }
                                     };
-                                    http._Group_User.UpdateLastReadMsgId(req);
+                                    http._Group_User.UpdateGroupLastReadMsgId(req);
                                     var subItem = Class1.unReadGroupMsgItemPool[groupId];
                                     clb_unread_msg.Items[2].SubItems.Remove(subItem);
                                     Class1.unReadGroupMsgItemPool.Remove(groupId);
@@ -107,12 +119,12 @@ namespace Poseidon
                         else
                             return;
 
-                        var req = new http._Relation.ReplyAddFriendReq()
+                        var req = new http._User_Relation.ReplyAddFriendReq()
                         {
                             Id = id,
                             Status = status
                         };
-                        var resp = http._Relation.ReplyAddFriend(req);
+                        var resp = http._User_Relation.ReplyAddFriend(req);
                         var replyId = resp.Id;
                         var createTime = resp.CreateTime;
                         bool ok = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {status} WHERE `id` = {id}");
@@ -134,7 +146,7 @@ namespace Poseidon
                 case (long)Class1.UnReadMsgType.ReplyAddFriend:
                     {
                         var id = (long)dict["id"];
-                        Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } }, new Dictionary<long, int>());
+                        Class1.UpdateMessageStatus(new Dictionary<long, int> { { id, 1 } }, new Dictionary<long, int>());
                         clb_unread_msg.Items[1].SubItems.Remove(e.SelectSubItem);
                         break;
                     }
@@ -184,7 +196,7 @@ namespace Poseidon
                 case (long)Class1.UnReadMsgType.ReplyAddGroup:
                     {
                         var id = (long)dict["id"];
-                        Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
+                        Class1.UpdateMessageStatus(new Dictionary<long, int>(), new Dictionary<long, int> { { id, 1 } });
                         clb_unread_msg.Items[1].SubItems.Remove(e.SelectSubItem);
                         break;
                     }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Poseidon.http
 {
-    class _Relation
+    class _User_Relation
     {
         public struct AddFriendReq
         {
@@ -54,6 +54,28 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct GetFriendLastReadMsgIdReq
+        {
+            public long UserId;
+        }
+        public struct GetFriendLastReadMsgIdResp
+        {
+            public Dictionary<long, long> LastReadMsgId;
+            public int StatusCode;
+            public string StatusMessage;
+        }
+
+        public struct UpdateFriendLastReadMsgIdReq
+        {
+            public long UserId;
+            public Dictionary<long, long> LastReadMsgId;
+        }
+
+        public struct UpdateFriendLastReadMsgIdResp
+        {
+            public int StatusCode;
+            public string StatusMessage;
+        }
         public static AddFriendResp AddFriend(AddFriendReq req)
         {
             var ret = Class1.DoHttpRequest("/friend", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
@@ -76,6 +98,18 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest($"/friend?user_id_send={req.UserIdSend}&user_id_recv={req.UserIdRecv}", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<DeleteFriendResp>(ret);
+            return resp;
+        }
+        public static GetFriendLastReadMsgIdResp GetFriendLastReadMsgId(GetFriendLastReadMsgIdReq req)
+        {
+            var ret = Class1.DoHttpRequest("/last_read_msg_id/friend/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
+            var resp = JsonConvert.DeserializeObject<GetFriendLastReadMsgIdResp>(ret);
+            return resp;
+        }
+        public static UpdateFriendLastReadMsgIdResp UpdateFriendLastReadMsgId(UpdateFriendLastReadMsgIdReq req)
+        {
+            var ret = Class1.DoHttpRequest("/last_read_msg_id/friend/" + req.UserId, "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
+            var resp = JsonConvert.DeserializeObject<UpdateFriendLastReadMsgIdResp>(ret);
             return resp;
         }
     }

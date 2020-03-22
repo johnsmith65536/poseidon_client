@@ -33,24 +33,24 @@ namespace Poseidon.http
             public string StatusMessage;
         }
 
-        public struct GetLastReadMsgIdReq
+        public struct GetGroupLastReadMsgIdReq
         {
             public long UserId;
         }
-        public struct GetLastReadMsgIdResp
+        public struct GetGroupLastReadMsgIdResp
         {
             public Dictionary<long, long> LastReadMsgId;
             public int StatusCode;
             public string StatusMessage;
         }
 
-        public struct UpdateLastReadMsgIdReq
+        public struct UpdateGroupLastReadMsgIdReq
         {
             public long UserId;
             public Dictionary<long, long> LastReadMsgId;
         }
 
-        public struct UpdateLastReadMsgIdResp
+        public struct UpdateGroupLastReadMsgIdResp
         {
             public int StatusCode;
             public string StatusMessage;
@@ -105,16 +105,16 @@ namespace Poseidon.http
             var resp = JsonConvert.DeserializeObject<FetchMemberListResp>(ret);
             return resp;
         }
-        public static GetLastReadMsgIdResp GetLastReadMsgId(GetLastReadMsgIdReq req)
+        public static GetGroupLastReadMsgIdResp GetGroupLastReadMsgId(GetGroupLastReadMsgIdReq req)
         {
-            var ret = Class1.DoHttpRequest("/group/last_read_msg_id/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
-            var resp = JsonConvert.DeserializeObject<GetLastReadMsgIdResp>(ret);
+            var ret = Class1.DoHttpRequest("/last_read_msg_id/group/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
+            var resp = JsonConvert.DeserializeObject<GetGroupLastReadMsgIdResp>(ret);
             return resp;
         }
-        public static UpdateLastReadMsgIdResp UpdateLastReadMsgId(UpdateLastReadMsgIdReq req)
+        public static UpdateGroupLastReadMsgIdResp UpdateGroupLastReadMsgId(UpdateGroupLastReadMsgIdReq req)
         {
-            var ret = Class1.DoHttpRequest("/group/last_read_msg_id/" + req.UserId, "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
-            var resp = JsonConvert.DeserializeObject<UpdateLastReadMsgIdResp>(ret);
+            var ret = Class1.DoHttpRequest("/last_read_msg_id/group/" + req.UserId, "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
+            var resp = JsonConvert.DeserializeObject<UpdateGroupLastReadMsgIdResp>(ret);
             return resp;
         }
         public static AddGroupResp AddGroup(AddGroupReq req)

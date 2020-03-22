@@ -252,8 +252,8 @@ namespace Poseidon
                 var messageId = sendMessageResp.Id;
                 var createTime = sendMessageResp.CreateTime;
                 var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(eTag));
-                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type, is_read) VALUES({messageId}, " +
-                            $"{Class1.UserId}, {idRecv}, 0, @param, {createTime}, {(int)Class1.ContentType.Image}, 0, 1)", param);
+                var ret = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({messageId}, " +
+                            $"{Class1.UserId}, {idRecv}, 0, @param, {createTime}, {(int)Class1.ContentType.Image}, 0)", param);
                 if (!ret)
                 {
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -413,7 +413,6 @@ namespace Poseidon
                   `create_time` INTEGER NOT NULL,
                   `content_type` INTEGER NOT NULL,
                   `msg_type` INTEGER NOT NULL,
-                  `is_read` INTEGER DEFAULT NULL,
                   PRIMARY KEY(`id`)
                 ) ; ");
                 if (!ret)
@@ -716,120 +715,247 @@ namespace Poseidon
             Class1.unReadPrivateMsgItemPool.Clear();
             Class1.unReadGroupMsgItemPool.Clear();
 
-            var readMessage = new Dictionary<long, int>();
-
             //private_chat
-            DataTable dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
-            if(dt != null && dt.Rows.Count != 0)
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    var id = long.Parse(row["id"].ToString());
-                    var userIdSend = long.Parse(row["user_id_send"].ToString());
-                    var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])row["content"]));
-                    var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                    var contentType = long.Parse(row["content_type"].ToString());
-
-                    if (Class1.formChatPool.ContainsKey(userIdSend))
-                    {
-                        var frm_chat = Class1.formChatPool[userIdSend];
-                        switch (contentType)
-                        {
-                            case (int)Class1.ContentType.Text:
-                                {
-                                    Class1.appendRtfToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), content);
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Object:
-                                {
-                                    var objId = long.Parse(content);
-                                    DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
-                                    if (dt1 == null || dt1.Rows.Count != 1)
-                                        throw new Exception("object not found, objId: " + objId);
-                                    var objName = dt1.Rows[0]["name"].ToString();
-                                    Class1.appendFileToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), "[文件]" + objName, objId);
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Vibration:
-                                {
-                                    Class1.appendSysMsgToMsgBox(frm_chat, "你" + (userIdSend == UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
-                                    Class1.Vibration(frm_chat);
-                                    break;
-                                }
-                            case (int)Class1.ContentType.Image:
-                                {
-                                    var eTag = content;
-                                    DataTable dt1 = sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
-                                    if (dt1 == null || dt1.Rows.Count != 1)
-                                        throw new Exception("image not found, e_tag: " + eTag);
-                                    var imageData = UnGzip((byte[])dt1.Rows[0]["content"]);
-                                    Class1.appendImageToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), imageData);
-                                    break;
-                                }
-                            default:
-                                {
-                                    Console.WriteLine("unknown content_type content_type = ", contentType);
-                                    break;
-                                }
-                        }
-                        readMessage.Add(id, 1);
-                    }
-                    else
-                    {
-                        switch (contentType)
-                        {
-                            case (int)ContentType.Text:
-                                {
-                                    appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
-                                    break;
-                                }
-                            case (int)ContentType.Object:
-                                {
-                                    var objId = long.Parse(content);
-                                    DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
-                                    if (dt1 == null || dt1.Rows.Count != 1)
-                                    {
-                                        Console.WriteLine("rowCount != 1");
-                                        return;
-                                    }
-                                    appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
-                                    break;
-                                }
-                            case (int)ContentType.Vibration:
-                                {
-                                    appendPersonalMsgToUnReadBox(id, userIdSend, "你收到了一个窗口抖动");
-                                    break;
-                                }
-                            case (int)ContentType.Image:
-                                {
-                                    appendPersonalMsgToUnReadBox(id, userIdSend, "[图片]");
-                                    break;
-                                }
-                            default:
-                                {
-                                    Console.WriteLine("unknown content_type " + contentType);
-                                    break;
-                                }
-                        }
-                    }
-                }
-            }
-
-            //group_chat
-            var req = new http._Group_User.GetLastReadMsgIdReq()
+            var getFriendLastReadMsgIdReq = new http._User_Relation.GetFriendLastReadMsgIdReq()
             {
                 UserId = Class1.UserId
             };
-            var resp = http._Group_User.GetLastReadMsgId(req);
-            var lastReadMsgId = resp.LastReadMsgId;
+            var getFriendLastReadMsgIdResp = http._User_Relation.GetFriendLastReadMsgId(getFriendLastReadMsgIdReq);
+            var friendLastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId;
 
-            var updateLastReadMsgIdReq = new http._Group_User.UpdateLastReadMsgIdReq()
+            var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
             {
                 UserId = Class1.UserId,
                 LastReadMsgId = new Dictionary<long, long>()
             };
 
-            foreach(var item in lastReadMsgId)
+            DataTable dt;
+
+
+            foreach (var item in friendLastReadMsgId)
+            {
+                var userIdSend = item.Key;
+                var msgId = item.Value;
+
+
+                dt = Class1.sql.SqlTable($"SELECT id, content, create_time, content_type FROM `message` WHERE `id` > {msgId} AND `user_id_send` = {userIdSend} AND `msg_type` = {(int)Class1.MsgType.PrivateChat}");
+                if (dt != null && dt.Rows.Count != 0)
+                {
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        var id = long.Parse(row["id"].ToString());
+                        var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])row["content"]));
+                        var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                        var contentType = long.Parse(row["content_type"].ToString());
+
+
+                        if (Class1.formChatPool.ContainsKey(userIdSend))
+                        {
+                            var frm_chat = Class1.formChatPool[userIdSend];
+                            switch (contentType)
+                            {
+                                case (int)Class1.ContentType.Text:
+                                    {
+                                        Class1.appendRtfToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), content);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Object:
+                                    {
+                                        var objId = long.Parse(content);
+                                        DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                            throw new Exception("object not found, objId: " + objId);
+                                        var objName = dt1.Rows[0]["name"].ToString();
+                                        Class1.appendFileToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), "[文件]" + objName, objId);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Vibration:
+                                    {
+                                        Class1.appendSysMsgToMsgBox(frm_chat, "你" + (userIdSend == UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                                        Class1.Vibration(frm_chat);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Image:
+                                    {
+                                        var eTag = content;
+                                        DataTable dt1 = sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                            throw new Exception("image not found, e_tag: " + eTag);
+                                        var imageData = UnGzip((byte[])dt1.Rows[0]["content"]);
+                                        Class1.appendImageToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), imageData);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type content_type = ", contentType);
+                                        break;
+                                    }
+                            }
+                            //readMessage.Add(id, 1);
+                            if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(userIdSend))
+                                updateFriendLastReadMsgIdReq.LastReadMsgId[userIdSend] = Math.Max(updateFriendLastReadMsgIdReq.LastReadMsgId[userIdSend], id);
+                            else
+                                updateFriendLastReadMsgIdReq.LastReadMsgId.Add(userIdSend, id);
+                        }
+                        else
+                        {
+                            switch (contentType)
+                            {
+                                case (int)ContentType.Text:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
+                                        break;
+                                    }
+                                case (int)ContentType.Object:
+                                    {
+                                        var objId = long.Parse(content);
+                                        DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                        {
+                                            Console.WriteLine("rowCount != 1");
+                                            return;
+                                        }
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
+                                        break;
+                                    }
+                                case (int)ContentType.Vibration:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "你收到了一个窗口抖动");
+                                        break;
+                                    }
+                                case (int)ContentType.Image:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "[图片]");
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type " + contentType);
+                                        break;
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+                /*
+                DataTable dt = Class1.sql.SqlTable($"SELECT id, user_id_send, content, create_time, content_type FROM `message` WHERE `user_id_recv` = {Class1.UserId} AND `is_read` = 0");
+                if(dt != null && dt.Rows.Count != 0)
+                {
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        var id = long.Parse(row["id"].ToString());
+                        var userIdSend = long.Parse(row["user_id_send"].ToString());
+                        var content = System.Text.Encoding.Default.GetString(Class1.UnGzip((byte[])row["content"]));
+                        var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                        var contentType = long.Parse(row["content_type"].ToString());
+
+                        if (Class1.formChatPool.ContainsKey(userIdSend))
+                        {
+                            var frm_chat = Class1.formChatPool[userIdSend];
+                            switch (contentType)
+                            {
+                                case (int)Class1.ContentType.Text:
+                                    {
+                                        Class1.appendRtfToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), content);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Object:
+                                    {
+                                        var objId = long.Parse(content);
+                                        DataTable dt1 = Class1.sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                            throw new Exception("object not found, objId: " + objId);
+                                        var objName = dt1.Rows[0]["name"].ToString();
+                                        Class1.appendFileToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), "[文件]" + objName, objId);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Vibration:
+                                    {
+                                        Class1.appendSysMsgToMsgBox(frm_chat, "你" + (userIdSend == UserId ? "发送" : "收到") + "了一个窗口抖动。\r\n", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
+                                        Class1.Vibration(frm_chat);
+                                        break;
+                                    }
+                                case (int)Class1.ContentType.Image:
+                                    {
+                                        var eTag = content;
+                                        DataTable dt1 = sql.SqlTable($"SELECT content FROM `image` WHERE `e_tag` = \"{eTag}\"");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                            throw new Exception("image not found, e_tag: " + eTag);
+                                        var imageData = UnGzip((byte[])dt1.Rows[0]["content"]);
+                                        Class1.appendImageToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), imageData);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type content_type = ", contentType);
+                                        break;
+                                    }
+                            }
+                            readMessage.Add(id, 1);
+                            if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(groupId))
+                                updateFriendLastReadMsgIdReq.LastReadMsgId[groupId] = Math.Max(updateLastReadMsgIdReq.LastReadMsgId[groupId], id);
+                            else
+                                updateFriendLastReadMsgIdReq.LastReadMsgId.Add(groupId, id);
+                        }
+                        else
+                        {
+                            switch (contentType)
+                            {
+                                case (int)ContentType.Text:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, Class1.rtfToText(content));
+                                        break;
+                                    }
+                                case (int)ContentType.Object:
+                                    {
+                                        var objId = long.Parse(content);
+                                        DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
+                                        if (dt1 == null || dt1.Rows.Count != 1)
+                                        {
+                                            Console.WriteLine("rowCount != 1");
+                                            return;
+                                        }
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
+                                        break;
+                                    }
+                                case (int)ContentType.Vibration:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "你收到了一个窗口抖动");
+                                        break;
+                                    }
+                                case (int)ContentType.Image:
+                                    {
+                                        appendPersonalMsgToUnReadBox(id, userIdSend, "[图片]");
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        Console.WriteLine("unknown content_type " + contentType);
+                                        break;
+                                    }
+                            }
+                        }
+                    }
+                }*/
+
+
+
+                //group_chat
+                var getGroupLastReadMsgIdReq = new http._Group_User.GetGroupLastReadMsgIdReq()
+            {
+                UserId = Class1.UserId
+            };
+            var getGroupLastReadMsgIdResp = http._Group_User.GetGroupLastReadMsgId(getGroupLastReadMsgIdReq);
+            var groupLastReadMsgId = getGroupLastReadMsgIdResp.LastReadMsgId;
+
+            var updateGroupLastReadMsgIdReq = new http._Group_User.UpdateGroupLastReadMsgIdReq()
+            {
+                UserId = Class1.UserId,
+                LastReadMsgId = new Dictionary<long, long>()
+            };
+
+            foreach(var item in groupLastReadMsgId)
             {
                 var groupId = item.Key;
                 var msgId = item.Value;
@@ -879,11 +1005,10 @@ namespace Poseidon
                                 default:
                                         throw new Exception("unknown content_type content_type = " + contentType);
                             }
-                            if (updateLastReadMsgIdReq.LastReadMsgId.ContainsKey(groupId))
-                                updateLastReadMsgIdReq.LastReadMsgId[groupId] = Math.Max(updateLastReadMsgIdReq.LastReadMsgId[groupId], id);
+                            if (updateGroupLastReadMsgIdReq.LastReadMsgId.ContainsKey(groupId))
+                                updateGroupLastReadMsgIdReq.LastReadMsgId[groupId] = Math.Max(updateGroupLastReadMsgIdReq.LastReadMsgId[groupId], id);
                             else
-                                updateLastReadMsgIdReq.LastReadMsgId.Add(groupId, id);
-
+                                updateGroupLastReadMsgIdReq.LastReadMsgId.Add(groupId, id);
                         }
                         else
                         {
@@ -924,8 +1049,9 @@ namespace Poseidon
 
 
             //进入聊天框的消息已读
-            UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
-            http._Group_User.UpdateLastReadMsgId(updateLastReadMsgIdReq);
+            //UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
+            http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
+            http._Group_User.UpdateGroupLastReadMsgId(updateGroupLastReadMsgIdReq);
 
             dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0");
             foreach (DataRow row in dt.Rows)
@@ -945,16 +1071,6 @@ namespace Poseidon
                         return;
                     }
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
-                    string statusString;
-                    if (status == (long)Class1.AddFriendStatus.Accepted)
-                        statusString = "请求通过";
-                    else if (status == (long)Class1.AddFriendStatus.Rejected)
-                        statusString = "请求被拒绝";
-                    else
-                    {
-                        Console.WriteLine("无效的status, status = " + status);
-                        return;
-                    }
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
                 }
             }
@@ -978,17 +1094,6 @@ namespace Poseidon
                         return;
                     }
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
-                    /*
-                    string statusString;
-                    if (status == (long)Class1.AddFriendStatus.Accepted)
-                        statusString = "请求通过";
-                    else if (status == (long)Class1.AddFriendStatus.Rejected)
-                        statusString = "请求被拒绝";
-                    else
-                    {
-                        Console.WriteLine("无效的status, status = " + status);
-                        return;
-                    }*/
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
                 }
             }
@@ -996,10 +1101,11 @@ namespace Poseidon
             icon.ChangeIconState();
         }
 
-        public static void UpdateMessageStatus(Dictionary<long, int> message, Dictionary<long, int> userRelationRequest, Dictionary<long, int> groupUserRequest)
+        public static void UpdateMessageStatus(Dictionary<long, int> userRelationRequest, Dictionary<long, int> groupUserRequest)
         {
             if (!Class1.IsOnline) //离线时，为保证本地和远程数据一致性，不做已读状态更新
                 return;
+            /*
             foreach (var item in message)
             {
                 bool ret = Class1.sql.ExecuteNonQuery($"UPDATE `message` SET `is_read` = {item.Value} WHERE `id` = {item.Key}");
@@ -1008,7 +1114,7 @@ namespace Poseidon
                     MessageBox.Show("DB错误，UPDATE message", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-            }
+            }*/
             foreach (var item in userRelationRequest)
             {
                 bool ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET `status` = {item.Value} WHERE `id` = {item.Key}");
@@ -1027,14 +1133,13 @@ namespace Poseidon
                     return;
                 }
             }
-            var req = new http._Message.UpdateMessageStatusReq()
+            var req = new http._Request.UpdateRequestStatusReq()
             {
-                MessageIds = message,
                 UserRelationRequestIds = userRelationRequest,
                 GroupUserRequestIds = groupUserRequest
               
             };
-            http._Message.UpdateMessageStatus(req);
+            http._Request.UpdateRequestStatus(req);
         }
         public static byte[] Gzip(byte[] data)
         {

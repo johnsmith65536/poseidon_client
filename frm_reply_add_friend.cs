@@ -30,22 +30,22 @@ namespace Poseidon
 
         private void btn_accept_Click(object sender, EventArgs e)
         {
-            var req = new http._Relation.ReplyAddFriendReq()
+            var req = new http._User_Relation.ReplyAddFriendReq()
             {
                 Id = id,
                 Status = (int)Class1.AddFriendStatus.Accepted
             };
-            http._Relation.ReplyAddFriend(req);
+            http._User_Relation.ReplyAddFriend(req);
         }
 
         private void btn_reject_Click(object sender, EventArgs e)
         {
-            var req = new http._Relation.ReplyAddFriendReq()
+            var req = new http._User_Relation.ReplyAddFriendReq()
             {
                 Id = id,
                 Status = (int)Class1.AddFriendStatus.Rejected
             };
-            http._Relation.ReplyAddFriend(req);
+            http._User_Relation.ReplyAddFriend(req);
         }
     }
 }

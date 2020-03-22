@@ -80,32 +80,7 @@ namespace Poseidon.http
             public string StatusMessage;
         }
 
-        public struct UpdateMessageStatusReq
-        {
-            public Dictionary<long, int> MessageIds;
-            public Dictionary<long, int> UserRelationRequestIds;
-            public Dictionary<long, int> GroupUserRequestIds;
-
-        }
-        public struct UpdateMessageStatusResp
-        {
-            public int StatusCode;
-            public string StatusMessage;
-        }
-        public struct FetchMessageStatusReq
-        {
-            public List<long> MessageIds;
-            public List<long> UserRelationRequestIds;
-            public List<long> GroupUserRequestIds;
-        }
-        public struct FetchMessageStatusResp
-        {
-            public Dictionary<long, int> MessageIds;
-            public Dictionary<long, int> UserRelationRequestIds;
-            public Dictionary<long, int> GroupUserRequestIds;
-            public int StatusCode;
-            public string StatusMessage;
-        }
+        
         public static SendMessageResp SendMessage(SendMessageReq req)
         {
             req.Content = Convert.ToBase64String(Class1.Gzip(System.Text.Encoding.Default.GetBytes(req.Content)));
@@ -134,25 +109,6 @@ namespace Poseidon.http
                 };
                 resp.Messages[i] = msg;
             }
-            return resp;
-        }
-        public static UpdateMessageStatusResp UpdateMessageStatus(UpdateMessageStatusReq req)
-        {
-            var ret = Class1.DoHttpRequest("/message/status", "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
-            var resp = JsonConvert.DeserializeObject<UpdateMessageStatusResp>(ret);
-            return resp;
-        }
-        public static FetchMessageStatusResp FetchMessageStatus(FetchMessageStatusReq req)
-        {
-            var url = "/message/status?";
-            foreach (var messageId in req.MessageIds)
-                url += "message_ids=" + messageId + "&";
-            foreach (var userRelationRequestId in req.UserRelationRequestIds)
-                url += "user_relation_request_ids=" + userRelationRequestId + "&";
-            foreach (var groupUserRequestIds in req.GroupUserRequestIds)
-                url += "group_user_request_ids=" + groupUserRequestIds + "&";
-            var ret = Class1.DoHttpRequest(url, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
-            var resp = JsonConvert.DeserializeObject<FetchMessageStatusResp>(ret);
             return resp;
         }
     }

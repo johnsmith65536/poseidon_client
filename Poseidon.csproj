@@ -150,7 +150,8 @@
     <Compile Include="http\_Message.cs" />
     <Compile Include="http\_Object.cs" />
     <Compile Include="http\_Oss.cs" />
-    <Compile Include="http\_Relation.cs" />
+    <Compile Include="http\_User_Relation.cs" />
+    <Compile Include="http\_Request.cs" />
     <Compile Include="http\_User.cs" />
     <Compile Include="icon.cs" />
     <Compile Include="infra\redis\redis.cs" />
