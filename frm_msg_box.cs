@@ -211,10 +211,7 @@ namespace Poseidon
                         break;
                     }
                 default:
-                    {
-                        Console.WriteLine("unknown type");
-                        break;
-                    }
+                        throw new Exception("unknown UnReadMsgType");
             }
             icon.ChangeIconState();
         }

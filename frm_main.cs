@@ -476,10 +476,7 @@ namespace Poseidon
                                                     break;
                                                 }
                                             default:
-                                                {
-                                                    Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
-                                                    break;
-                                                }
+                                                throw new Exception("unknown content_type " + msg.ContentType);
                                         }
                                         //消息已读
                                         //Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>(), new Dictionary<long, int>());
@@ -518,10 +515,7 @@ namespace Poseidon
                                                     break;
                                                 }
                                             default:
-                                                {
-                                                    Console.WriteLine("unknown content_type content_type = ", msg.ContentType);
-                                                    break;
-                                                }
+                                                throw new Exception("unknown content_type " + msg.ContentType);
                                         }
                                     }
                                     break;
@@ -665,11 +659,7 @@ namespace Poseidon
                         break;
                     }
                 default:
-                    {
-                        Console.WriteLine("Unknown BroadcastMsgType, type: " + broadcastMsgType);
-
-                        break;
-                    }
+                    throw new Exception("unknown BroadcastMsgType " + broadcastMsgType);
             }
 
             icon.ChangeIconState();

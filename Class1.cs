@@ -786,10 +786,7 @@ namespace Poseidon
                                         break;
                                     }
                                 default:
-                                    {
-                                        Console.WriteLine("unknown content_type content_type = ", contentType);
-                                        break;
-                                    }
+                                        throw new Exception("unknown content_type content_type = " + contentType);
                             }
                             //readMessage.Add(id, 1);
                             if (updateFriendLastReadMsgIdReq.LastReadMsgId.ContainsKey(userIdSend))
@@ -811,10 +808,7 @@ namespace Poseidon
                                         var objId = long.Parse(content);
                                         DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
                                         if (dt1 == null || dt1.Rows.Count != 1)
-                                        {
-                                            Console.WriteLine("rowCount != 1");
-                                            return;
-                                        }
+                                            throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
                                         appendPersonalMsgToUnReadBox(id, userIdSend, "[文件]" + dt1.Rows[0]["name"].ToString());
                                         break;
                                     }
@@ -829,10 +823,7 @@ namespace Poseidon
                                         break;
                                     }
                                 default:
-                                    {
-                                        Console.WriteLine("unknown content_type " + contentType);
-                                        break;
-                                    }
+                                        throw new Exception("unknown content_type " + contentType);
                             }
                         }
                     }
@@ -1024,10 +1015,7 @@ namespace Poseidon
                                         var objId = long.Parse(content);
                                         DataTable dt1 = sql.SqlTable($"SELECT name FROM `object` WHERE `id` = {objId}");
                                         if (dt1 == null || dt1.Rows.Count != 1)
-                                        {
-                                            Console.WriteLine("rowCount != 1");
-                                            return;
-                                        }
+                                            throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
                                         appendGroupMsgToUnReadBox(id, userIdSend, groupId, "[文件]" + dt1.Rows[0]["name"].ToString());
                                         break;
                                     }
@@ -1037,10 +1025,7 @@ namespace Poseidon
                                         break;
                                     }
                                 default:
-                                    {
-                                        Console.WriteLine("unknown content_type " + contentType);
-                                        break;
-                                    }
+                                    throw new Exception("unknown content_type " + contentType);
                             }
                         }
                     }
@@ -1066,10 +1051,7 @@ namespace Poseidon
                 {
                     var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {parentId}");
                     if (dt1 == null || dt1.Rows.Count == 0)
-                    {
-                        Console.WriteLine("parentId 不存在");
-                        return;
-                    }
+                        throw new Exception("parent id not found");
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
                 }
@@ -1089,10 +1071,7 @@ namespace Poseidon
                 {
                     var dt1 = Class1.sql.SqlTable($"SELECT status FROM `group_user_request` WHERE `id` = {parentId}");
                     if (dt1 == null || dt1.Rows.Count == 0)
-                    {
-                        Console.WriteLine("parentId 不存在");
-                        return;
-                    }
+                        throw new Exception("parent id not found");
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
                     Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
                 }
