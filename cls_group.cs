@@ -205,7 +205,7 @@ namespace Poseidon
                 }
                 var imageData = Class1.LoadFile(localFileName);
                 var imageParam = Class1.Gzip(imageData);
-                Class1.InsertImage(eTag, imageParam);
+                Class1.InsertImageIfNotExists(eTag, imageParam);
                 cls_group.appendImageToMsgBox(frmGroup, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), imageData);
             }));
             t.Start();

@@ -170,6 +170,31 @@ namespace Poseidon
                             var subItem = new ChatListSubItem(userId.ToString());
                             subItem.ID = (uint)userId;
                             Class1.chatListSubItemPool.Add(userId, subItem);
+
+                            //新增好友后，拉取历史消息
+                            var dt1 = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE (user_id_send = {Class1.UserId} AND user_id_recv = {userId}) OR (user_id_send = {userId} AND user_id_recv = {Class1.UserId})");
+                            if (dt1 == null || dt1.Rows.Count != 1)
+                                throw new Exception("select count(*) from message failed");
+
+                            var localCount = long.Parse(dt1.Rows[0]["count"].ToString());
+                            var fetchFriendHistoryMessageReq = new http._Message.FetchFriendHistoryMessageReq()
+                            {
+                                UserIdAlice = Class1.UserId,
+                                UserIdBob = userId,
+                                LocalCount = localCount
+                            };
+                            var fetchFriendHistoryMessageResp = http._Message.FetchFriendHistoryMessage(fetchFriendHistoryMessageReq);
+                            if (fetchFriendHistoryMessageResp.StatusCode == 254)
+                                return;
+                            foreach (var obj in fetchFriendHistoryMessageResp.Objects)
+                                Class1.InsertObjectIfNotExists(obj.Id, obj.ETag, obj.Name);
+                            foreach (var msg in fetchFriendHistoryMessageResp.Messages)
+                            {
+                                if (msg.ContentType == (int)Class1.ContentType.Image)
+                                    Class1.FetchImage(msg.Content);
+                                var contentParam = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
+                                Class1.InsertMessageIfNotExists(msg.Id, msg.UserIdSend, msg.UserIdRecv, msg.GroupId, contentParam, msg.CreateTime, msg.ContentType, msg.MsgType);
+                            }
                         }
 
                     //状态转移
@@ -259,14 +284,35 @@ namespace Poseidon
                                 ChatListBox.Items[2].SubItems.Add(subItem);
                             }));
                             Class1.groupItemPool.Add(groupId, subItem);
+
+
+                            //新增群组后，拉取历史消息
+                            var dt1 = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE group_id = {groupId}");
+                            if (dt1 == null || dt1.Rows.Count != 1)
+                                throw new Exception("select count(*) from message failed");
+
+                            var localCount = long.Parse(dt1.Rows[0]["count"].ToString());
+                            var fetchGroupHistoryMessageReq = new http._Message.FetchGroupHistoryMessageReq()
+                            {
+                                GroupId = groupId,
+                                LocalCount = localCount
+                            };
+                            var fetchGroupHistoryMessageResp = http._Message.FetchGroupHistoryMessage(fetchGroupHistoryMessageReq);
+                            if (fetchGroupHistoryMessageResp.StatusCode == 254)
+                                return;
+                            foreach (var obj in fetchGroupHistoryMessageResp.Objects)
+                                Class1.InsertObjectIfNotExists(obj.Id, obj.ETag, obj.Name);
+                            foreach (var msg in fetchGroupHistoryMessageResp.Messages)
+                            {
+                                if (msg.ContentType == (int)Class1.ContentType.Image)
+                                    Class1.FetchImage(msg.Content);
+                                var contentParam = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
+                                Class1.InsertMessageIfNotExists(msg.Id, msg.UserIdSend, msg.UserIdRecv, msg.GroupId, contentParam, msg.CreateTime, msg.ContentType, msg.MsgType);
+                            }
                         }
                     }
 
 
-
-                    /*
-                     * 拉取远程request.status
-                     */
                     var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
 
                     // 同步最新UserRelationRequest & GroupUserRequest的status
@@ -357,20 +403,17 @@ namespace Poseidon
                 //消息落库
 
                 foreach (var obj in objects)
-                    Class1.InsertObject(obj.Id, obj.ETag, obj.Name);
+                    Class1.InsertObjectIfNotExists(obj.Id, obj.ETag, obj.Name);
 
                 foreach (var msg in messages)
                 {
                     if (msg.ContentType == (int)Class1.ContentType.Image)
                         Class1.FetchImage(msg.Content);
                     var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
+                    /*
                     bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType})", param);
-                    if (!ret1)
-                    {
-                        MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
+                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType})", param);*/
+                    Class1.InsertMessageIfNotExists(msg.Id, msg.UserIdSend, msg.UserIdRecv, msg.GroupId, param, msg.CreateTime, msg.ContentType, msg.MsgType);
                 }
 
                 foreach (var msg in userRelations)
@@ -500,7 +543,7 @@ namespace Poseidon
                                             case (int)Class1.ContentType.Object:
                                                 {
                                                     var objId = long.Parse(msg.Content);
-                                                    Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
+                                                    Class1.InsertObjectIfNotExists(objId, msg.ObjectETag, msg.ObjectName);
                                                     Class1.appendPersonalMsgToUnReadBox(msg.Id, msg.UserIdSend, "[文件]" + msg.ObjectName);
                                                     break;
                                                 }
@@ -566,7 +609,7 @@ namespace Poseidon
                                             case (int)Class1.ContentType.Object:
                                                 {
                                                     var objId = long.Parse(msg.Content);
-                                                    Class1.InsertObject(objId, msg.ObjectETag, msg.ObjectName);
+                                                    Class1.InsertObjectIfNotExists(objId, msg.ObjectETag, msg.ObjectName);
                                                     Class1.appendGroupMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.GroupId, "[文件]" + msg.ObjectName);
                                                     break;
                                                 }

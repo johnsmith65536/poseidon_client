@@ -302,7 +302,7 @@ namespace Poseidon
                 };
                 var createObjectResp = http._Object.CreateObject(createObjectReq);
                 var objId = createObjectResp.Id;
-                Class1.InsertObject(objId, eTag, name);
+                Class1.InsertObjectIfNotExists(objId, eTag, name);
 
                 var sendMessageReq = new http._Message.SendMessageReq()
                 {

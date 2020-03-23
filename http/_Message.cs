@@ -79,8 +79,33 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct FetchFriendHistoryMessageReq
+        {
+            public long UserIdAlice;
+            public long UserIdBob;
+            public long LocalCount;
+        }
+        public struct FetchFriendHistoryMessageResp
+        {
+            public List<Message> Messages;
+            public List<Object> Objects;
+            public int StatusCode;
+            public string StatusMessage;
+        }
+        public struct FetchGroupHistoryMessageReq
+        {
+            public long GroupId;
+            public long LocalCount;
+        }
+        public struct FetchGroupHistoryMessageResp
+        {
+            public List<Message> Messages;
+            public List<Object> Objects;
+            public int StatusCode;
+            public string StatusMessage;
+        }
 
-        
+
         public static SendMessageResp SendMessage(SendMessageReq req)
         {
             req.Content = Convert.ToBase64String(Class1.Gzip(System.Text.Encoding.Default.GetBytes(req.Content)));
@@ -93,6 +118,54 @@ namespace Poseidon.http
             var ret = Class1.DoHttpRequest($"/message?user_id={req.UserId}&message_id={req.MessageId}&user_relation_id={req.UserRelationId}&group_user_id={req.GroupUserId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  null);
             var resp = JsonConvert.DeserializeObject<SyncMessageResp>(ret);
             for (int i = 0;i < resp.Messages.Count;i++)
+            {
+                var rawContent = System.Text.Encoding.Default.GetString(Class1.UnGzip(Convert.FromBase64String(resp.Messages[i].Content)));
+                var msg = new Message()
+                {
+                    Id = resp.Messages[i].Id,
+                    UserIdSend = resp.Messages[i].UserIdSend,
+                    UserIdRecv = resp.Messages[i].UserIdRecv,
+                    GroupId = resp.Messages[i].GroupId,
+                    Content = rawContent,
+                    CreateTime = resp.Messages[i].CreateTime,
+                    ContentType = resp.Messages[i].ContentType,
+                    MsgType = resp.Messages[i].MsgType,
+                    IsRead = resp.Messages[i].IsRead
+                };
+                resp.Messages[i] = msg;
+            }
+            return resp;
+        }
+        public static FetchFriendHistoryMessageResp FetchFriendHistoryMessage(FetchFriendHistoryMessageReq req)
+        {
+            var url = $"/message/history/friend?user_id_alice={req.UserIdAlice}&user_id_bob={req.UserIdBob}&local_count={req.LocalCount}";
+            var ret = Class1.DoHttpRequest(url, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, null);
+            var resp = JsonConvert.DeserializeObject<FetchFriendHistoryMessageResp>(ret);
+            for (int i = 0; i < resp.Messages.Count; i++)
+            {
+                var rawContent = System.Text.Encoding.Default.GetString(Class1.UnGzip(Convert.FromBase64String(resp.Messages[i].Content)));
+                var msg = new Message()
+                {
+                    Id = resp.Messages[i].Id,
+                    UserIdSend = resp.Messages[i].UserIdSend,
+                    UserIdRecv = resp.Messages[i].UserIdRecv,
+                    GroupId = resp.Messages[i].GroupId,
+                    Content = rawContent,
+                    CreateTime = resp.Messages[i].CreateTime,
+                    ContentType = resp.Messages[i].ContentType,
+                    MsgType = resp.Messages[i].MsgType,
+                    IsRead = resp.Messages[i].IsRead
+                };
+                resp.Messages[i] = msg;
+            }
+            return resp;
+        }
+        public static FetchGroupHistoryMessageResp FetchGroupHistoryMessage(FetchGroupHistoryMessageReq req)
+        {
+            var url = $"/message/history/group?group_id={req.GroupId}&local_count={req.LocalCount}";
+            var ret = Class1.DoHttpRequest(url, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, null);
+            var resp = JsonConvert.DeserializeObject<FetchGroupHistoryMessageResp>(ret);
+            for (int i = 0; i < resp.Messages.Count; i++)
             {
                 var rawContent = System.Text.Encoding.Default.GetString(Class1.UnGzip(Convert.FromBase64String(resp.Messages[i].Content)));
                 var msg = new Message()
