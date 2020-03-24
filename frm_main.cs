@@ -112,8 +112,8 @@ namespace Poseidon
         public void LoadMain()
         {
             ChatListBox.Items.Clear();
-            ChatListBox.Items.Add(new ChatListItem("在线", true));
-            ChatListBox.Items.Add(new ChatListItem("离线", true));
+            ChatListBox.Items.Add(new ChatListItem("好友", true));
+            //ChatListBox.Items.Add(new ChatListItem("离线", true));
 
             Class1.chatListSubItemPool.Clear();
             Class1.onlineUserId.Clear();
@@ -170,6 +170,7 @@ namespace Poseidon
                             var subItem = new ChatListSubItem(userId.ToString());
                             subItem.ID = (uint)userId;
                             Class1.chatListSubItemPool.Add(userId, subItem);
+                            ChatListBox.Items[0].SubItems.Add(subItem);
 
                             //新增好友后，拉取历史消息
                             var dt1 = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE (user_id_send = {Class1.UserId} AND user_id_recv = {userId}) OR (user_id_send = {userId} AND user_id_recv = {Class1.UserId})");
@@ -198,6 +199,7 @@ namespace Poseidon
                         }
 
                     //状态转移
+                    /*
                     foreach (var userId in oldOnlineUserId)
                         if (!newOnlineUserId.Contains(userId))
                             Invoke(new Action(() =>
@@ -224,7 +226,10 @@ namespace Poseidon
                             Invoke(new Action(() =>
                             {
                                 ChatListBox.Items[1].SubItems.Add(Class1.chatListSubItemPool[userId]);
-                            }));
+                            }));*/
+
+
+
                     Class1.onlineUserId = newOnlineUserId;
                     Class1.offlineUserId = newOfflineUserId;
 
@@ -232,8 +237,19 @@ namespace Poseidon
 
                     //销毁删除的subItem
                     foreach (var userId in oldTotalUserId)
+                    {
                         if (!newTotalUserId.Contains(userId))
+                        {
+                            var subItem = Class1.chatListSubItemPool[userId];
+                            ChatListBox.Items[0].SubItems.Add(subItem);
                             Class1.chatListSubItemPool.Remove(userId);
+                        }
+                    }
+                    foreach (var userId in newOnlineUserId)
+                        Class1.chatListSubItemPool[userId].Status = ChatListSubItem.UserStatus.Online;
+                    foreach (var userId in newOfflineUserId)
+                        Class1.chatListSubItemPool[userId].Status = ChatListSubItem.UserStatus.OffLine;
+
                     icon.ChangeIconState();
 
                     /*
@@ -267,7 +283,7 @@ namespace Poseidon
                             var subItem = Class1.groupItemPool[groupId];
                             Invoke(new Action(() =>
                             {
-                                ChatListBox.Items[2].SubItems.Remove(subItem);
+                                ChatListBox.Items[1].SubItems.Remove(subItem);
                             }));
                             Class1.groupItemPool.Remove(groupId);
                         }
@@ -281,7 +297,7 @@ namespace Poseidon
                             subItem.ID = (uint)groupId;
                             Invoke(new Action(() =>
                             {
-                                ChatListBox.Items[2].SubItems.Add(subItem);
+                                ChatListBox.Items[1].SubItems.Add(subItem);
                             }));
                             Class1.groupItemPool.Add(groupId, subItem);
 

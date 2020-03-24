@@ -366,11 +366,17 @@ namespace Poseidon
                         AccessToken = "";
                         UpdateStatusCheckBox(false);
                         InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
+                        /*
                         foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
                             frm_main.Invoke(new Action(() =>
                             {
                                 frm_main.ChatListBox.Items[1].SubItems.Add(item);
                                 frm_main.ChatListBox.Items[0].SubItems.Remove(item);
+                            }));*/
+                        foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
+                            frm_main.Invoke(new Action(() =>
+                            {
+                                item.Status = ChatListSubItem.UserStatus.OffLine;
                             }));
                         MessageBox.Show(statusMessage, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
@@ -505,11 +511,17 @@ namespace Poseidon
             IsOnline = false;
             InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
             AccessToken = "";
+            /*
             foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
                 frm_main.Invoke(new Action(() =>
                 {
                     frm_main.ChatListBox.Items[1].SubItems.Add(item);
                     frm_main.ChatListBox.Items[0].SubItems.Remove(item);
+                }));*/
+            foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
+                frm_main.Invoke(new Action(() =>
+                {
+                    item.Status = ChatListSubItem.UserStatus.OffLine;
                 }));
 
         }
