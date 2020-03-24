@@ -78,7 +78,7 @@ namespace Poseidon
                 MessageBox.Show("DB错误，INSERT INTO user_relation_request失败777", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            MessageBox.Show("好友请求已发送666", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("好友请求已发送", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void dataGridView1_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)

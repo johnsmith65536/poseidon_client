@@ -106,13 +106,16 @@ namespace Poseidon
         }
         private void LoadMessage()
         {
-            var req = new http._Group_User.GetGroupLastReadMsgIdReq()
+            long lastReadMsgId = long.MaxValue;
+            if(Class1.IsOnline)
             {
-                UserId = Class1.UserId
-            };
-            var resp = http._Group_User.GetGroupLastReadMsgId(req);
-            var lastReadMsgId = resp.LastReadMsgId[groupChat.Id];
-
+                var req = new http._Group_User.GetGroupLastReadMsgIdReq()
+                {
+                    UserId = Class1.UserId
+                };
+                var resp = http._Group_User.GetGroupLastReadMsgId(req);
+                lastReadMsgId = resp.LastReadMsgId[groupChat.Id];
+            }
 
             DataTable dt;
             dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `group_id` = {groupChat.Id}");
@@ -486,6 +489,26 @@ namespace Poseidon
                 UserId = selectId
             };
             http._Group_User.DeleteMember(req);
+        }
+
+        private void clb_member_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rtxt_send_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void skToolMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void rtxt_message_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

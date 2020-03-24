@@ -40,14 +40,17 @@ namespace Poseidon
             this.Text = "与" + userId + "的会话";
             userIdChat = userId;
             DataTable dt;
+            long lastReadMsgId = long.MaxValue;
 
-
-            var getFriendLastReadMsgIdReq = new http._User_Relation.GetFriendLastReadMsgIdReq()
+            if (Class1.IsOnline)
             {
-                UserId = Class1.UserId
-            };
-            var getFriendLastReadMsgIdResp = http._User_Relation.GetFriendLastReadMsgId(getFriendLastReadMsgIdReq);
-            var lastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId[userId];
+                var getFriendLastReadMsgIdReq = new http._User_Relation.GetFriendLastReadMsgIdReq()
+                {
+                    UserId = Class1.UserId
+                };
+                var getFriendLastReadMsgIdResp = http._User_Relation.GetFriendLastReadMsgId(getFriendLastReadMsgIdReq);
+                lastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId[userId];
+            }
 
             dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}");
             if (dt == null || dt.Rows.Count != 1)

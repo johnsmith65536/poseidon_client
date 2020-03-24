@@ -113,6 +113,8 @@ namespace Poseidon.http
         }
         public static UpdateGroupLastReadMsgIdResp UpdateGroupLastReadMsgId(UpdateGroupLastReadMsgIdReq req)
         {
+            if (!Class1.IsOnline)
+                return new UpdateGroupLastReadMsgIdResp();
             var ret = Class1.DoHttpRequest("/last_read_msg_id/group/" + req.UserId, "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<UpdateGroupLastReadMsgIdResp>(ret);
             return resp;

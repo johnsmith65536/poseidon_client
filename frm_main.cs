@@ -930,6 +930,11 @@ namespace Poseidon
 
         private void mnu_create_group_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var frmCreateGroup = new frm_create_group();
             frmCreateGroup.ShowDialog();
         }
@@ -952,6 +957,11 @@ namespace Poseidon
 
         private void mnu_dissolve_group_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var ret = MessageBox.Show("确定要解散群聊吗?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
             if (ret != DialogResult.Yes)
                 return;
@@ -965,6 +975,11 @@ namespace Poseidon
 
         private void mnu_quit_group_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var ret = MessageBox.Show("确定要退出群聊吗?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
             if (ret != DialogResult.Yes)
                 return;
@@ -975,6 +990,16 @@ namespace Poseidon
                 UserId = Class1.UserId
             };
             http._Group_User.DeleteMember(req);
+        }
+
+        private void mnu_strip_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
     }
 }

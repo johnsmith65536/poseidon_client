@@ -108,6 +108,8 @@ namespace Poseidon.http
         }
         public static UpdateFriendLastReadMsgIdResp UpdateFriendLastReadMsgId(UpdateFriendLastReadMsgIdReq req)
         {
+            if (!Class1.IsOnline)
+                return new UpdateFriendLastReadMsgIdResp();
             var ret = Class1.DoHttpRequest("/last_read_msg_id/friend/" + req.UserId, "PUT", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<UpdateFriendLastReadMsgIdResp>(ret);
             return resp;

@@ -71,6 +71,7 @@
             this.menuStrip1.Size = new System.Drawing.Size(269, 25);
             this.menuStrip1.TabIndex = 17;
             this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
             // 
             // mnu_add_friend
             // 
@@ -122,6 +123,7 @@
             this.mnu_del_friend});
             this.mnu_strip.Name = "mnu_strip";
             this.mnu_strip.Size = new System.Drawing.Size(125, 26);
+            this.mnu_strip.Opening += new System.ComponentModel.CancelEventHandler(this.mnu_strip_Opening);
             // 
             // mnu_del_friend
             // 
@@ -165,6 +167,9 @@
             // 
             // ChatListBox
             // 
+            this.ChatListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ChatListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.ChatListBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.ChatListBox.ForeColor = System.Drawing.Color.Black;
@@ -211,7 +216,7 @@
             // mnu_dissolve_group
             // 
             this.mnu_dissolve_group.Name = "mnu_dissolve_group";
-            this.mnu_dissolve_group.Size = new System.Drawing.Size(180, 22);
+            this.mnu_dissolve_group.Size = new System.Drawing.Size(124, 22);
             this.mnu_dissolve_group.Text = "解散群聊";
             this.mnu_dissolve_group.Click += new System.EventHandler(this.mnu_dissolve_group_Click);
             // 
@@ -220,12 +225,12 @@
             this.mnu_strip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnu_quit_group});
             this.mnu_strip2.Name = "mnu_strip";
-            this.mnu_strip2.Size = new System.Drawing.Size(181, 48);
+            this.mnu_strip2.Size = new System.Drawing.Size(125, 26);
             // 
             // mnu_quit_group
             // 
             this.mnu_quit_group.Name = "mnu_quit_group";
-            this.mnu_quit_group.Size = new System.Drawing.Size(180, 22);
+            this.mnu_quit_group.Size = new System.Drawing.Size(124, 22);
             this.mnu_quit_group.Text = "退出群聊";
             this.mnu_quit_group.Click += new System.EventHandler(this.mnu_quit_group_Click);
             // 

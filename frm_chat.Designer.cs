@@ -38,7 +38,6 @@
             this.rtxt_send = new CCWin.SkinControl.SkinChatRichTextBox();
             this.skToolMenu = new CCWin.SkinControl.SkinToolStrip();
             this.toolFont = new System.Windows.Forms.ToolStripButton();
-            this.toolCountenance = new System.Windows.Forms.ToolStripButton();
             this.toolVibration = new System.Windows.Forms.ToolStripButton();
             this.toolImgFile = new System.Windows.Forms.ToolStripButton();
             this.toolfile = new System.Windows.Forms.ToolStripButton();
@@ -58,7 +57,6 @@
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.清屏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.消息管理器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolPrintScreen = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolItemPrint = new System.Windows.Forms.ToolStripMenuItem();
             this.录制视屏动画ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.捕捉视屏图像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,23 +73,28 @@
             // 
             // pgb_upload
             // 
-            this.pgb_upload.Location = new System.Drawing.Point(616, 72);
+            this.pgb_upload.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pgb_upload.Location = new System.Drawing.Point(12, 504);
             this.pgb_upload.Name = "pgb_upload";
-            this.pgb_upload.Size = new System.Drawing.Size(510, 23);
+            this.pgb_upload.Size = new System.Drawing.Size(138, 23);
             this.pgb_upload.TabIndex = 22;
             // 
             // pgb_download
             // 
-            this.pgb_download.Location = new System.Drawing.Point(616, 119);
+            this.pgb_download.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pgb_download.Location = new System.Drawing.Point(163, 504);
             this.pgb_download.Name = "pgb_download";
-            this.pgb_download.Size = new System.Drawing.Size(510, 23);
+            this.pgb_download.Size = new System.Drawing.Size(157, 23);
             this.pgb_download.TabIndex = 23;
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(480, 569);
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(393, 504);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(83, 29);
             this.button2.TabIndex = 26;
             this.button2.Text = "发送消息";
             this.button2.UseVisualStyleBackColor = true;
@@ -105,30 +108,29 @@
             this.rtxt_message.BackColor = System.Drawing.Color.White;
             this.rtxt_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtxt_message.DetectUrls = false;
-            this.rtxt_message.Location = new System.Drawing.Point(8, 12);
+            this.rtxt_message.Location = new System.Drawing.Point(0, 0);
             this.rtxt_message.Name = "rtxt_message";
             this.rtxt_message.ReadOnly = true;
             this.rtxt_message.SelectControl = null;
             this.rtxt_message.SelectControlIndex = 0;
             this.rtxt_message.SelectControlPoint = new System.Drawing.Point(0, 0);
-            this.rtxt_message.Size = new System.Drawing.Size(477, 323);
+            this.rtxt_message.Size = new System.Drawing.Size(476, 366);
             this.rtxt_message.TabIndex = 27;
             this.rtxt_message.Text = "";
             this.rtxt_message.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtxt_message_LinkClicked);
             // 
             // rtxt_send
             // 
-            this.rtxt_send.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.rtxt_send.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rtxt_send.BackColor = System.Drawing.Color.White;
             this.rtxt_send.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtxt_send.Location = new System.Drawing.Point(8, 379);
+            this.rtxt_send.Location = new System.Drawing.Point(0, 393);
             this.rtxt_send.Name = "rtxt_send";
             this.rtxt_send.SelectControl = null;
             this.rtxt_send.SelectControlIndex = 0;
             this.rtxt_send.SelectControlPoint = new System.Drawing.Point(0, 0);
-            this.rtxt_send.Size = new System.Drawing.Size(477, 122);
+            this.rtxt_send.Size = new System.Drawing.Size(476, 105);
             this.rtxt_send.TabIndex = 28;
             this.rtxt_send.Text = "";
             this.rtxt_send.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rtxt_send_KeyDown);
@@ -177,16 +179,14 @@
             this.skToolMenu.ItemRadiusStyle = CCWin.SkinClass.RoundStyle.None;
             this.skToolMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolFont,
-            this.toolCountenance,
             this.toolVibration,
             this.toolImgFile,
-            this.toolfile,
             this.toolStripDropDownButton4,
-            this.toolPrintScreen});
-            this.skToolMenu.Location = new System.Drawing.Point(8, 338);
+            this.toolfile});
+            this.skToolMenu.Location = new System.Drawing.Point(0, 364);
             this.skToolMenu.Name = "skToolMenu";
             this.skToolMenu.RadiusStyle = CCWin.SkinClass.RoundStyle.All;
-            this.skToolMenu.Size = new System.Drawing.Size(477, 32);
+            this.skToolMenu.Size = new System.Drawing.Size(476, 26);
             this.skToolMenu.SkinAllColor = true;
             this.skToolMenu.TabIndex = 122;
             this.skToolMenu.Text = "skinToolStrip1";
@@ -202,21 +202,10 @@
             this.toolFont.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolFont.Margin = new System.Windows.Forms.Padding(4, 1, 0, 2);
             this.toolFont.Name = "toolFont";
-            this.toolFont.Size = new System.Drawing.Size(23, 29);
+            this.toolFont.Size = new System.Drawing.Size(23, 23);
             this.toolFont.Text = "toolStripButton1";
             this.toolFont.ToolTipText = "字体选择工具栏";
             this.toolFont.Click += new System.EventHandler(this.toolFont_Click);
-            // 
-            // toolCountenance
-            // 
-            this.toolCountenance.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolCountenance.Image = ((System.Drawing.Image)(resources.GetObject("toolCountenance.Image")));
-            this.toolCountenance.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolCountenance.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
-            this.toolCountenance.Name = "toolCountenance";
-            this.toolCountenance.Size = new System.Drawing.Size(23, 29);
-            this.toolCountenance.Text = "toolStripButton2";
-            this.toolCountenance.ToolTipText = "选择表情";
             // 
             // toolVibration
             // 
@@ -225,7 +214,7 @@
             this.toolVibration.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolVibration.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
             this.toolVibration.Name = "toolVibration";
-            this.toolVibration.Size = new System.Drawing.Size(23, 29);
+            this.toolVibration.Size = new System.Drawing.Size(23, 23);
             this.toolVibration.Text = "toolStripButton4";
             this.toolVibration.ToolTipText = "向好友发送窗口抖动";
             this.toolVibration.Click += new System.EventHandler(this.toolVibration_Click);
@@ -236,7 +225,7 @@
             this.toolImgFile.Image = ((System.Drawing.Image)(resources.GetObject("toolImgFile.Image")));
             this.toolImgFile.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolImgFile.Name = "toolImgFile";
-            this.toolImgFile.Size = new System.Drawing.Size(23, 29);
+            this.toolImgFile.Size = new System.Drawing.Size(23, 23);
             this.toolImgFile.Text = "toolStripButton7";
             this.toolImgFile.ToolTipText = "发送图片";
             this.toolImgFile.Click += new System.EventHandler(this.toolImgFile_Click);
@@ -247,7 +236,7 @@
             this.toolfile.Image = ((System.Drawing.Image)(resources.GetObject("toolfile.Image")));
             this.toolfile.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolfile.Name = "toolfile";
-            this.toolfile.Size = new System.Drawing.Size(23, 29);
+            this.toolfile.Size = new System.Drawing.Size(23, 23);
             this.toolfile.Text = "发送文件";
             this.toolfile.Click += new System.EventHandler(this.toolfile_Click);
             // 
@@ -370,17 +359,6 @@
             this.消息管理器ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.消息管理器ToolStripMenuItem.Text = "消息管理器";
             // 
-            // toolPrintScreen
-            // 
-            this.toolPrintScreen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolPrintScreen.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolPrintScreen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolPrintScreen.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
-            this.toolPrintScreen.Name = "toolPrintScreen";
-            this.toolPrintScreen.Size = new System.Drawing.Size(16, 29);
-            this.toolPrintScreen.Text = "toolStripButton8";
-            this.toolPrintScreen.ToolTipText = "屏幕截图 Ctrl + Alt + A";
-            // 
             // ToolItemPrint
             // 
             this.ToolItemPrint.Name = "ToolItemPrint";
@@ -420,7 +398,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1252, 621);
+            this.ClientSize = new System.Drawing.Size(476, 534);
             this.Controls.Add(this.skToolMenu);
             this.Controls.Add(this.rtxt_send);
             this.Controls.Add(this.rtxt_message);
@@ -447,10 +425,8 @@
         public CCWin.SkinControl.SkinChatRichTextBox rtxt_send;
         private CCWin.SkinControl.SkinToolStrip skToolMenu;
         private System.Windows.Forms.ToolStripButton toolFont;
-        private System.Windows.Forms.ToolStripButton toolCountenance;
         private System.Windows.Forms.ToolStripButton toolVibration;
         private System.Windows.Forms.ToolStripButton toolImgFile;
-        private System.Windows.Forms.ToolStripSplitButton toolPrintScreen;
         private System.Windows.Forms.ToolStripMenuItem ToolItemPrint;
         private System.Windows.Forms.ToolStripMenuItem 录制视屏动画ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 捕捉视屏图像ToolStripMenuItem;

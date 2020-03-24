@@ -33,6 +33,11 @@ namespace Poseidon
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             List<long> userIds = new List<long>();
             for (int i = 0; i < clb_friend.Items.Count; i++)
                 if (clb_friend.GetItemChecked(i))
