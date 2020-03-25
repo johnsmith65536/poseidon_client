@@ -45,6 +45,8 @@ namespace Poseidon
                         GroupId = groupChat.Id
                     };
                     var resp = http._Group_User.FetchMemberList(req);
+                    if (resp.StatusCode == 254)
+                        return;
 
                     var oldOnlineUserId = onlineUserId;
                     var oldOfflineUserId = offlineUserId;

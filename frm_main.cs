@@ -170,8 +170,10 @@ namespace Poseidon
                             var subItem = new ChatListSubItem(userId.ToString());
                             subItem.ID = (uint)userId;
                             Class1.chatListSubItemPool.Add(userId, subItem);
-                            ChatListBox.Items[0].SubItems.Add(subItem);
-
+                            Invoke(new Action(() =>
+                            {
+                                ChatListBox.Items[0].SubItems.Add(subItem);
+                            }));
                             //新增好友后，拉取历史消息
                             var dt1 = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE (user_id_send = {Class1.UserId} AND user_id_recv = {userId}) OR (user_id_send = {userId} AND user_id_recv = {Class1.UserId})");
                             if (dt1 == null || dt1.Rows.Count != 1)
@@ -241,7 +243,10 @@ namespace Poseidon
                         if (!newTotalUserId.Contains(userId))
                         {
                             var subItem = Class1.chatListSubItemPool[userId];
-                            ChatListBox.Items[0].SubItems.Add(subItem);
+                            Invoke(new Action(() =>
+                            {
+                                ChatListBox.Items[0].SubItems.Remove(subItem);
+                            }));
                             Class1.chatListSubItemPool.Remove(userId);
                         }
                     }
@@ -260,7 +265,7 @@ namespace Poseidon
                         UserId = Class1.UserId
                     };
                     var fetchGroupListResp = http._Group_User.FetchGroupList(fetchGroupListReq);
-                    if (resp.StatusCode == 254)
+                    if (fetchGroupListResp.StatusCode == 254)
                         return;
 
                     var oldGroupIds = new HashSet<long>();
