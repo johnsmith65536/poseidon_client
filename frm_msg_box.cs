@@ -84,7 +84,6 @@ namespace Poseidon
                                         Class1.formGroupPool.Add(groupId, frmGroup);
                                         frmGroup.Show();
                                     }
-                                    //Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
                                     var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                                     {
                                         UserId = Class1.UserId,

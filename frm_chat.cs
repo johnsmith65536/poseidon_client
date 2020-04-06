@@ -18,10 +18,6 @@ namespace Poseidon
     public partial class frm_chat : Form
     {
         public static long userIdChat;
-        public frm_chat()
-        {
-            InitializeComponent();
-        }
         HashSet<Image> imagePool = new HashSet<Image>();
         delegate void ProgressBarSetValueCallBackCallBack(ProgressBar pgb, int value); 
         private void InvokeProgressBarSetValue(ProgressBar pgb, int value)
@@ -49,7 +45,12 @@ namespace Poseidon
                     UserId = Class1.UserId
                 };
                 var getFriendLastReadMsgIdResp = http._User_Relation.GetFriendLastReadMsgId(getFriendLastReadMsgIdReq);
-                lastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId[userId];
+                if (getFriendLastReadMsgIdResp.LastReadMsgId.ContainsKey(userId))
+                    lastReadMsgId = getFriendLastReadMsgIdResp.LastReadMsgId[userId];
+                else
+                {
+                    //未成为好友，无法发送消息，会在SendMessage中拒绝，这里放行
+                }
             }
 
             dt = Class1.sql.SqlTable($"SELECT count(*) as count FROM `message` WHERE `id` > {lastReadMsgId} AND `user_id_send` = {userId} AND `user_id_recv` = {Class1.UserId}");
@@ -292,13 +293,6 @@ namespace Poseidon
             Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(),DateTime.Now,content);
             rtxt_send.Rtf = string.Empty;
         }
-        
-
-        private void frm_chat_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void rtxt_message_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             if (!Class1.IsOnline)
@@ -372,7 +366,6 @@ namespace Poseidon
                 return;
             }
 
-            //Class1.appendSystemMsgToMsgBox(this, Class1.UserId.ToString(), DateTime.Now);
             Class1.appendSysMsgToMsgBox(this, "你发送了一个窗口抖动。\r\n", DateTime.Now);
             rtxt_message.Select(rtxt_message.Text.Length, 0);
             rtxt_message.ScrollToCaret();

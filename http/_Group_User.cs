@@ -83,7 +83,6 @@ namespace Poseidon.http
         }
         public struct DeleteMemberReq
         {
-            public long Operator;
             public long GroupId;
             public long UserId;
         }

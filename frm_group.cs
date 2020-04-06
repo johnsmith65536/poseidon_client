@@ -25,10 +25,6 @@ namespace Poseidon
         private long selectId;
 
         HashSet<Image> imagePool = new HashSet<Image>();
-        public frm_group()
-        {
-            InitializeComponent();
-        }
         public void login()
         {
             memberPool.Clear();
@@ -486,7 +482,6 @@ namespace Poseidon
                 return;
             var req = new http._Group_User.DeleteMemberReq()
             {
-                Operator = Class1.UserId,
                 GroupId = groupChat.Id,
                 UserId = selectId
             };

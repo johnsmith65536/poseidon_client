@@ -23,7 +23,7 @@ namespace Poseidon
 {
     public static class Class1
     {
-        public const string Ip = "192.168.6.128";
+        public const string Ip = "112.74.188.186";
 
         public const string HttpPort = ":8081";
 
@@ -360,19 +360,11 @@ namespace Poseidon
             {
                 case 254:
                     {
-                        redis.UnSubscribe("poseidon_heart_beat_channel");
                         redis.UnSubscribe("poseidon_message_channel_" + UserId);
                         IsOnline = false;
                         AccessToken = "";
                         UpdateStatusCheckBox(false);
                         InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
-                        /*
-                        foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
-                            frm_main.Invoke(new Action(() =>
-                            {
-                                frm_main.ChatListBox.Items[1].SubItems.Add(item);
-                                frm_main.ChatListBox.Items[0].SubItems.Remove(item);
-                            }));*/
                         foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
                             frm_main.Invoke(new Action(() =>
                             {
@@ -506,18 +498,10 @@ namespace Poseidon
             };
 
             http._Login.Logout(req);
-            redis.UnSubscribe("poseidon_heart_beat_channel");
             redis.UnSubscribe("poseidon_message_channel_" + UserId);
             IsOnline = false;
             InvokeToolStripStatusLabel(frm_main.toolStripStatusLabel1, "离线");
             AccessToken = "";
-            /*
-            foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
-                frm_main.Invoke(new Action(() =>
-                {
-                    frm_main.ChatListBox.Items[1].SubItems.Add(item);
-                    frm_main.ChatListBox.Items[0].SubItems.Remove(item);
-                }));*/
             foreach (ChatListSubItem item in frm_main.ChatListBox.Items[0].SubItems)
                 frm_main.Invoke(new Action(() =>
                 {
@@ -951,7 +935,6 @@ namespace Poseidon
 
 
             //进入聊天框的消息已读
-            //UpdateMessageStatus(readMessage, new Dictionary<long, int>(), new Dictionary<long, int>());
             http._User_Relation.UpdateFriendLastReadMsgId(updateFriendLastReadMsgIdReq);
             http._Group_User.UpdateGroupLastReadMsgId(updateGroupLastReadMsgIdReq);
 

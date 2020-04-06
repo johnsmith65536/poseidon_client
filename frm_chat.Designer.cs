@@ -408,7 +408,6 @@
             this.Name = "frm_chat";
             this.Text = "frm_chat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frm_chat_FormClosed);
-            this.Load += new System.EventHandler(this.frm_chat_Load);
             this.skToolMenu.ResumeLayout(false);
             this.skToolMenu.PerformLayout();
             this.ResumeLayout(false);

@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using StackExchange.Redis;
 using Poseidon.infra.redis;
 using Newtonsoft.Json;
 using CCWin.SkinControl;
-using Aliyun.OSS;
-using Aliyun.OSS.Common;
-using System.IO;
 
 namespace Poseidon
 {
@@ -85,35 +77,11 @@ namespace Poseidon
         {
             InitializeComponent();
         }
-        delegate void GridAddCallBack(DataGridView dgv, Dictionary<string, object> dict);
-        delegate void GridClearCallBack(DataGridView dgv);
-
-        private void InvokeGridAdd(DataGridView dgv, Dictionary<string, object> dict)
-        {
-            if (dgv.InvokeRequired)
-            {
-                GridAddCallBack stcb = new GridAddCallBack(InvokeGridAdd);
-                this.Invoke(stcb, new object[] { dgv, dict });
-            }
-            else
-                Class1.GridAdd(dgv, dict);
-        }
-        private void InvokeGridClear(DataGridView dgv)
-        {
-            if (dgv.InvokeRequired)
-            {
-                GridClearCallBack stcb = new GridClearCallBack(InvokeGridClear);
-                this.Invoke(stcb, new object[] { dgv });
-            }
-            else
-                dgv.Rows.Clear();
-        }
 
         public void LoadMain()
         {
             ChatListBox.Items.Clear();
             ChatListBox.Items.Add(new ChatListItem("好友", true));
-            //ChatListBox.Items.Add(new ChatListItem("离线", true));
 
             Class1.chatListSubItemPool.Clear();
             Class1.onlineUserId.Clear();
@@ -200,42 +168,8 @@ namespace Poseidon
                             }
                         }
 
-                    //状态转移
-                    /*
-                    foreach (var userId in oldOnlineUserId)
-                        if (!newOnlineUserId.Contains(userId))
-                            Invoke(new Action(() =>
-                            {
-                                ChatListBox.Items[0].SubItems.Remove(Class1.chatListSubItemPool[userId]);
-                            }));
-                    foreach (var userId in newOnlineUserId)
-                        if (!oldOnlineUserId.Contains(userId))
-                            Invoke(new Action(() =>
-                            {
-                                ChatListBox.Items[0].SubItems.Add(Class1.chatListSubItemPool[userId]);
-                            }));
-
-
-                    foreach (var userId in oldOfflineUserId)
-                        if (!newOfflineUserId.Contains(userId))
-                            Invoke(new Action(() =>
-                            {
-                                ChatListBox.Items[1].SubItems.Remove(Class1.chatListSubItemPool[userId]);
-                            }));
-
-                    foreach (var userId in newOfflineUserId)
-                        if (!oldOfflineUserId.Contains(userId))
-                            Invoke(new Action(() =>
-                            {
-                                ChatListBox.Items[1].SubItems.Add(Class1.chatListSubItemPool[userId]);
-                            }));*/
-
-
-
                     Class1.onlineUserId = newOnlineUserId;
                     Class1.offlineUserId = newOfflineUserId;
-
-
 
                     //销毁删除的subItem
                     foreach (var userId in oldTotalUserId)
@@ -431,9 +365,6 @@ namespace Poseidon
                     if (msg.ContentType == (int)Class1.ContentType.Image)
                         Class1.FetchImage(msg.Content);
                     var param = Class1.Gzip(System.Text.Encoding.Default.GetBytes(msg.Content));
-                    /*
-                    bool ret1 = Class1.sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) VALUES({msg.Id}, " +
-                        $"{msg.UserIdSend}, {msg.UserIdRecv}, {msg.GroupId}, @param, {msg.CreateTime}, {msg.ContentType}, {msg.MsgType})", param);*/
                     Class1.InsertMessageIfNotExists(msg.Id, msg.UserIdSend, msg.UserIdRecv, msg.GroupId, param, msg.CreateTime, msg.ContentType, msg.MsgType);
                 }
 
@@ -466,7 +397,20 @@ namespace Poseidon
             }));
             t2.Start();
 
-            redis.Subscribe("poseidon_heart_beat_channel", HeartBeatChannel);
+            Thread t3 = new Thread(new ThreadStart(() =>    //心跳包
+            {
+                var req = new http._Heart_Beat.HeartBeatReq()
+                {
+                    UserId = Class1.UserId
+                };
+                while (Class1.IsOnline)
+                {
+                    http._Heart_Beat.HeartBeat(req);
+                    Thread.Sleep(5 * 1000);
+                }
+            }));
+            t3.Start();
+
             redis.Subscribe("poseidon_message_channel_" + Class1.UserId, MessageChannel);
             Class1.UpdateStatusCheckBox(Class1.IsOnline);
             Class1.InvokeToolStripStatusLabel(toolStripStatusLabel1, "在线");
@@ -543,7 +487,6 @@ namespace Poseidon
                                                 throw new Exception("unknown content_type " + msg.ContentType);
                                         }
                                         //消息已读
-                                        //Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>(), new Dictionary<long, int>());
                                         var updateFriendLastReadMsgIdReq = new http._User_Relation.UpdateFriendLastReadMsgIdReq()
                                         {
                                             UserId = Class1.UserId,
@@ -610,7 +553,6 @@ namespace Poseidon
                                                 throw new Exception("unknown content_type content_type = " + msg.ContentType);
                                         }
                                         //消息已读
-                                        //Class1.UpdateMessageStatus(new Dictionary<long, int> { { msg.Id, 1 } }, new Dictionary<long, int>());
                                         var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                                         {
                                             UserId = Class1.UserId,
@@ -730,16 +672,6 @@ namespace Poseidon
 
             Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
-        public void HeartBeatChannel(RedisChannel cnl, RedisValue val)
-        {
-            var req = new http._Heart_Beat.HeartBeatReq()
-            {
-                UserId = Class1.UserId
-            };
-            http._Heart_Beat.HeartBeat(req);
-            Console.WriteLine("Send HeartBeat");
-            // Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
-        }
         private void frm_main_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (Class1.IsOnline)
@@ -760,7 +692,6 @@ namespace Poseidon
             BroadcastMsgType type = obj.BroadcastMsgType;
             return type;
         }
-
         private void mnu_add_friend_Click(object sender, EventArgs e)
         {
             if (!Class1.IsOnline)
@@ -876,10 +807,8 @@ namespace Poseidon
                 }
                 if (Class1.unReadGroupMsgItemPool.ContainsKey(groupId))
                 {
-                    Dictionary<long, int> readMessage = new Dictionary<long, int>();
                     var subItem = Class1.unReadGroupMsgItemPool[groupId];
                     var maxId = (long)((Dictionary<string, object>)subItem.Tag)["max_id"];
-                    //Class1.UpdateMessageStatus(readMessage, new Dictionary<long, int>());
                     var req = new http._Group_User.UpdateGroupLastReadMsgIdReq()
                     {
                         UserId = Class1.UserId,
@@ -905,7 +834,7 @@ namespace Poseidon
             }
             else if (Class1.groupItemPool.ContainsKey(selectId) && Class1.groupItemPool[selectId] == e.SelectSubItem)
             {
-                if(Class1.GroupId2Group[selectId].Owner == Class1.UserId)
+                if (Class1.GroupId2Group[selectId].Owner == Class1.UserId)
                     mnu_strip1.Show(MousePosition.X, MousePosition.Y);
                 else
                     mnu_strip2.Show(MousePosition.X, MousePosition.Y);
@@ -942,11 +871,6 @@ namespace Poseidon
             }
             var frmCreateGroup = new frm_create_group();
             frmCreateGroup.ShowDialog();
-        }
-
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-
         }
 
         private void mnu_join_group_Click(object sender, EventArgs e)
@@ -990,21 +914,10 @@ namespace Poseidon
                 return;
             var req = new http._Group_User.DeleteMemberReq()
             {
-                Operator = Class1.UserId,
                 GroupId = selectId,
                 UserId = Class1.UserId
             };
             http._Group_User.DeleteMember(req);
-        }
-
-        private void mnu_strip_Opening(object sender, CancelEventArgs e)
-        {
-
-        }
-
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
         }
     }
 }

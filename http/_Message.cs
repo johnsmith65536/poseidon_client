@@ -75,7 +75,6 @@ namespace Poseidon.http
             public List<UserRelationRequest> UserRelations;
             public List<Object> Objects;
             public List<GroupUserRequest> GroupUsers;
-            public long LastOnlineTime;
             public int StatusCode;
             public string StatusMessage;
         }
