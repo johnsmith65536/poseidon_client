@@ -41,6 +41,16 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct GetUserInfoReq
+        {
+            public long UserId;
+        }
+        public struct GetUserInfoResp
+        {
+            public User User;
+            public int StatusCode;
+            public string StatusMessage;
+        }
         public static CreateUserResp CreateUser(CreateUserReq req)
         {
             var ret = Class1.DoHttpRequest("/user", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } },  JsonConvert.SerializeObject(req));
@@ -51,6 +61,12 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest($"/user/search?user_id={req.UserId}&data={req.Data}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
             var resp = JsonConvert.DeserializeObject<SearchUserResp>(ret);
+            return resp;
+        }
+        public static GetUserInfoResp GetUserInfo(GetUserInfoReq req)
+        {
+            var ret = Class1.DoHttpRequest($"/user/info/{req.UserId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
+            var resp = JsonConvert.DeserializeObject<GetUserInfoResp>(ret);
             return resp;
         }
     }

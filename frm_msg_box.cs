@@ -80,7 +80,7 @@ namespace Poseidon
                                     }
                                     else
                                     {
-                                        frmGroup = new frm_group(Class1.GroupId2Group[groupId]);
+                                        frmGroup = new frm_group(Class1.GetGroupInfo(groupId));
                                         Class1.formGroupPool.Add(groupId, frmGroup);
                                         frmGroup.Show();
                                     }
@@ -109,7 +109,7 @@ namespace Poseidon
                             return;
                         }
                         var id = (long)dict["id"];
-                        var ret = MessageBox.Show(userIdSend + "请求添加为好友，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+                        var ret = MessageBox.Show($"{Class1.GetUserInfo(userIdSend).NickName}({userIdSend})" + "请求添加为好友，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
                         int status;
                         if (ret == DialogResult.Yes)
                             status = (int)Class1.AddFriendStatus.Accepted;
@@ -159,7 +159,7 @@ namespace Poseidon
                         }
                         var id = (long)dict["id"];
                         var groupId = (long)dict["group_id"];
-                        var ret = MessageBox.Show(userIdSend + "请求加入群聊" + groupId + "，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+                        var ret = MessageBox.Show($"{Class1.GetUserInfo(userIdSend).NickName}({userIdSend})" + "请求加入群聊" + $"{Class1.GetGroupInfo(groupId).Name}({groupId})" + "，是否接受？", "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
                         int status;
                         if (ret == DialogResult.Yes)
                             status = (int)Class1.AddFriendStatus.Accepted;

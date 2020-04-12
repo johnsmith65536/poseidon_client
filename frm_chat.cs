@@ -17,7 +17,7 @@ namespace Poseidon
 {
     public partial class frm_chat : Form
     {
-        public static long userIdChat;
+        public long userIdChat;
         HashSet<Image> imagePool = new HashSet<Image>();
         delegate void ProgressBarSetValueCallBackCallBack(ProgressBar pgb, int value); 
         private void InvokeProgressBarSetValue(ProgressBar pgb, int value)
@@ -33,7 +33,7 @@ namespace Poseidon
         public frm_chat(long userId)
         {
             InitializeComponent();
-            this.Text = "与" + userId + "的会话";
+            this.Text = $"私聊会话 {Class1.UserId2User[userId].NickName}({userId})";
             userIdChat = userId;
             DataTable dt;
             long lastReadMsgId = long.MaxValue;
@@ -75,7 +75,7 @@ namespace Poseidon
                 {
                     case (int)Class1.ContentType.Text:
                         {
-                            Class1.appendRtfToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), content);
+                            Class1.appendRtfToMsgBox(this, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(createTime), content);
                             break;
                         }
                     case (int)Class1.ContentType.Object:
@@ -84,7 +84,7 @@ namespace Poseidon
                             DataTable dt1 = Class1.sql.SqlTable($"SELECT e_tag, name FROM `object` WHERE `id` = {objId}");
                             if (dt1 == null || dt1.Rows.Count != 1)
                                 throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
-                            Class1.appendFileToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
+                            Class1.appendFileToMsgBox(this, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(createTime), "[文件]" + dt1.Rows[0]["name"].ToString(), objId);
                             break;
                         }
                     case (int)Class1.ContentType.Vibration:
@@ -99,7 +99,7 @@ namespace Poseidon
                             if (dt1 == null || dt1.Rows.Count != 1)
                                 throw new Exception("rowCount != 1, rowCount = " + dt1.Rows.Count);
                             var imageData = Class1.UnGzip((byte[])dt1.Rows[0]["content"]);
-                            var stream = Class1.appendImageToMsgBox(this, userIdSend.ToString(), Class1.StampToDateTime(createTime), imageData);
+                            var stream = Class1.appendImageToMsgBox(this, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(createTime), imageData);
                             imagePool.Add(stream);
                             break;
                         }
@@ -116,9 +116,10 @@ namespace Poseidon
         }
         private void UploadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
-            //System.Console.WriteLine("ProgressCallback - Progress: {0}%, TotalBytes:{1}, TransferredBytes:{2} ",
-            //args.TransferredBytes * 100 / args.TotalBytes, args.TotalBytes, args.TransferredBytes);
-            InvokeProgressBarSetValue(pgb_upload, (int)(args.TransferredBytes * 100 / args.TotalBytes));
+            Invoke(new Action(() =>
+            {
+                pgb_upload.Value = (int)(args.TransferredBytes * 100 / args.TotalBytes);
+            }));
         }
         private void UploadFile(string localFileName)
         {
@@ -155,9 +156,14 @@ namespace Poseidon
                         Console.WriteLine("Failed with error info: {0}", ex.Message);
                     }
                 }
-                
+                Invoke(new Action(() =>
+                {
+                    pgb_upload.Value = 100;
+                    pgb_upload.Visible = false;
+                }));
+
                 var name = Path.GetFileName(localFileName);
-               var createObjectReq = new http._Object.CreateObjectReq()
+                var createObjectReq = new http._Object.CreateObjectReq()
                 {
                     ETag = eTag,
                     Name = name
@@ -181,7 +187,7 @@ namespace Poseidon
                 {
                     case 1:
                         {
-                            Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                            Class1.appendSysMsgToMsgBox(this, "你与" + $"{Class1.UserId2User[userIdChat].NickName}({userIdChat})" + "未成为好友，无法发送消息", DateTime.Now);
                             return;
                         }
                 }
@@ -196,15 +202,16 @@ namespace Poseidon
                     MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                Class1.appendFileToMsgBox(this, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), "[文件]" + name, objId);
+                Class1.appendFileToMsgBox(this, $"{Class1.UserId2User[Class1.UserId].NickName}({Class1.UserId})", Class1.StampToDateTime(createTime), "[文件]" + name, objId);
             }));
             t.Start();
         }
         private void DownloadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
-            //System.Console.WriteLine("ProgressCallback - Progress: {0}%, TotalBytes:{1}, TransferredBytes:{2} ",
-            //args.TransferredBytes * 100 / args.TotalBytes, args.TotalBytes, args.TransferredBytes);
-            InvokeProgressBarSetValue(pgb_download, (int)(args.TransferredBytes * 100 / args.TotalBytes));
+            Invoke(new Action(() =>
+            {
+                pgb_download.Value = (int)(args.TransferredBytes * 100 / args.TotalBytes);
+            }));
         }
         private void DownloadFile(string eTag, string localFileName)
         {
@@ -234,7 +241,12 @@ namespace Poseidon
                         }
                         bw.Close();
                     }
-                    Console.WriteLine("Get object:{0} succeeded", eTag);
+                    Console.WriteLine("Get object:{0} succeeded", eTag); 
+                    Invoke(new Action(() =>
+                    {
+                        pgb_download.Value = 100;
+                        pgb_download.Visible = false;
+                    }));
                 }
                 catch (OssException ex)
                 {
@@ -277,7 +289,7 @@ namespace Poseidon
             {
                 case 1:
                     {
-                        Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                        Class1.appendSysMsgToMsgBox(this, "你与" + $"{Class1.UserId2User[userIdChat].NickName}({userIdChat})" + "未成为好友，无法发送消息", DateTime.Now);
                         return;
                     }
             }
@@ -290,7 +302,7 @@ namespace Poseidon
                 MessageBox.Show("DB错误，INSERT INTO message失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            Class1.appendRtfToMsgBox(this, Class1.UserId.ToString(),DateTime.Now,content);
+            Class1.appendRtfToMsgBox(this, $"{Class1.UserId2User[Class1.UserId].NickName}({Class1.UserId})", DateTime.Now,content);
             rtxt_send.Rtf = string.Empty;
         }
         private void rtxt_message_LinkClicked(object sender, LinkClickedEventArgs e)
@@ -316,9 +328,9 @@ namespace Poseidon
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var localFileName = saveFileDialog1.FileName;
-                InvokeProgressBarSetValue(pgb_download, 0);
+                pgb_download.Value = 0;
+                pgb_download.Visible = true;
                 DownloadFile(eTag, localFileName);
-                InvokeProgressBarSetValue(pgb_download, 100);
             }
         }
 
@@ -352,7 +364,7 @@ namespace Poseidon
             {
                 case 1:
                     {
-                        Class1.appendSysMsgToMsgBox(this, "你与" + userIdChat + "未成为好友，无法发送消息", DateTime.Now);
+                        Class1.appendSysMsgToMsgBox(this, "你与" + $"{Class1.UserId2User[userIdChat].NickName}({userIdChat})" + "未成为好友，无法发送消息", DateTime.Now);
                         return;
                     }
             }
@@ -414,9 +426,7 @@ namespace Poseidon
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var localFileName = openFileDialog1.FileName;
-                InvokeProgressBarSetValue(pgb_upload, 0);
                 Class1.UploadImage(localFileName, userIdChat, this);
-                InvokeProgressBarSetValue(pgb_upload, 100);
             }
         }
         private void toolfile_Click(object sender, EventArgs e)
@@ -430,12 +440,16 @@ namespace Poseidon
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var localFileName = openFileDialog1.FileName;
-                InvokeProgressBarSetValue(pgb_upload, 0);
+                pgb_upload.Value = 0;
+                pgb_upload.Visible = true;
                 UploadFile(localFileName);
-                InvokeProgressBarSetValue(pgb_upload, 100);
 
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

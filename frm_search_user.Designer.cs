@@ -44,7 +44,7 @@
             // 
             // txt_search
             // 
-            this.txt_search.Location = new System.Drawing.Point(39, 35);
+            this.txt_search.Location = new System.Drawing.Point(28, 27);
             this.txt_search.Name = "txt_search";
             this.txt_search.Size = new System.Drawing.Size(161, 21);
             this.txt_search.TabIndex = 0;
@@ -52,7 +52,7 @@
             // 
             // btn_search
             // 
-            this.btn_search.Location = new System.Drawing.Point(395, 33);
+            this.btn_search.Location = new System.Drawing.Point(258, 25);
             this.btn_search.Name = "btn_search";
             this.btn_search.Size = new System.Drawing.Size(75, 23);
             this.btn_search.TabIndex = 1;
@@ -89,13 +89,13 @@
             this.last_online_time,
             this.is_friend});
             this.dataGridView1.GridColor = System.Drawing.Color.White;
-            this.dataGridView1.Location = new System.Drawing.Point(39, 81);
+            this.dataGridView1.Location = new System.Drawing.Point(28, 73);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowTemplate.Height = 23;
-            this.dataGridView1.Size = new System.Drawing.Size(431, 171);
+            this.dataGridView1.Size = new System.Drawing.Size(305, 171);
             this.dataGridView1.TabIndex = 4;
             this.dataGridView1.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_CellMouseUp);
             // 
@@ -134,14 +134,16 @@
             // 
             // frm_search_user
             // 
+            this.AcceptButton = this.btn_search;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(500, 282);
+            this.ClientSize = new System.Drawing.Size(366, 271);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.btn_search);
             this.Controls.Add(this.txt_search);
             this.Name = "frm_search_user";
-            this.Text = "frm_search_user";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "查找用户";
             this.mnu_strip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);

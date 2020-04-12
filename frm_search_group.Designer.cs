@@ -44,7 +44,7 @@
             // 
             // btn_search
             // 
-            this.btn_search.Location = new System.Drawing.Point(414, 39);
+            this.btn_search.Location = new System.Drawing.Point(260, 27);
             this.btn_search.Name = "btn_search";
             this.btn_search.Size = new System.Drawing.Size(75, 23);
             this.btn_search.TabIndex = 6;
@@ -54,7 +54,7 @@
             // 
             // txt_search
             // 
-            this.txt_search.Location = new System.Drawing.Point(58, 41);
+            this.txt_search.Location = new System.Drawing.Point(31, 27);
             this.txt_search.Name = "txt_search";
             this.txt_search.Size = new System.Drawing.Size(161, 21);
             this.txt_search.TabIndex = 5;
@@ -65,12 +65,12 @@
             this.mnu_add_group});
             this.mnu_strip.Name = "mnu_strip";
             this.mnu_strip.ShowImageMargin = false;
-            this.mnu_strip.Size = new System.Drawing.Size(156, 48);
+            this.mnu_strip.Size = new System.Drawing.Size(88, 26);
             // 
             // mnu_add_group
             // 
             this.mnu_add_group.Name = "mnu_add_group";
-            this.mnu_add_group.Size = new System.Drawing.Size(155, 22);
+            this.mnu_add_group.Size = new System.Drawing.Size(87, 22);
             this.mnu_add_group.Text = "加入群";
             this.mnu_add_group.Click += new System.EventHandler(this.mnu_add_group_Click);
             // 
@@ -87,13 +87,13 @@
             this.create_time,
             this.is_member});
             this.dataGridView1.GridColor = System.Drawing.Color.White;
-            this.dataGridView1.Location = new System.Drawing.Point(58, 87);
+            this.dataGridView1.Location = new System.Drawing.Point(31, 73);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowTemplate.Height = 23;
-            this.dataGridView1.Size = new System.Drawing.Size(431, 171);
+            this.dataGridView1.Size = new System.Drawing.Size(304, 171);
             this.dataGridView1.TabIndex = 7;
             this.dataGridView1.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_CellMouseUp);
             // 
@@ -132,14 +132,17 @@
             // 
             // frm_search_group
             // 
+            this.AcceptButton = this.btn_search;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(593, 302);
+            this.ClientSize = new System.Drawing.Size(380, 265);
             this.Controls.Add(this.btn_search);
             this.Controls.Add(this.txt_search);
             this.Controls.Add(this.dataGridView1);
             this.Name = "frm_search_group";
-            this.Text = "frm_search_group";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "查找群组";
+            this.Load += new System.EventHandler(this.frm_search_group_Load);
             this.mnu_strip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);

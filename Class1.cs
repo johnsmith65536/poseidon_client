@@ -58,7 +58,8 @@ namespace Poseidon
 
         public static Dictionary<long, ChatListSubItem> groupItemPool = new Dictionary<long, ChatListSubItem>();
 
-        public static Dictionary<long, Group> GroupId2Group;
+        public static Dictionary<long, Group> GroupId2Group = new Dictionary<long, Group>();
+        public static Dictionary<long, User> UserId2User = new Dictionary<long, User>();
 
         public struct Group
         {
@@ -66,6 +67,11 @@ namespace Poseidon
             public string Name;
             public long Owner;
             public long CreateTime;
+        }
+        public struct User
+        {
+            public long Id;
+            public string NickName;
         }
 
         public enum AddFriendStatus
@@ -243,7 +249,7 @@ namespace Poseidon
                 {
                     case 1:
                         {
-                            Class1.appendSysMsgToMsgBox(frmChat, "你与" + idRecv + "未成为好友，无法发送消息", DateTime.Now);
+                            Class1.appendSysMsgToMsgBox(frmChat, "你与" + $"{Class1.UserId2User[idRecv].NickName}({idRecv})" + "未成为好友，无法发送消息", DateTime.Now);
                             return;
                         }
                 }
@@ -262,7 +268,7 @@ namespace Poseidon
                 var imageData = Class1.LoadFile(localFileName);
                 var imageParam = Class1.Gzip(imageData);
                 Class1.InsertImageIfNotExists(eTag, imageParam);
-                Class1.appendImageToMsgBox(frmChat, Class1.UserId.ToString(), Class1.StampToDateTime(createTime), imageData);
+                Class1.appendImageToMsgBox(frmChat, $"{Class1.UserId2User[Class1.UserId].NickName}({Class1.UserId})", Class1.StampToDateTime(createTime), imageData);
             }));
             t.Start();
         }
@@ -324,7 +330,6 @@ namespace Poseidon
         }
         public static void InsertMessageIfNotExists(long id, long userIdSend, long userIdRecv, long groupId, byte[] contentParam, long createTime, int contentType, int msgType)
         {
-            Console.WriteLine("id = " + id + " send = " + userIdSend + " recv = " + userIdRecv);
             bool ret = sql.ExecuteNonQueryWithBinary($"INSERT INTO `message`(id, user_id_send, user_id_recv, group_id, content, create_time, content_type, msg_type) SELECT {id}, {userIdSend}, {userIdRecv}, {groupId}, @param, {createTime}, {contentType}, {msgType} WHERE NOT EXISTS (SELECT * FROM `message` WHERE message.id = {id})", contentParam);
             if (!ret)
             {
@@ -370,7 +375,7 @@ namespace Poseidon
                             {
                                 item.Status = ChatListSubItem.UserStatus.OffLine;
                             }));
-                        MessageBox.Show(statusMessage, "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("登录身份过期，请重新登录", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
                 case 255:
@@ -384,7 +389,6 @@ namespace Poseidon
 
         public static Tuple<int, string> GetStatus(string jsonString)
         {
-            Console.WriteLine(jsonString);
             var obj = JsonConvert.DeserializeObject<dynamic>(jsonString);
             return new Tuple<int, string>((int)obj.StatusCode, (string)obj.StatusMessage);
         }
@@ -406,6 +410,8 @@ namespace Poseidon
             var resp = http._Login.Login(req);
             if (resp.Success)
             {
+                Class1.updateUserId2User(req.UserId, new Class1.User() { Id = req.UserId, NickName = resp.NickName });
+
                 string sqlFile = $"{System.Environment.CurrentDirectory}\\{userId}\\profile.db";
                 sql.CreateDBFile(sqlFile);
                 sql.Connection(sqlFile);
@@ -667,7 +673,7 @@ namespace Poseidon
             else
             {
                 subItem = new ChatListSubItem("");
-                subItem.DisplayName = userId.ToString();
+                subItem.DisplayName = $"{Class1.GetUserInfo(userId).NickName}({userId})";
                 subItem.Tag = new Dictionary<string, object> { { "type", (long)UnReadMsgType.Message }, { "user_id_send", userId }, { "msg_type", (int)Class1.MsgType.PrivateChat },{ "ids", new List<long>() } };
                 unReadPrivateMsgItemPool.Add(userId, subItem);
                 frmMsgBox.clb_unread_msg.Items[0].SubItems.Add(subItem);
@@ -693,7 +699,7 @@ namespace Poseidon
             else
             {
                 subItem = new ChatListSubItem("");
-                subItem.DisplayName = groupId.ToString();
+                subItem.DisplayName = $"{Class1.GetGroupInfo(groupId).Name}({groupId})";
                 subItem.Tag = new Dictionary<string, object> { { "type", (long)UnReadMsgType.Message }, { "group_id", groupId }, { "msg_type", (int)Class1.MsgType.GroupChat} ,{ "max_id", 0 } };
                 unReadGroupMsgItemPool.Add(groupId, subItem);
                 frmMsgBox.clb_unread_msg.Items[2].SubItems.Add(subItem);
@@ -759,7 +765,7 @@ namespace Poseidon
                             {
                                 case (int)Class1.ContentType.Text:
                                     {
-                                        Class1.appendRtfToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), content);
+                                        Class1.appendRtfToMsgBox(frm_chat, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), content);
                                         break;
                                     }
                                 case (int)Class1.ContentType.Object:
@@ -769,7 +775,7 @@ namespace Poseidon
                                         if (dt1 == null || dt1.Rows.Count != 1)
                                             throw new Exception("object not found, objId: " + objId);
                                         var objName = dt1.Rows[0]["name"].ToString();
-                                        Class1.appendFileToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), "[文件]" + objName, objId);
+                                        Class1.appendFileToMsgBox(frm_chat, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), "[文件]" + objName, objId);
                                         break;
                                     }
                                 case (int)Class1.ContentType.Vibration:
@@ -785,7 +791,7 @@ namespace Poseidon
                                         if (dt1 == null || dt1.Rows.Count != 1)
                                             throw new Exception("image not found, e_tag: " + eTag);
                                         var imageData = UnGzip((byte[])dt1.Rows[0]["content"]);
-                                        Class1.appendImageToMsgBox(frm_chat, userIdSend.ToString(), Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), imageData);
+                                        Class1.appendImageToMsgBox(frm_chat, $"{Class1.UserId2User[userIdSend].NickName}({userIdSend})", Class1.StampToDateTime(long.Parse(row["create_time"].ToString())), imageData);
                                         break;
                                     }
                                 default:
@@ -833,8 +839,8 @@ namespace Poseidon
                 }
             }
                
-                //group_chat
-                var getGroupLastReadMsgIdReq = new http._Group_User.GetGroupLastReadMsgIdReq()
+            //group_chat
+            var getGroupLastReadMsgIdReq = new http._Group_User.GetGroupLastReadMsgIdReq()
             {
                 UserId = Class1.UserId
             };
@@ -946,14 +952,14 @@ namespace Poseidon
                 var createTime = Class1.FormatDateTime(Class1.StampToDateTime(long.Parse(row["create_time"].ToString())));
                 var parentId = long.Parse(row["parent_id"].ToString());
                 if (parentId == -1)
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, "来自" + userIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend, new Dictionary<string, object>());
+                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, "来自" + $"{GetUserInfo(userIdSend).NickName}({userIdSend})" + "的好友请求", Class1.UnReadMsgType.AddFriend, new Dictionary<string, object>());
                 else
                 {
                     var dt1 = Class1.sql.SqlTable($"SELECT status FROM `user_relation_request` WHERE `id` = {parentId}");
                     if (dt1 == null || dt1.Rows.Count == 0)
                         throw new Exception("parent id not found");
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
+                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, $"{GetUserInfo(userIdSend).NickName}({userIdSend})" + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
                 }
             }
 
@@ -966,14 +972,14 @@ namespace Poseidon
                 var parentId = long.Parse(row["parent_id"].ToString());
                 var groupId = long.Parse(row["group_id"].ToString());
                 if (parentId == -1)
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + "请求加入群聊" + groupId, Class1.UnReadMsgType.AddGroup, new Dictionary<string, object>() { { "group_id", groupId } });
+                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, $"{GetUserInfo(userIdSend).NickName}({userIdSend})" + "请求加入群聊" + $"{Class1.GetGroupInfo(groupId).Name}({groupId})", Class1.UnReadMsgType.AddGroup, new Dictionary<string, object>() { { "group_id", groupId } });
                 else
                 {
                     var dt1 = Class1.sql.SqlTable($"SELECT status FROM `group_user_request` WHERE `id` = {parentId}");
                     if (dt1 == null || dt1.Rows.Count == 0)
                         throw new Exception("parent id not found");
                     var status = long.Parse(dt1.Rows[0]["status"].ToString());
-                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, userIdSend + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
+                    Class1.appendSystemMsgToUnReadBox(id, userIdSend, $"{GetUserInfo(userIdSend).NickName}({userIdSend})" + (status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
                 }
             }
 
@@ -1065,6 +1071,44 @@ namespace Poseidon
                 MessageBox.Show("错误消息:" + ex.Message, "IOException异常");
             }
             return data;
+        }
+        public static void updateUserId2User(long userId, User user)
+        {
+            if (UserId2User.ContainsKey(userId))
+                return;
+            UserId2User.Add(userId, user);
+        }
+        public static User GetUserInfo(long userId)
+        {
+            if (UserId2User.ContainsKey(userId))
+                return UserId2User[userId];
+            var req = new http._User.GetUserInfoReq()
+            { 
+                UserId = userId 
+            };
+            var resp = http._User.GetUserInfo(req);
+            var user = new User() { Id = resp.User.Id, NickName = resp.User.NickName };
+            updateUserId2User(userId, user);
+            return user;
+        }
+        public static void updateGroupId2Group(long groupId, Group group)
+        {
+            if (GroupId2Group.ContainsKey(groupId))
+                return;
+            GroupId2Group.Add(groupId, group);
+        }
+        public static Group GetGroupInfo(long groupId)
+        {
+            if (GroupId2Group.ContainsKey(groupId))
+                return GroupId2Group[groupId];
+            var req = new http._Group.GetGroupInfoReq()
+            {
+                GroupId = groupId
+            };
+            var resp = http._Group.GetGroupInfo(req);
+            var group = new Group() { Id = resp.Group.Id, Name = resp.Group.Name,Owner = resp.Group.Owner,CreateTime = resp.Group.CreateTime };
+            updateGroupId2Group(groupId, group);
+            return group;
         }
     }
 }

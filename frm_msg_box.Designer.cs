@@ -33,6 +33,9 @@
             // 
             // clb_unread_msg
             // 
+            this.clb_unread_msg.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.clb_unread_msg.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.clb_unread_msg.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.clb_unread_msg.ForeColor = System.Drawing.Color.Black;
@@ -41,7 +44,7 @@
             this.clb_unread_msg.Location = new System.Drawing.Point(0, 0);
             this.clb_unread_msg.Name = "clb_unread_msg";
             this.clb_unread_msg.SelectSubItem = null;
-            this.clb_unread_msg.Size = new System.Drawing.Size(247, 155);
+            this.clb_unread_msg.Size = new System.Drawing.Size(383, 155);
             this.clb_unread_msg.SubItemMenu = null;
             this.clb_unread_msg.TabIndex = 23;
             this.clb_unread_msg.Text = "chatListBox1";
@@ -51,7 +54,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(248, 157);
+            this.ClientSize = new System.Drawing.Size(384, 157);
+            this.ControlBox = false;
             this.Controls.Add(this.clb_unread_msg);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
@@ -59,7 +63,7 @@
             this.Name = "frm_msg_box";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "frm_msg_box";
+            this.Text = "未读消息";
             this.TopMost = true;
             this.ResumeLayout(false);
 

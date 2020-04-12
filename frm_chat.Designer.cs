@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_chat));
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pgb_upload = new System.Windows.Forms.ProgressBar();
-            this.pgb_download = new System.Windows.Forms.ProgressBar();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.button2 = new System.Windows.Forms.Button();
             this.rtxt_message = new CCWin.SkinControl.SkinChatRichTextBox();
@@ -40,7 +39,6 @@
             this.toolFont = new System.Windows.Forms.ToolStripButton();
             this.toolVibration = new System.Windows.Forms.ToolStripButton();
             this.toolImgFile = new System.Windows.Forms.ToolStripButton();
-            this.toolfile = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton4 = new System.Windows.Forms.ToolStripSplitButton();
             this.显示消息记录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.显示比例ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,6 +55,7 @@
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.清屏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.消息管理器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolfile = new System.Windows.Forms.ToolStripButton();
             this.ToolItemPrint = new System.Windows.Forms.ToolStripMenuItem();
             this.录制视屏动画ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.捕捉视屏图像ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,6 +63,8 @@
             this.显示截图编辑工具栏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.截图时隐藏当前窗口ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
+            this.pgb_download = new System.Windows.Forms.ProgressBar();
+            this.button1 = new System.Windows.Forms.Button();
             this.skToolMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -75,24 +76,16 @@
             // 
             this.pgb_upload.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pgb_upload.Location = new System.Drawing.Point(12, 504);
+            this.pgb_upload.Location = new System.Drawing.Point(12, 517);
             this.pgb_upload.Name = "pgb_upload";
-            this.pgb_upload.Size = new System.Drawing.Size(138, 23);
+            this.pgb_upload.Size = new System.Drawing.Size(157, 10);
             this.pgb_upload.TabIndex = 22;
-            // 
-            // pgb_download
-            // 
-            this.pgb_download.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pgb_download.Location = new System.Drawing.Point(163, 504);
-            this.pgb_download.Name = "pgb_download";
-            this.pgb_download.Size = new System.Drawing.Size(157, 23);
-            this.pgb_download.TabIndex = 23;
+            this.pgb_upload.Visible = false;
             // 
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(393, 504);
+            this.button2.Location = new System.Drawing.Point(381, 501);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(83, 29);
             this.button2.TabIndex = 26;
@@ -230,16 +223,6 @@
             this.toolImgFile.ToolTipText = "发送图片";
             this.toolImgFile.Click += new System.EventHandler(this.toolImgFile_Click);
             // 
-            // toolfile
-            // 
-            this.toolfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolfile.Image = ((System.Drawing.Image)(resources.GetObject("toolfile.Image")));
-            this.toolfile.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolfile.Name = "toolfile";
-            this.toolfile.Size = new System.Drawing.Size(23, 23);
-            this.toolfile.Text = "发送文件";
-            this.toolfile.Click += new System.EventHandler(this.toolfile_Click);
-            // 
             // toolStripDropDownButton4
             // 
             this.toolStripDropDownButton4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -359,6 +342,16 @@
             this.消息管理器ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.消息管理器ToolStripMenuItem.Text = "消息管理器";
             // 
+            // toolfile
+            // 
+            this.toolfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolfile.Image = ((System.Drawing.Image)(resources.GetObject("toolfile.Image")));
+            this.toolfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolfile.Name = "toolfile";
+            this.toolfile.Size = new System.Drawing.Size(23, 23);
+            this.toolfile.Text = "发送文件";
+            this.toolfile.Click += new System.EventHandler(this.toolfile_Click);
+            // 
             // ToolItemPrint
             // 
             this.ToolItemPrint.Name = "ToolItemPrint";
@@ -394,11 +387,35 @@
             this.截图时隐藏当前窗口ToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.截图时隐藏当前窗口ToolStripMenuItem.Text = "截图时隐藏当前窗口";
             // 
+            // pgb_download
+            // 
+            this.pgb_download.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pgb_download.Location = new System.Drawing.Point(12, 501);
+            this.pgb_download.Name = "pgb_download";
+            this.pgb_download.Size = new System.Drawing.Size(157, 10);
+            this.pgb_download.TabIndex = 23;
+            this.pgb_download.Visible = false;
+            // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(292, 501);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(83, 29);
+            this.button1.TabIndex = 123;
+            this.button1.Text = "关闭";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // frm_chat
             // 
+            this.AcceptButton = this.button2;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.button1;
             this.ClientSize = new System.Drawing.Size(476, 534);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.skToolMenu);
             this.Controls.Add(this.rtxt_send);
             this.Controls.Add(this.rtxt_message);
@@ -406,6 +423,7 @@
             this.Controls.Add(this.pgb_download);
             this.Controls.Add(this.pgb_upload);
             this.Name = "frm_chat";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "frm_chat";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frm_chat_FormClosed);
             this.skToolMenu.ResumeLayout(false);
@@ -417,7 +435,6 @@
         #endregion
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ProgressBar pgb_upload;
-        private System.Windows.Forms.ProgressBar pgb_download;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Button button2;
         public CCWin.SkinControl.SkinChatRichTextBox rtxt_message;
@@ -450,5 +467,7 @@
         private System.Windows.Forms.ToolStripMenuItem 消息管理器ToolStripMenuItem;
         private System.Windows.Forms.FontDialog fontDialog1;
         private System.Windows.Forms.ToolStripButton toolfile;
+        private System.Windows.Forms.ProgressBar pgb_download;
+        private System.Windows.Forms.Button button1;
     }
 }

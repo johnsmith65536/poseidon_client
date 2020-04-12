@@ -10,25 +10,29 @@ using System.Windows.Forms;
 
 namespace Poseidon
 {
-    public partial class frm_create_group : Form
+    public partial class frm_invite_group : Form
     {
-        public frm_create_group()
+        public long GroupId;
+        public frm_invite_group()
         {
             InitializeComponent();
         }
-
-        private void frm_create_group_Load(object sender, EventArgs e)
+        public frm_invite_group(long groupId)
         {
-            var req = new http._User_Relation.FetchFriendListReq()
-            {
-                UserId = Class1.UserId
-            };
-            var resp = http._User_Relation.FetchFriendList(req);
-            foreach (var user in resp.OnlineUsers)
-                clb_friend.Items.Add($"{user.NickName}({user.Id})", false);
-            foreach (var user in resp.OfflineUsers)
-                clb_friend.Items.Add($"{user.NickName}({user.Id})", false);
+            InitializeComponent();
+            GroupId = groupId;
+        }
 
+        private void frm_invite_group_Load(object sender, EventArgs e)
+        {
+            var req = new http._Group_User.InviteGroupFriendListReq()
+            {
+                UserId = Class1.UserId,
+                GroupId = GroupId
+            };
+            var resp = http._Group_User.InviteGroupFriendList(req);
+            foreach (var user in resp.NotInGroupUsers)
+                clb_friend.Items.Add($"{user.NickName}({user.Id})", false);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -46,17 +50,16 @@ namespace Poseidon
                     var text = clb_friend.GetItemText(clb_friend.Items[i]);
                     var l = text.LastIndexOf('(');
                     var r = text.LastIndexOf(')');
-                    userIds.Add(long.Parse(text.Substring(l+1,r-l-1)));
+                    userIds.Add(long.Parse(text.Substring(l + 1, r - l - 1)));
                 }
             }
-            var req = new http._Group.CreateGroupReq()
+            var req = new http._Group_User.InviteGroupReq()
             {
-                Owner = Class1.UserId,
-                Name = txt_group_name.Text,
-                UserIds = userIds.ToArray()
+                UserIds = userIds,
+                GroupId = GroupId
             };
-            http._Group.CreateGroup(req);
-            MessageBox.Show("群组已建立", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            http._Group_User.InviteGroup(req);
+            this.Close();
         }
     }
 }

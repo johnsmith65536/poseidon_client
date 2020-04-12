@@ -87,7 +87,6 @@ namespace Poseidon
             {
                 if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
                 {
-                    Console.WriteLine(dataGridView1.Rows[e.RowIndex].Cells["user_id"].Value);
                     userIdRecv = long.Parse(dataGridView1.Rows[e.RowIndex].Cells["user_id"].Value.ToString());
                     dataGridView1.ClearSelection();
                     dataGridView1.Rows[e.RowIndex].Selected = true;

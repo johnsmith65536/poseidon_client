@@ -95,5 +95,10 @@ namespace Poseidon
             }
             MessageBox.Show("加群请求已发送", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        private void frm_search_group_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

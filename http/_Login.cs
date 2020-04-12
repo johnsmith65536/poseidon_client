@@ -18,6 +18,7 @@ namespace Poseidon.http
         {
             public bool Success;
             public string AccessToken;
+            public string NickName;
             public int StatusCode;
             public string StatusMessage;
         }

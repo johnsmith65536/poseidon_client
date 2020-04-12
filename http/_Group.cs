@@ -31,6 +31,7 @@ namespace Poseidon.http
             public long Id;
             public string Name;
             public long CreateTime;
+            public long Owner;
             public bool IsMember;
         }
         public struct SearchGroupResp
@@ -46,6 +47,16 @@ namespace Poseidon.http
         }
         public struct DeleteGroupResp
         {
+            public int StatusCode;
+            public string StatusMessage;
+        }
+        public struct GetGroupInfoReq
+        {
+            public long GroupId;
+        }
+        public struct GetGroupInfoResp
+        {
+            public Group Group;
             public int StatusCode;
             public string StatusMessage;
         }
@@ -65,6 +76,12 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest("/group", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<DeleteGroupResp>(ret);
+            return resp;
+        }
+        public static GetGroupInfoResp GetGroupInfo(GetGroupInfoReq req)
+        {
+            var ret = Class1.DoHttpRequest("/group/info/" + req.GroupId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
+            var resp = JsonConvert.DeserializeObject<GetGroupInfoResp>(ret);
             return resp;
         }
     }

@@ -39,8 +39,8 @@ namespace Poseidon.http
         }
         public struct FetchFriendListResp
         {
-            public List<long> OnlineUserIds;
-            public List<long> OfflineUserIds;
+            public List<_User.User> OnlineUsers;
+            public List<_User.User> OfflineUsers;
             public int StatusCode;
             public string StatusMessage;
         }

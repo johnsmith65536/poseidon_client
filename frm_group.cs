@@ -18,7 +18,7 @@ namespace Poseidon
     public partial class frm_group : Form
     {
         //public static long groupIdChat;
-        private static Class1.Group groupChat;
+        private Class1.Group groupChat;
         private Dictionary<long, ChatListSubItem> memberPool = new Dictionary<long, ChatListSubItem>();
         private HashSet<long> onlineUserId = new HashSet<long>();
         private HashSet<long> offlineUserId = new HashSet<long>();
@@ -44,6 +44,11 @@ namespace Poseidon
                     if (resp.StatusCode == 254)
                         return;
 
+                    foreach (var user in resp.OnlineUsers)
+                        Class1.updateUserId2User(user.Id, new Class1.User() { Id = user.Id, NickName = user.NickName });
+                    foreach (var user in resp.OfflineUsers)
+                        Class1.updateUserId2User(user.Id, new Class1.User() { Id = user.Id, NickName = user.NickName });
+
                     var oldOnlineUserId = onlineUserId;
                     var oldOfflineUserId = offlineUserId;
                     var oldUserId = new HashSet<long>();
@@ -52,10 +57,10 @@ namespace Poseidon
 
                     var newOnlineUserId = new HashSet<long>();
                     var newOfflineUserId = new HashSet<long>();
-                    foreach (var userId in resp.OnlineUserIds)
-                        newOnlineUserId.Add(userId);
-                    foreach (var userId in resp.OfflineUserIds)
-                        newOfflineUserId.Add(userId);
+                    foreach (var user in resp.OnlineUsers)
+                        newOnlineUserId.Add(user.Id);
+                    foreach (var user in resp.OfflineUsers)
+                        newOfflineUserId.Add(user.Id);
                     var newUserId = new HashSet<long>();
                     newUserId.UnionWith(newOnlineUserId);
                     newUserId.UnionWith(newOfflineUserId);
@@ -76,15 +81,17 @@ namespace Poseidon
                         {
                             var subItem = new ChatListSubItem(userId.ToString());
                             subItem.ID = (uint)userId;
+                            subItem.DisplayName = Class1.UserId2User[userId].NickName;
+                            subItem.NicName = userId.ToString();
                             clb_member.Items[0].SubItems.Add(subItem);
                             memberPool.Add(userId, subItem);
                         }
                     }
 
-                    foreach (var userId in resp.OnlineUserIds)
-                        memberPool[userId].Status = ChatListSubItem.UserStatus.Online;
-                    foreach (var userId in resp.OfflineUserIds)
-                        memberPool[userId].Status = ChatListSubItem.UserStatus.OffLine;
+                    foreach (var user in resp.OnlineUsers)
+                        memberPool[user.Id].Status = ChatListSubItem.UserStatus.Online;
+                    foreach (var user in resp.OfflineUsers)
+                        memberPool[user.Id].Status = ChatListSubItem.UserStatus.OffLine;
 
                     onlineUserId = newOnlineUserId;
                     offlineUserId = newOfflineUserId;
@@ -97,7 +104,7 @@ namespace Poseidon
         public frm_group(Class1.Group group)
         {
             InitializeComponent();
-            this.Text = $"{group.Name}({group.Id})";
+            this.Text = $"群聊会话 {group.Name}({group.Id})";
             groupChat = group;
             login();
             LoadMessage();
@@ -255,9 +262,17 @@ namespace Poseidon
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 var localFileName = openFileDialog1.FileName;
+                pgb_upload.Value = 0;
+                pgb_upload.Visible = true;
                 UploadFile(localFileName);
-
             }
+        }
+        private void UploadProgressCallback(object sender, StreamTransferProgressArgs args)
+        {
+            Invoke(new Action(() =>
+            {
+                pgb_upload.Value = (int)(args.TransferredBytes * 100 / args.TotalBytes);
+            }));
         }
         private void UploadFile(string localFileName)
         {
@@ -279,7 +294,7 @@ namespace Poseidon
                         using (var fs = File.Open(localFileName, FileMode.Open))
                         {
                             var putObjectRequest = new PutObjectRequest(Class1.BucketName, eTag, fs);
-                            //putObjectRequest.StreamTransferProgress += UploadProgressCallback;
+                            putObjectRequest.StreamTransferProgress += UploadProgressCallback;
                             client.PutObject(putObjectRequest);
                         }
                         Console.WriteLine("Put object:{0} succeeded", eTag);
@@ -294,7 +309,11 @@ namespace Poseidon
                         Console.WriteLine("Failed with error info: {0}", ex.Message);
                     }
                 }
-
+                Invoke(new Action(() =>
+                {
+                    pgb_upload.Value = 100;
+                    pgb_upload.Visible = false;
+                }));
                 var name = Path.GetFileName(localFileName);
                 var createObjectReq = new http._Object.CreateObjectReq()
                 {
@@ -362,14 +381,17 @@ namespace Poseidon
             saveFileDialog1.FileName = name;
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                var localFileName = saveFileDialog1.FileName;
+                var localFileName = saveFileDialog1.FileName; 
+                Invoke(new Action(() =>
+                {
+                    pgb_download.Value = 0;
+                    pgb_download.Visible = true;
+                }));
                 DownloadFile(eTag, localFileName);
             }
         }
         private void DownloadProgressCallback(object sender, StreamTransferProgressArgs args)
         {
-            //System.Console.WriteLine("ProgressCallback - Progress: {0}%, TotalBytes:{1}, TransferredBytes:{2} ",
-            //args.TransferredBytes * 100 / args.TotalBytes, args.TotalBytes, args.TransferredBytes);
             Invoke(new Action(() =>
             {
                 pgb_download.Value = (int)(args.TransferredBytes * 100 / args.TotalBytes);
@@ -403,7 +425,12 @@ namespace Poseidon
                         }
                         bw.Close();
                     }
-                    Console.WriteLine("Get object:{0} succeeded", eTag);
+                    Console.WriteLine("Get object:{0} succeeded", eTag); 
+                    Invoke(new Action(() =>
+                    {
+                        pgb_download.Value = 100;
+                        pgb_download.Visible = false;
+                    }));
                 }
                 catch (OssException ex)
                 {
@@ -488,24 +515,38 @@ namespace Poseidon
             http._Group_User.DeleteMember(req);
         }
 
-        private void clb_member_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-
+            this.Close();
         }
 
-        private void rtxt_send_TextChanged(object sender, EventArgs e)
+        private void mnu_invite_group_Click(object sender, EventArgs e)
         {
-
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var frmInviteGroup = new frm_invite_group(groupChat.Id);
+            frmInviteGroup.ShowDialog();
         }
 
-        private void skToolMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
-
+            if (!Class1.IsOnline)
+            {
+                MessageBox.Show("你目前处于离线状态，暂时无法使用此功能", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var frmInviteGroup = new frm_invite_group(groupChat.Id);
+            frmInviteGroup.ShowDialog();
         }
 
-        private void rtxt_message_TextChanged(object sender, EventArgs e)
+        private void clb_member_MouseUp(object sender, MouseEventArgs e)
         {
-
+            if (e.Button != MouseButtons.Right)
+                return;
+            contextMenuStrip1.Show(MousePosition.X, MousePosition.Y);
         }
     }
 }

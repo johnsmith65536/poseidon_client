@@ -27,8 +27,8 @@ namespace Poseidon.http
         }
         public struct FetchMemberListResp
         {
-            public long[] OnlineUserIds;
-            public long[] OfflineUserIds;
+            public _User.User[] OnlineUsers;
+            public _User.User[] OfflineUsers;
             public int StatusCode;
             public string StatusMessage;
         }
@@ -92,6 +92,27 @@ namespace Poseidon.http
             public int StatusCode;
             public string StatusMessage;
         }
+        public struct InviteGroupReq
+        {
+            public long GroupId;
+            public List<long> UserIds;
+        }
+        public struct InviteGroupResp
+        {
+            public int StatusCode;
+            public string StatusMessage;
+        }
+        public struct InviteGroupFriendListReq
+        {
+            public long GroupId;
+            public long UserId;
+        }
+        public struct InviteGroupFriendListResp
+        {
+            public _User.User[] NotInGroupUsers;
+            public int StatusCode;
+            public string StatusMessage;
+        }
         public static FetchGroupListResp FetchGroupList(FetchGroupListReq req)
         {
             var ret = Class1.DoHttpRequest("/group/list/" + req.UserId, "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
@@ -134,6 +155,18 @@ namespace Poseidon.http
         {
             var ret = Class1.DoHttpRequest("/group/member", "DELETE", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
             var resp = JsonConvert.DeserializeObject<DeleteMemberResp>(ret);
+            return resp;
+        }
+        public static InviteGroupResp InviteGroup(InviteGroupReq req)
+        {
+            var ret = Class1.DoHttpRequest("/group/member/invite", "POST", new Dictionary<string, string> { { "access_token", Class1.AccessToken } }, JsonConvert.SerializeObject(req));
+            var resp = JsonConvert.DeserializeObject<InviteGroupResp>(ret);
+            return resp;
+        }
+        public static InviteGroupFriendListResp InviteGroupFriendList(InviteGroupFriendListReq req)
+        {
+            var ret = Class1.DoHttpRequest($"/group/invite/friend?user_id={req.UserId}&group_id={req.GroupId}", "GET", new Dictionary<string, string> { { "access_token", Class1.AccessToken } });
+            var resp = JsonConvert.DeserializeObject<InviteGroupFriendListResp>(ret);
             return resp;
         }
     }

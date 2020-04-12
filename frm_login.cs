@@ -35,5 +35,16 @@ namespace Poseidon
             this.Hide();
             Class1.frm_main.Show();
         }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var frmCreateUser = new frm_create_user();
+            frmCreateUser.ShowDialog();
+        }
     }
 }

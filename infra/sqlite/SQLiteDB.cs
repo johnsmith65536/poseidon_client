@@ -19,7 +19,6 @@ namespace Poseidon.infra.sqlite
         public void CreateDBFile(string fileName)
         {
             var dirPath = new FileInfo(fileName).DirectoryName;
-            Console.WriteLine(dirPath);
             Directory.CreateDirectory(dirPath);
             if (!File.Exists(fileName))
             {

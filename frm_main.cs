@@ -97,6 +97,7 @@ namespace Poseidon
             Class1.groupItemPool.Clear();
             ChatListBox.Items.Add(new ChatListItem("群组", true));
 
+            //throw new Exception("");
 
             Thread t1 = new Thread(new ThreadStart(() =>
             {
@@ -113,6 +114,11 @@ namespace Poseidon
                     if (resp.StatusCode == 254)
                         return;
 
+                    foreach (var user in resp.OnlineUsers)
+                        Class1.updateUserId2User(user.Id, new Class1.User() { Id = user.Id, NickName = user.NickName });
+                    foreach (var user in resp.OfflineUsers)
+                        Class1.updateUserId2User(user.Id, new Class1.User() { Id = user.Id, NickName = user.NickName });
+
                     var oldOnlineUserId = Class1.onlineUserId;
                     var oldOfflineUserId = Class1.offlineUserId;
                     var oldTotalUserId = new HashSet<long>();
@@ -123,10 +129,10 @@ namespace Poseidon
                     var newOfflineUserId = new HashSet<long>();
                     var newTotalUserId = new HashSet<long>();
 
-                    foreach (var userId in resp.OnlineUserIds)
-                        newOnlineUserId.Add(userId);
-                    foreach (var userId in resp.OfflineUserIds)
-                        newOfflineUserId.Add(userId);
+                    foreach (var user in resp.OnlineUsers)
+                        newOnlineUserId.Add(user.Id);
+                    foreach (var user in resp.OfflineUsers)
+                        newOfflineUserId.Add(user.Id);
 
                     newTotalUserId.UnionWith(newOnlineUserId);
                     newTotalUserId.UnionWith(newOfflineUserId);
@@ -137,6 +143,9 @@ namespace Poseidon
                         {
                             var subItem = new ChatListSubItem(userId.ToString());
                             subItem.ID = (uint)userId;
+                            subItem.DisplayName = Class1.UserId2User[userId].NickName;
+                            subItem.NicName = userId.ToString();
+                            subItem.Status = ChatListSubItem.UserStatus.OffLine;
                             Class1.chatListSubItemPool.Add(userId, subItem);
                             Invoke(new Action(() =>
                             {
@@ -204,7 +213,6 @@ namespace Poseidon
 
                     var oldGroupIds = new HashSet<long>();
                     var newGroupIds = new HashSet<long>();
-                    Class1.GroupId2Group = new Dictionary<long, Class1.Group>();
 
                     foreach (var item in Class1.groupItemPool)
                         oldGroupIds.Add(item.Key);
@@ -212,7 +220,7 @@ namespace Poseidon
                     foreach (var group in fetchGroupListResp.Groups)
                     {
                         newGroupIds.Add(group.Id);
-                        Class1.GroupId2Group.Add(group.Id, group);
+                        Class1.updateGroupId2Group(group.Id, group);
                     }
 
                     foreach (var groupId in oldGroupIds)
@@ -232,8 +240,10 @@ namespace Poseidon
                     {
                         if (!oldGroupIds.Contains(groupId))
                         {
-                            var subItem = new ChatListSubItem(Class1.GroupId2Group[groupId].Name);
+                            var subItem = new ChatListSubItem(Class1.GetGroupInfo(groupId).Name);
                             subItem.ID = (uint)groupId;
+                            subItem.NicName = groupId.ToString();
+                            subItem.DisplayName = Class1.GetGroupInfo(groupId).Name;
                             Invoke(new Action(() =>
                             {
                                 ChatListBox.Items[1].SubItems.Add(subItem);
@@ -267,56 +277,7 @@ namespace Poseidon
                         }
                     }
 
-
-                    var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
-
-                    // 同步最新UserRelationRequest & GroupUserRequest的status
-                    List<long> userRelationQueryIds = new List<long>();
-                    List<long> groupUserQueryIds = new List<long>();
-                    foreach (DataRow row in dt.Rows)
-                    {
-                        var parentId = long.Parse(row["parent_id"].ToString());
-                        userRelationQueryIds.Add(parentId);
-                    }
-
-                    dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `group_user_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
-                    foreach (DataRow row in dt.Rows)
-                    {
-                        var parentId = long.Parse(row["parent_id"].ToString());
-                        groupUserQueryIds.Add(parentId);
-                    }
-
-                    var fetchRequestStatusReq = new http._Request.FetchRequestStatusReq()
-                    {
-                        UserRelationRequestIds = userRelationQueryIds,
-                        GroupUserRequestIds = groupUserQueryIds
-                    };
-                    var fetchRequestStatusResp = http._Request.FetchRequestStatus(fetchRequestStatusReq);
-                    if (fetchRequestStatusResp.StatusCode == 254)
-                        return;
-                    foreach (var item in fetchRequestStatusResp.UserRelationRequestIds)
-                    {
-                        var id = item.Key;
-                        var status = item.Value;
-                        var ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET status = {status} WHERE id = {id}");
-                        if (!ret)
-                        {
-                            MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-                    }
-
-                    foreach (var item in fetchRequestStatusResp.GroupUserRequestIds)
-                    {
-                        var id = item.Key;
-                        var status = item.Value;
-                        var ret = Class1.sql.ExecuteNonQuery($"UPDATE `group_user_request` SET status = {status} WHERE id = {id}");
-                        if (!ret)
-                        {
-                            MessageBox.Show("DB错误，UPDATE group_user_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            return;
-                        }
-                    }
+                    updateRequestStatus();
 
                     Thread.Sleep(2 * 1000);
                 };
@@ -390,6 +351,8 @@ namespace Poseidon
                     }
                 }
 
+                //先同步地拉取status，防止LoadUnReadMessage读到脏数据
+                updateRequestStatus();
 
                 Class1.LoadUnReadMessage();
 
@@ -415,13 +378,64 @@ namespace Poseidon
             Class1.UpdateStatusCheckBox(Class1.IsOnline);
             Class1.InvokeToolStripStatusLabel(toolStripStatusLabel1, "在线");
             toolStripStatusLabel2.Text = Class1.FormatDateTime(DateTime.Now);
-            notifyIcon1.Text = Class1.UserId.ToString();
-            this.Text = Class1.UserId.ToString();
+            notifyIcon1.Text = $"{Class1.UserId2User[Class1.UserId].NickName}({Class1.UserId})";
+            this.Text = $"{Class1.UserId2User[Class1.UserId].NickName}({Class1.UserId})";
 
             foreach (var item in Class1.formGroupPool)
             {
                 var frmGroup = item.Value;
                 frmGroup.login();
+            }
+        }
+        public void updateRequestStatus()
+        {
+            //拉取最新UserRelationRequest & GroupUserRequest的status
+            var dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `user_relation_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
+
+            List<long> userRelationQueryIds = new List<long>();
+            List<long> groupUserQueryIds = new List<long>();
+            foreach (DataRow row in dt.Rows)
+            {
+                var parentId = long.Parse(row["parent_id"].ToString());
+                userRelationQueryIds.Add(parentId);
+            }
+
+            dt = Class1.sql.SqlTable($"SELECT id, user_id_send, create_time, parent_id FROM `group_user_request` WHERE `user_id_recv` = {Class1.UserId} AND `status` = 0 AND `parent_id` != -1");
+            foreach (DataRow row in dt.Rows)
+            {
+                var parentId = long.Parse(row["parent_id"].ToString());
+                groupUserQueryIds.Add(parentId);
+            }
+            var fetchRequestStatusReq = new http._Request.FetchRequestStatusReq()
+            {
+                UserRelationRequestIds = userRelationQueryIds,
+                GroupUserRequestIds = groupUserQueryIds
+            };
+            var fetchRequestStatusResp = http._Request.FetchRequestStatus(fetchRequestStatusReq);
+            if (fetchRequestStatusResp.StatusCode == 254)
+                return;
+            foreach (var item in fetchRequestStatusResp.UserRelationRequestIds)
+            {
+                var id = item.Key;
+                var status = item.Value;
+                var ret = Class1.sql.ExecuteNonQuery($"UPDATE `user_relation_request` SET status = {status} WHERE id = {id}");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            foreach (var item in fetchRequestStatusResp.GroupUserRequestIds)
+            {
+                var id = item.Key;
+                var status = item.Value;
+                var ret = Class1.sql.ExecuteNonQuery($"UPDATE `group_user_request` SET status = {status} WHERE id = {id}");
+                if (!ret)
+                {
+                    MessageBox.Show("DB错误，UPDATE group_user_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
         }
         private void frm_main_Load(object sender, EventArgs e)
@@ -434,7 +448,6 @@ namespace Poseidon
         public void MessageChannel(RedisChannel cnl, RedisValue val)
         {
             ConnectionMultiplexer redisCli = redis.GetRedisConn();
-            Console.WriteLine("频道：" + cnl + "\t收到消息:" + val);
 
             var broadcastMsgType = GetBroadcastMsgType(val.ToString());
             switch (broadcastMsgType)
@@ -464,12 +477,14 @@ namespace Poseidon
                                         {
                                             case (int)Class1.ContentType.Text:
                                                 {
-                                                    Class1.appendRtfToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), msg.Content);
+                                                    Class1.appendRtfToMsgBox(frm_chat, $"{Class1.UserId2User[msg.UserIdSend].NickName}({msg.UserIdSend})", Class1.StampToDateTime(msg.CreateTime), msg.Content);
                                                     break;
                                                 }
                                             case (int)Class1.ContentType.Object:
                                                 {
-                                                    Class1.appendFileToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), "[文件]" + msg.ObjectName, long.Parse(msg.Content));
+                                                    var objId = long.Parse(msg.Content);
+                                                    Class1.InsertObjectIfNotExists(objId, msg.ObjectETag, msg.ObjectName);
+                                                    Class1.appendFileToMsgBox(frm_chat, $"{Class1.UserId2User[msg.UserIdSend].NickName}({msg.UserIdSend})", Class1.StampToDateTime(msg.CreateTime), "[文件]" + msg.ObjectName, long.Parse(msg.Content));
                                                     break;
                                                 }
                                             case (int)Class1.ContentType.Vibration:
@@ -480,7 +495,7 @@ namespace Poseidon
                                                 }
                                             case (int)Class1.ContentType.Image:
                                                 {
-                                                    Class1.appendImageToMsgBox(frm_chat, msg.UserIdSend.ToString(), Class1.StampToDateTime(msg.CreateTime), imageData);
+                                                    Class1.appendImageToMsgBox(frm_chat, $"{Class1.UserId2User[msg.UserIdSend].NickName}({msg.UserIdSend})", Class1.StampToDateTime(msg.CreateTime), imageData);
                                                     break;
                                                 }
                                             default:
@@ -602,7 +617,7 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO user_relation_request失败888", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, "来自" + msg.UserIdSend + "的好友请求", Class1.UnReadMsgType.AddFriend, new Dictionary<string, object>());
+                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, "来自" + $"{Class1.GetUserInfo(msg.UserIdSend).NickName}({msg.UserIdSend})" + "的好友请求", Class1.UnReadMsgType.AddFriend, new Dictionary<string, object>());
                         break;
                     }
                 case BroadcastMsgType.ReplyAddFriend:
@@ -621,7 +636,7 @@ namespace Poseidon
                             MessageBox.Show("DB错误，UPDATE user_relation_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.UserIdSend + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
+                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, $"{Class1.GetUserInfo(msg.UserIdSend).NickName}({msg.UserIdSend})" + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了好友请求", Class1.UnReadMsgType.ReplyAddFriend, new Dictionary<string, object>());
                         break;
                     }
                 case BroadcastMsgType.AddGroup:
@@ -634,7 +649,7 @@ namespace Poseidon
                             MessageBox.Show("DB错误，INSERT INTO group_user_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.UserIdSend + "请求加入群聊" + msg.GroupId, Class1.UnReadMsgType.AddGroup, new Dictionary<string, object>() { { "group_id", msg.GroupId } });
+                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, $"{Class1.GetUserInfo(msg.UserIdSend).NickName}({msg.UserIdSend})" + "请求加入群聊" + $"{Class1.GetGroupInfo(msg.GroupId).Name}({msg.GroupId})", Class1.UnReadMsgType.AddGroup, new Dictionary<string, object>() { { "group_id", msg.GroupId } });
                         break;
                     }
                 case BroadcastMsgType.ReplyAddGroup:
@@ -653,7 +668,7 @@ namespace Poseidon
                             MessageBox.Show("DB错误，UPDATE group_user_request失败", "信息", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             return;
                         }
-                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, msg.UserIdSend + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
+                        Class1.appendSystemMsgToUnReadBox(msg.Id, msg.UserIdSend, $"{Class1.GetUserInfo(msg.UserIdSend).NickName}({msg.UserIdSend})" + (msg.Status == (long)Class1.AddFriendStatus.Accepted ? "通过" : "拒绝") + "了加群请求", Class1.UnReadMsgType.ReplyAddGroup, new Dictionary<string, object>());
                         break;
                     }
                 case BroadcastMsgType.InviteAddGroup:
@@ -669,8 +684,6 @@ namespace Poseidon
             }
 
             icon.ChangeIconState();
-
-            Console.WriteLine("线程：" + Thread.CurrentThread.ManagedThreadId + ",是否线程池：" + Thread.CurrentThread.IsThreadPoolThread);
         }
         private void frm_main_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -684,6 +697,12 @@ namespace Poseidon
                 http._Login.Logout(req);
             }
             notifyIcon1.Dispose();
+            var tmp = new List<long>(Class1.formChatPool.Keys);
+            for (int i = 0; i < tmp.Count; i++)
+                Class1.formChatPool[tmp[i]].Close();
+            tmp = new List<long>(Class1.formGroupPool.Keys);
+            for (int i = 0; i < tmp.Count; i++)
+                Class1.formGroupPool[tmp[i]].Close();
             Environment.Exit(0);
         }
         private static BroadcastMsgType GetBroadcastMsgType(string jsonString)
@@ -801,7 +820,7 @@ namespace Poseidon
                 }
                 else
                 {
-                    frmGroup = new frm_group(Class1.GroupId2Group[groupId]);
+                    frmGroup = new frm_group(Class1.GetGroupInfo(groupId));
                     Class1.formGroupPool.Add(groupId, frmGroup);
                     frmGroup.Show();
                 }
@@ -834,7 +853,7 @@ namespace Poseidon
             }
             else if (Class1.groupItemPool.ContainsKey(selectId) && Class1.groupItemPool[selectId] == e.SelectSubItem)
             {
-                if (Class1.GroupId2Group[selectId].Owner == Class1.UserId)
+                if (Class1.GetGroupInfo(selectId).Owner == Class1.UserId)
                     mnu_strip1.Show(MousePosition.X, MousePosition.Y);
                 else
                     mnu_strip2.Show(MousePosition.X, MousePosition.Y);

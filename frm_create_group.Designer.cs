@@ -70,6 +70,7 @@
             // 
             // frm_create_group
             // 
+            this.AcceptButton = this.button1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(348, 251);
@@ -78,7 +79,8 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txt_group_name);
             this.Name = "frm_create_group";
-            this.Text = "frm_create_group";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "创建群组";
             this.Load += new System.EventHandler(this.frm_create_group_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
