@@ -548,5 +548,21 @@ namespace Poseidon
                 return;
             contextMenuStrip1.Show(MousePosition.X, MousePosition.Y);
         }
+
+        private void toolStripDropDownButton4_ButtonClick(object sender, EventArgs e)
+        {
+            frm_msg_view frmMsgView;
+            if (Class1.formMsgViewGroupPool.ContainsKey(groupChat.Id))
+            {
+                frmMsgView = Class1.formMsgViewGroupPool[groupChat.Id];
+                frmMsgView.Activate();
+            }
+            else
+            {
+                frmMsgView = new frm_msg_view(groupChat.Id, "group");
+                Class1.formMsgViewGroupPool.Add(groupChat.Id, frmMsgView);
+                frmMsgView.Show();
+            }
+        }
     }
 }

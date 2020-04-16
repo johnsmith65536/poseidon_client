@@ -43,7 +43,7 @@
             this.txt_password.PasswordChar = '*';
             this.txt_password.Size = new System.Drawing.Size(100, 21);
             this.txt_password.TabIndex = 5;
-            this.txt_password.Text = "test";
+            this.txt_password.Text = "john";
             // 
             // txt_user_id
             // 
@@ -51,7 +51,7 @@
             this.txt_user_id.Name = "txt_user_id";
             this.txt_user_id.Size = new System.Drawing.Size(100, 21);
             this.txt_user_id.TabIndex = 4;
-            this.txt_user_id.Text = "2917";
+            this.txt_user_id.Text = "7803";
             // 
             // button2
             // 

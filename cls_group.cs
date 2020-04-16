@@ -18,7 +18,7 @@ namespace Poseidon
         {
             if (!frmGroup.IsHandleCreated)
             {
-                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                 frmGroup.rtxt_message.AppendRtf(content);
                 frmGroup.rtxt_message.Select(frmGroup.rtxt_message.Text.Length, 0);
@@ -29,7 +29,7 @@ namespace Poseidon
             {
                 frmGroup.Invoke(new Action(() =>
                 {
-                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                          new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                     frmGroup.rtxt_message.AppendRtf(content);
                     frmGroup.rtxt_message.Select(frmGroup.rtxt_message.Text.Length, 0);
@@ -42,7 +42,7 @@ namespace Poseidon
         {
             if (!frmGroup.IsHandleCreated)
             {
-                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                 frmGroup.rtxt_message.AppendText(fileName);
                 frmGroup.rtxt_message.AppendText("\n");
@@ -56,7 +56,7 @@ namespace Poseidon
             {
                 frmGroup.Invoke(new Action(() =>
                 {
-                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                          new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                     frmGroup.rtxt_message.AppendText(fileName);
                     frmGroup.rtxt_message.AppendText("\n");
@@ -73,7 +73,7 @@ namespace Poseidon
         {
             if (!frmGroup.IsHandleCreated)
             {
-                frmGroup.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                frmGroup.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                 new Font(frmGroup.Font, FontStyle.Regular), Color.Blue);
                 frmGroup.rtxt_message.AppendText(content + "\r\n");
                 frmGroup.rtxt_message.ForeColor = Color.Black;
@@ -85,7 +85,7 @@ namespace Poseidon
             {
                 frmGroup.Invoke(new Action(() =>
                 {
-                    frmGroup.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                    frmGroup.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                 new Font(frmGroup.Font, FontStyle.Regular), Color.Blue);
                     frmGroup.rtxt_message.AppendText(content + "\r\n");
                     frmGroup.rtxt_message.ForeColor = Color.Black;
@@ -100,7 +100,7 @@ namespace Poseidon
             var image = Image.FromStream(new MemoryStream(imageData));
             if (!frmGroup.IsHandleCreated)
             {
-                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                 frmGroup.rtxt_message.InsertImage(image);
                 frmGroup.rtxt_message.AppendText("\n");
@@ -112,7 +112,7 @@ namespace Poseidon
             {
                 frmGroup.Invoke(new Action(() =>
                 {
-                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmGroup.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                         new Font(frmGroup.Font, FontStyle.Regular), Color.Green);
                     frmGroup.rtxt_message.InsertImage(image);
                     frmGroup.rtxt_message.AppendText("\n");

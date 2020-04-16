@@ -451,5 +451,21 @@ namespace Poseidon
         {
             this.Close();
         }
+
+        private void toolStripDropDownButton4_ButtonClick(object sender, EventArgs e)
+        {
+            frm_msg_view frmMsgView;
+            if (Class1.formMsgViewPrivatePool.ContainsKey(userIdChat))
+            {
+                frmMsgView = Class1.formMsgViewPrivatePool[userIdChat];
+                frmMsgView.Activate();
+            }
+            else
+            {
+                frmMsgView = new frm_msg_view(userIdChat, "private");
+                Class1.formMsgViewPrivatePool.Add(userIdChat, frmMsgView);
+                frmMsgView.Show();
+            }
+        }
     }
 }

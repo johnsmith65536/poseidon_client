@@ -40,21 +40,7 @@
             this.toolVibration = new System.Windows.Forms.ToolStripButton();
             this.toolImgFile = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton4 = new System.Windows.Forms.ToolStripSplitButton();
-            this.显示消息记录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.显示比例ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.放大Ctrl滚轮ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.缩小ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem10 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem14 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
-            this.清屏ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.消息管理器ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolfile = new System.Windows.Forms.ToolStripButton();
             this.ToolItemPrint = new System.Windows.Forms.ToolStripMenuItem();
             this.录制视屏动画ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -228,11 +214,7 @@
             this.toolStripDropDownButton4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripDropDownButton4.AutoSize = false;
             this.toolStripDropDownButton4.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.显示消息记录ToolStripMenuItem,
-            this.显示比例ToolStripMenuItem,
-            this.toolStripMenuItem5,
-            this.清屏ToolStripMenuItem,
-            this.消息管理器ToolStripMenuItem});
+            this.toolStripMenuItem5});
             this.toolStripDropDownButton4.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.toolStripDropDownButton4.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripDropDownButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -242,105 +224,12 @@
             this.toolStripDropDownButton4.Text = "消息记录";
             this.toolStripDropDownButton4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.toolStripDropDownButton4.ToolTipText = "显示消息记录";
-            // 
-            // 显示消息记录ToolStripMenuItem
-            // 
-            this.显示消息记录ToolStripMenuItem.Name = "显示消息记录ToolStripMenuItem";
-            this.显示消息记录ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.显示消息记录ToolStripMenuItem.Text = "显示消息记录";
-            // 
-            // 显示比例ToolStripMenuItem
-            // 
-            this.显示比例ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.放大Ctrl滚轮ToolStripMenuItem,
-            this.缩小ToolStripMenuItem,
-            this.toolStripMenuItem6,
-            this.toolStripMenuItem8,
-            this.toolStripMenuItem9,
-            this.toolStripMenuItem10,
-            this.toolStripMenuItem11,
-            this.toolStripMenuItem12,
-            this.toolStripMenuItem13,
-            this.toolStripMenuItem14});
-            this.显示比例ToolStripMenuItem.Name = "显示比例ToolStripMenuItem";
-            this.显示比例ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.显示比例ToolStripMenuItem.Text = "显示比例";
-            // 
-            // 放大Ctrl滚轮ToolStripMenuItem
-            // 
-            this.放大Ctrl滚轮ToolStripMenuItem.Name = "放大Ctrl滚轮ToolStripMenuItem";
-            this.放大Ctrl滚轮ToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.放大Ctrl滚轮ToolStripMenuItem.Text = "放大 Ctrl+滚轮";
-            // 
-            // 缩小ToolStripMenuItem
-            // 
-            this.缩小ToolStripMenuItem.Name = "缩小ToolStripMenuItem";
-            this.缩小ToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.缩小ToolStripMenuItem.Text = "缩小";
-            // 
-            // toolStripMenuItem6
-            // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(154, 6);
-            // 
-            // toolStripMenuItem8
-            // 
-            this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-            this.toolStripMenuItem8.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem8.Text = "400%";
-            // 
-            // toolStripMenuItem9
-            // 
-            this.toolStripMenuItem9.Name = "toolStripMenuItem9";
-            this.toolStripMenuItem9.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem9.Text = "200%";
-            // 
-            // toolStripMenuItem10
-            // 
-            this.toolStripMenuItem10.Name = "toolStripMenuItem10";
-            this.toolStripMenuItem10.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem10.Text = "150%";
-            // 
-            // toolStripMenuItem11
-            // 
-            this.toolStripMenuItem11.Name = "toolStripMenuItem11";
-            this.toolStripMenuItem11.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem11.Text = "125%";
-            // 
-            // toolStripMenuItem12
-            // 
-            this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem12.Text = "100%";
-            // 
-            // toolStripMenuItem13
-            // 
-            this.toolStripMenuItem13.Name = "toolStripMenuItem13";
-            this.toolStripMenuItem13.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem13.Text = "75%";
-            // 
-            // toolStripMenuItem14
-            // 
-            this.toolStripMenuItem14.Name = "toolStripMenuItem14";
-            this.toolStripMenuItem14.Size = new System.Drawing.Size(157, 22);
-            this.toolStripMenuItem14.Text = "50%";
+            this.toolStripDropDownButton4.ButtonClick += new System.EventHandler(this.toolStripDropDownButton4_ButtonClick);
             // 
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(145, 6);
-            // 
-            // 清屏ToolStripMenuItem
-            // 
-            this.清屏ToolStripMenuItem.Name = "清屏ToolStripMenuItem";
-            this.清屏ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.清屏ToolStripMenuItem.Text = "清屏";
-            // 
-            // 消息管理器ToolStripMenuItem
-            // 
-            this.消息管理器ToolStripMenuItem.Name = "消息管理器ToolStripMenuItem";
-            this.消息管理器ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
-            this.消息管理器ToolStripMenuItem.Text = "消息管理器";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(177, 6);
             // 
             // toolfile
             // 
@@ -400,6 +289,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button1.Location = new System.Drawing.Point(292, 501);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(83, 29);
@@ -450,21 +340,7 @@
         private System.Windows.Forms.ToolStripMenuItem 显示截图编辑工具栏ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 截图时隐藏当前窗口ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSplitButton toolStripDropDownButton4;
-        private System.Windows.Forms.ToolStripMenuItem 显示消息记录ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 显示比例ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 放大Ctrl滚轮ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 缩小ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem8;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem9;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem10;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem11;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem12;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem13;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem14;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
-        private System.Windows.Forms.ToolStripMenuItem 清屏ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 消息管理器ToolStripMenuItem;
         private System.Windows.Forms.FontDialog fontDialog1;
         private System.Windows.Forms.ToolStripButton toolfile;
         private System.Windows.Forms.ProgressBar pgb_download;

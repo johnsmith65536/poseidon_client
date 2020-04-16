@@ -47,6 +47,8 @@ namespace Poseidon
 
         public static Dictionary<long, frm_chat> formChatPool = new Dictionary<long, frm_chat>();
         public static Dictionary<long, frm_group> formGroupPool = new Dictionary<long, frm_group>();
+        public static Dictionary<long, frm_msg_view> formMsgViewPrivatePool = new Dictionary<long, frm_msg_view>();
+        public static Dictionary<long, frm_msg_view> formMsgViewGroupPool = new Dictionary<long, frm_msg_view>();
 
         public static Dictionary<long, ChatListSubItem> chatListSubItemPool = new Dictionary<long, ChatListSubItem>();
         public static HashSet<long> onlineUserId = new HashSet<long>();
@@ -520,7 +522,7 @@ namespace Poseidon
         {
             if (!frmChat.IsHandleCreated)
             {
-                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                 frmChat.rtxt_message.AppendRtf(content);
                 frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
@@ -532,7 +534,7 @@ namespace Poseidon
 
                 frmChat.Invoke(new Action(() =>
                 {
-                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                          new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     frmChat.rtxt_message.AppendRtf(content);
                     frmChat.rtxt_message.Select(frmChat.rtxt_message.Text.Length, 0);
@@ -545,7 +547,7 @@ namespace Poseidon
         {
             if (!frmChat.IsHandleCreated)
             {
-                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                 frmChat.rtxt_message.AppendText(fileName);
                 frmChat.rtxt_message.AppendText("\n");
@@ -559,7 +561,7 @@ namespace Poseidon
             {
                 frmChat.Invoke(new Action(() =>
                 {
-                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                          new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     frmChat.rtxt_message.AppendText(fileName);
                     frmChat.rtxt_message.AppendText("\n");
@@ -575,7 +577,7 @@ namespace Poseidon
         {
             if (!frmChat.IsHandleCreated)
             {
-                frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                 new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
                 frmChat.rtxt_message.AppendText(content + "\r\n");
                 frmChat.rtxt_message.ForeColor = Color.Black;
@@ -587,7 +589,7 @@ namespace Poseidon
             {
                 frmChat.Invoke(new Action(() =>
                 {
-                    frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToLongTimeString() + "\r\n",
+                    frmChat.rtxt_message.AppendRichText("[系统消息]" + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                 new Font(frmChat.Font, FontStyle.Regular), Color.Blue);
                     frmChat.rtxt_message.AppendText(content + "\r\n");
                     frmChat.rtxt_message.ForeColor = Color.Black;
@@ -602,7 +604,7 @@ namespace Poseidon
             var image = Image.FromStream(new MemoryStream(imageData));
             if (!frmChat.IsHandleCreated)
             {
-                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                      new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                 frmChat.rtxt_message.InsertImage(image);
                 frmChat.rtxt_message.AppendText("\n");
@@ -614,7 +616,7 @@ namespace Poseidon
             {
                 frmChat.Invoke(new Action(() =>
                 {
-                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToLongTimeString() + "\r\n",
+                    frmChat.rtxt_message.AppendRichText(name + "  " + time.ToString("yyyy-MM-dd HH:mm:ss") + "\r\n",
                         new Font(frmChat.Font, FontStyle.Regular), Color.Green);
                     frmChat.rtxt_message.InsertImage(image);
                     frmChat.rtxt_message.AppendText("\n");
